@@ -1,4 +1,4 @@
-package ar.edu.unlam.mobile2.ui
+package ar.edu.unlam.mobile2.kitties.ui
 
 import android.os.Bundle
 import android.util.Log
@@ -50,8 +50,7 @@ class MainActivity : /*AppCompatActivity()*/ ComponentActivity() {
                     CoroutineScope(Dispatchers.Main).launch {
                         Log.i("MainActivity", "Observer")
                         setContent {
-                            content(name = "Mundo")
-                        }
+                            content(name = "Mundo")                        }
                     }
                 }
             },

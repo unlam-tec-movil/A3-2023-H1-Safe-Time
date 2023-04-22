@@ -1,6 +1,6 @@
-package ar.edu.unlam.mobile2.domain
+package ar.edu.unlam.mobile2.kitties.domain
 
-import ar.edu.unlam.mobile2.data.KittiesRepo
+import ar.edu.unlam.mobile2.kitties.data.KittiesRepo
 import javax.inject.Inject
 
 class GetNewKitty {
