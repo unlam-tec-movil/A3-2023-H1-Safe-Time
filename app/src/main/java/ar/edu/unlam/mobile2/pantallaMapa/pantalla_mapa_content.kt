@@ -1,25 +1,16 @@
-package com.example.pantallastp.pantallaMapa
+package ar.edu.unlam.mobile2.pantallaMapa
 
 import android.annotation.SuppressLint
 import android.widget.Toast
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Call
-import androidx.compose.material.icons.outlined.Home
-import androidx.compose.material.icons.outlined.LocationOn
-import androidx.compose.material.icons.outlined.Notifications
-import androidx.compose.material.icons.outlined.PlayArrow
-import androidx.compose.material.icons.outlined.Settings
-import androidx.compose.material.icons.outlined.Share
 import androidx.compose.material.icons.rounded.Call
 import androidx.compose.material.icons.rounded.Home
 import androidx.compose.material.icons.rounded.LocationOn
 import androidx.compose.material.icons.rounded.Settings
-import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -43,6 +34,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ar.edu.unlam.mobile2.R
+import ar.edu.unlam.mobile2.pantallaMapa.data.BottomNavItem
 
 @Preview(showSystemUi = true, showBackground = true)
 @Composable
@@ -98,17 +90,17 @@ fun Bottombar(/*navController: NavController*/) {
     )
 
     NavigationBar(
-        containerColor = Color.Blue,
+        containerColor = Color(R.color.safe_purple),
         modifier = Modifier.size(width = 400.dp, height = 60.dp)
     ) {
 
 
         bottomNavItem.forEach { item ->
-            val selected = item.route /*== backbackStackEntry.value?.destination?.route*/
+            /*val selected = item.route == backbackStackEntry.value?.destination?.route*/
 
             NavigationBarItem(
                 selected = /*selected*/ false,
-                onClick = { Toast.makeText(context, "Click 1", Toast.LENGTH_SHORT).show() },
+                onClick = { Toast.makeText(context, "Click ${item.name}", Toast.LENGTH_SHORT).show() },
                 icon = {
                     Icon(
                         imageVector = item.icon,
@@ -148,7 +140,7 @@ fun Toolbar() {
                 )
             }
         },
-        colors = TopAppBarDefaults.smallTopAppBarColors(containerColor = Blue),
+        colors = TopAppBarDefaults.smallTopAppBarColors(Color(R.color.safe_purple))/*TopAppBarDefaults.smallTopAppBarColors(containerColor = Blue)*/,
         actions = {
             //Setting Icon
             TopAppBarActionButton(

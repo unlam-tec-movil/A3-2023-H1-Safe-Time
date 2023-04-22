@@ -1,4 +1,4 @@
-package com.example.pantallastp.pantallaMapa
+package ar.edu.unlam.mobile2.pantallaMapa.data
 
 import androidx.compose.ui.graphics.vector.ImageVector
 
