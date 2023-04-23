@@ -1,4 +1,4 @@
-package ar.edu.unlam.mobile2
+package ar.edu.unlam.mobile2.kitties
 
 import android.app.Application
 import dagger.hilt.android.HiltAndroidApp
