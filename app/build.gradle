@@ -95,6 +95,10 @@ dependencies {
 
     // Async Images
     implementation("io.coil-kt:coil-compose:2.3.0")
+
+    //map
+    implementation 'com.google.android.gms:play-services-maps:18.1.0'
+    implementation "com.google.maps.android:maps-compose:1.0.0"
 }
 
 // Allow references to generated code

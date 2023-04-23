@@ -2,8 +2,12 @@ package ar.edu.unlam.mobile2.pantallaMapa
 
 import android.annotation.SuppressLint
 import android.widget.Toast
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
@@ -26,21 +30,28 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Color.Companion.Blue
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.modifier.modifierLocalMapOf
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
+import androidx.navigation.compose.currentBackStackEntryAsState
+import ar.edu.unlam.mobile2.HomeScreen
 import ar.edu.unlam.mobile2.R
+import ar.edu.unlam.mobile2.navigation.AppScreens
 import ar.edu.unlam.mobile2.pantallaMapa.data.BottomNavItem
+import com.google.android.gms.maps.GoogleMap
+import com.google.maps.android.compose.GoogleMap
+import com.google.maps.android.compose.MapProperties
 
 @Preview(showSystemUi = true, showBackground = true)
 @Composable
 private fun DefaultPreview() {
-
-    ViewContainer()
 }
 
 
@@ -53,22 +64,24 @@ fun PantallaMapa() {
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ViewContainer() {
+fun ViewContainer(navController: NavController) {
 
     Scaffold(
         topBar = { Toolbar() },
         content = { Content() },
-        bottomBar = { Bottombar() }
+        bottomBar = { Bottombar(navController) }
     )
 
 }
 
-@Preview
+
+
+
 @Composable
-fun Bottombar(/*navController: NavController*/) {
+fun Bottombar(navController: NavController){
 
 
-    //val backStackEntry = navController.currentBackStackEntryAsState()
+    val backStackEntry = navController.currentBackStackEntryAsState()
     val context = LocalContext.current
     val bottomNavItem = listOf(
 
@@ -91,7 +104,9 @@ fun Bottombar(/*navController: NavController*/) {
 
     NavigationBar(
         containerColor = Color(R.color.safe_purple),
-        modifier = Modifier.size(width = 400.dp, height = 60.dp)
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(65.dp)
     ) {
 
 
@@ -99,8 +114,12 @@ fun Bottombar(/*navController: NavController*/) {
             /*val selected = item.route == backbackStackEntry.value?.destination?.route*/
 
             NavigationBarItem(
-                selected = /*selected*/ false,
-                onClick = { Toast.makeText(context, "Click ${item.name}", Toast.LENGTH_SHORT).show() },
+                selected =false,
+                onClick = {
+                    when(item.route){
+                      "home"-> navController.navigate(route = AppScreens.HomeScreen.route)
+                        "map"->navController.navigate(route = AppScreens.MapScreen.route)
+                    } },
                 icon = {
                     Icon(
                         imageVector = item.icon,
@@ -172,5 +191,7 @@ fun TopAppBarActionButton(
 
 @Composable
 fun Content() {
-
+    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.CenterStart){
+        GoogleMap(modifier = Modifier.fillMaxSize().padding(Dp(0f), Dp(64f)))
+    }
 }

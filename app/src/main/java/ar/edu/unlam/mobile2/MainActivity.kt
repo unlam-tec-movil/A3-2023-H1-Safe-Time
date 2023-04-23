@@ -3,6 +3,9 @@ package ar.edu.unlam.mobile2
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import ar.edu.unlam.mobile2.navigation.AppNavigation
+import ar.edu.unlam.mobile2.pantallaMapa.ViewContainer
 
 class MainActivity : ComponentActivity() {
 
@@ -11,6 +14,9 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         Log.i("MainActivity", "onCreate")
 
+        setContent{
+           AppNavigation()
+        }
 
     }
 }
