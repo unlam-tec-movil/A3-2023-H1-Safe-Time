@@ -1,4 +1,4 @@
-package ar.edu.unlam.mobile2.kitties.ui
+package ar.edu.unlam.mobile2.ui
 
 import android.os.Bundle
 import android.util.Log
@@ -14,7 +14,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -23,7 +23,6 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Observer
 import androidx.navigation.ui.AppBarConfiguration
 import ar.edu.unlam.mobile2.BuildConfig
-import ar.edu.unlam.mobile2.HomeScreen
 import ar.edu.unlam.mobile2.R
 import ar.edu.unlam.mobile2.databinding.ActivityMainBinding
 import coil.compose.SubcomposeAsyncImage
@@ -51,7 +50,7 @@ class MainActivity : /*AppCompatActivity()*/ ComponentActivity() {
                     CoroutineScope(Dispatchers.Main).launch {
                         Log.i("MainActivity", "Observer")
                         setContent {
-                            HomeScreen()
+                            content(name = "Mundo")
                         }
                     }
                 }
@@ -63,6 +62,7 @@ class MainActivity : /*AppCompatActivity()*/ ComponentActivity() {
         super.onStart()
         Log.i("MainActivity", "onStart")
     }
+
     @Composable
     fun content(name: String) {
         Log.i("MainActivity", "start content")
