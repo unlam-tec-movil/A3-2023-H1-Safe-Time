@@ -1,12 +1,20 @@
 package ar.edu.unlam.mobile2.pantallaMapa
 
-import android.annotation.SuppressLint
 import android.widget.Toast
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.ArrowDropDown
 import androidx.compose.material.icons.rounded.Call
 import androidx.compose.material.icons.rounded.Home
 import androidx.compose.material.icons.rounded.LocationOn
@@ -16,21 +24,32 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.max
 import androidx.compose.ui.unit.sp
 import ar.edu.unlam.mobile2.R
 import ar.edu.unlam.mobile2.pantallaMapa.data.BottomNavItem
@@ -49,20 +68,68 @@ fun PantallaMapa() {
 
 }
 
-@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ViewContainer() {
 
-    Scaffold(
-        topBar = { Toolbar() },
-        content = { Content() },
-        bottomBar = { Bottombar() }
-    )
+    val scafoldState = rememberScrollState()
+    val coroutineScope = rememberCoroutineScope()
+    val context = LocalContext.current.applicationContext
+    var listaState by rememberSaveable() { mutableStateOf(true) }
+
+    Scaffold(topBar = { Toolbar() }, bottomBar = { Bottombar() }) {
+
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues = it)
+                .padding(top = 15.dp),
+            verticalArrangement = Arrangement.Top,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+
+            Row(
+                modifier = Modifier
+                    .background(
+                        Color(R.color.safe_light_purple),
+                        shape = RoundedCornerShape(20.dp)
+                    )
+                    .padding(10.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
+
+            ) {
+
+                TextoViajes()
+
+                Row(
+                    modifier = Modifier
+                        .background(
+                            Color(R.color.safe_purple),
+                            shape = RoundedCornerShape(20.dp)
+                        ),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    ListaDirecciones(listaState)
+                    Icon(
+                        imageVector = Icons.Rounded.ArrowDropDown,
+                        contentDescription = "Abrir lista",
+                        tint = Color.White,
+                        modifier = Modifier
+                            .size(35.dp)
+                            .clickable {
+                                listaState = !listaState
+                            }
+                    )
+                }
+            }
+        }
+    }
+
 
 }
 
-@Preview
 @Composable
 fun Bottombar(/*navController: NavController*/) {
 
@@ -99,7 +166,9 @@ fun Bottombar(/*navController: NavController*/) {
 
             NavigationBarItem(
                 selected = /*selected*/ false,
-                onClick = { Toast.makeText(context, "Click ${item.name}", Toast.LENGTH_SHORT).show() },
+                onClick = {
+                    Toast.makeText(context, "Click ${item.name}", Toast.LENGTH_SHORT).show()
+                },
                 icon = {
                     Icon(
                         imageVector = item.icon,
@@ -170,6 +239,49 @@ fun TopAppBarActionButton(
 
 
 @Composable
-fun Content() {
+private fun TextoViajes() {
 
+    Text(
+        text = "VIAJANDO A",
+        fontSize = 18.sp,
+        fontWeight = FontWeight.SemiBold,
+        color = Color.White
+    )
+}
+
+@Composable
+private fun ListaDirecciones(state: Boolean) {
+
+    var heightTotal = 30.dp
+
+    LazyColumn(
+        verticalArrangement = Arrangement.spacedBy(4.dp),
+        modifier = Modifier
+            .padding(start = 4.dp)
+            .background(shape = RoundedCornerShape(20.dp), color = Color.Unspecified)
+            .size(width = 80.dp, if (state) heightTotal else 120.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+
+        ) {
+        item {
+            ItemsDirecciones("Casa")
+            ItemsDirecciones("Escuela")
+            ItemsDirecciones("Hospital")
+            ItemsDirecciones("Abuela")
+            ItemsDirecciones("Mama")
+        }
+    }
+
+}
+
+@Composable
+private fun ItemsDirecciones(direccion: String) {
+
+    Text(
+        text = direccion,
+        fontSize = 18.sp,
+        fontWeight = FontWeight.Normal,
+        color = Color.White,
+        modifier = Modifier.clickable { /*MECANISMO DE CAMBIO DE MAPA*/ }
+    )
 }
