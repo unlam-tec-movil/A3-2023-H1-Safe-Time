@@ -62,8 +62,10 @@ private fun DefaultPreview() {
 }
 
 
+@Preview
 @Composable
 fun PantallaMapa() {
+
 
 
 }
@@ -252,14 +254,12 @@ private fun TextoViajes() {
 @Composable
 private fun ListaDirecciones(state: Boolean) {
 
-    var heightTotal = 30.dp
-
     LazyColumn(
         verticalArrangement = Arrangement.spacedBy(4.dp),
         modifier = Modifier
             .padding(start = 4.dp)
             .background(shape = RoundedCornerShape(20.dp), color = Color.Unspecified)
-            .size(width = 80.dp, if (state) heightTotal else 120.dp),
+            .size(width = 80.dp, if (state) 30.dp else 120.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
 
         ) {
@@ -278,7 +278,7 @@ private fun ListaDirecciones(state: Boolean) {
 private fun ItemsDirecciones(direccion: String) {
 
     Text(
-        text = direccion,
+        text = direccion.uppercase(),
         fontSize = 18.sp,
         fontWeight = FontWeight.Normal,
         color = Color.White,
