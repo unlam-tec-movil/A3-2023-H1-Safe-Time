@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ArrowDropDown
@@ -24,17 +23,13 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -43,13 +38,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.max
 import androidx.compose.ui.unit.sp
 import ar.edu.unlam.mobile2.R
 import ar.edu.unlam.mobile2.pantallaMapa.data.BottomNavItem
@@ -66,8 +58,14 @@ private fun DefaultPreview() {
 @Composable
 fun PantallaMapa() {
 
+/*    val markerUNLAM = LatLng(-34.6690101,-58.5637967)
+    GoogleMap(modifier = Modifier
+        .fillMaxSize()
+        .padding(10.dp)){
 
-
+        rememberMarkerState(position = markerUNLAM)
+    }*/
+    ViewContainer()
 }
 
 
@@ -75,10 +73,10 @@ fun PantallaMapa() {
 @Composable
 fun ViewContainer() {
 
-    val scafoldState = rememberScrollState()
-    val coroutineScope = rememberCoroutineScope()
+    /*val scafoldState = rememberScrollState()
+    val coroutineScope = rememberCoroutineScope()*/
     val context = LocalContext.current.applicationContext
-    var listaState by rememberSaveable() { mutableStateOf(true) }
+    var listaState by rememberSaveable { mutableStateOf(true) }
 
     Scaffold(topBar = { Toolbar() }, bottomBar = { Bottombar() }) {
 
@@ -126,6 +124,7 @@ fun ViewContainer() {
                     )
                 }
             }
+            //PantallaMapa()
         }
     }
 
@@ -254,13 +253,13 @@ private fun TextoViajes() {
 @Composable
 private fun ListaDirecciones(state: Boolean) {
 
-    LazyColumn(
-        verticalArrangement = Arrangement.spacedBy(4.dp),
-        modifier = Modifier
-            .padding(start = 4.dp)
-            .background(shape = RoundedCornerShape(20.dp), color = Color.Unspecified)
-            .size(width = 80.dp, if (state) 30.dp else 120.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
+        LazyColumn(
+            verticalArrangement = Arrangement.spacedBy(4.dp),
+            modifier = Modifier
+                .padding(start = 4.dp)
+                .background(shape = RoundedCornerShape(20.dp), color = Color.Unspecified)
+                .size(width = 80.dp, if (state) 30.dp else 120.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
 
         ) {
         item {
