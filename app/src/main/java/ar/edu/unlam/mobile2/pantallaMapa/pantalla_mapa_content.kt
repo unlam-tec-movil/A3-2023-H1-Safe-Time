@@ -1,5 +1,9 @@
 package ar.edu.unlam.mobile2.pantallaMapa
 
+import android.Manifest
+import android.app.Activity
+import android.content.pm.PackageManager
+import android.location.Location
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -30,6 +34,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -43,8 +48,21 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.app.ActivityCompat
 import ar.edu.unlam.mobile2.R
 import ar.edu.unlam.mobile2.pantallaMapa.data.BottomNavItem
+import com.google.android.gms.location.LocationServices
+import com.google.android.gms.maps.model.CameraPosition
+import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.Marker
+import com.google.maps.android.compose.GoogleMap
+import com.google.maps.android.compose.MapProperties
+import com.google.maps.android.compose.MapType
+import com.google.maps.android.compose.MapUiSettings
+import com.google.maps.android.compose.Marker
+import com.google.maps.android.compose.MarkerState
+import com.google.maps.android.compose.rememberCameraPositionState
+import com.google.maps.android.compose.rememberMarkerState
 
 @Preview(showSystemUi = true, showBackground = true)
 @Composable
@@ -58,16 +76,32 @@ private fun DefaultPreview() {
 @Composable
 fun PantallaMapa() {
 
-/*    val markerUNLAM = LatLng(-34.6690101,-58.5637967)
-    GoogleMap(modifier = Modifier
-        .fillMaxSize()
-        .padding(10.dp)){
-
-        rememberMarkerState(position = markerUNLAM)
-    }*/
     ViewContainer()
 }
 
+@Composable
+fun MapScreen() {
+
+    val markerUNLAM = LatLng(-34.6690101, -58.5637967)
+    val mapProperties by remember { mutableStateOf(MapProperties(mapType = MapType.HYBRID)) }
+    val uiSettings by remember { mutableStateOf(MapUiSettings(rotationGesturesEnabled = false)) }
+    val initialCameraPositionState = rememberCameraPositionState {
+        position = CameraPosition.fromLatLngZoom(markerUNLAM, 16.6f)
+    }
+
+    GoogleMap(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(10.dp),
+        cameraPositionState = initialCameraPositionState,
+        properties = mapProperties,
+        uiSettings = uiSettings
+    ) {
+
+        Marker(state = MarkerState(markerUNLAM))
+    }
+
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -124,7 +158,7 @@ fun ViewContainer() {
                     )
                 }
             }
-            //PantallaMapa()
+            MapScreen()
         }
     }
 
@@ -253,17 +287,17 @@ private fun TextoViajes() {
 @Composable
 private fun ListaDirecciones(state: Boolean) {
 
-        LazyColumn(
-            verticalArrangement = Arrangement.spacedBy(4.dp),
-            modifier = Modifier
-                .padding(start = 4.dp)
-                .background(shape = RoundedCornerShape(20.dp), color = Color.Unspecified)
-                .size(width = 80.dp, if (state) 30.dp else 120.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
+    LazyColumn(
+        verticalArrangement = Arrangement.spacedBy(4.dp),
+        modifier = Modifier
+            .padding(start = 4.dp)
+            .background(shape = RoundedCornerShape(20.dp), color = Color.Unspecified)
+            .size(width = 80.dp, if (state) 30.dp else 120.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
 
         ) {
         item {
-            ItemsDirecciones("Casa")
+            ItemsDirecciones("UNLAM")
             ItemsDirecciones("Escuela")
             ItemsDirecciones("Hospital")
             ItemsDirecciones("Abuela")
