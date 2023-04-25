@@ -1,15 +1,12 @@
 package ar.edu.unlam.mobile2.pantallaMapa
 
-import android.Manifest
-import android.app.Activity
-import android.content.pm.PackageManager
-import android.location.Location
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -48,13 +45,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.app.ActivityCompat
 import ar.edu.unlam.mobile2.R
 import ar.edu.unlam.mobile2.pantallaMapa.data.BottomNavItem
-import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.Marker
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.MapProperties
 import com.google.maps.android.compose.MapType
@@ -62,7 +56,6 @@ import com.google.maps.android.compose.MapUiSettings
 import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.rememberCameraPositionState
-import com.google.maps.android.compose.rememberMarkerState
 
 @Preview(showSystemUi = true, showBackground = true)
 @Composable
@@ -91,7 +84,7 @@ fun MapScreen() {
 
     GoogleMap(
         modifier = Modifier
-            .fillMaxSize()
+            .size(width = 380.dp, height = 500.dp)
             .padding(10.dp),
         cameraPositionState = initialCameraPositionState,
         properties = mapProperties,
@@ -159,6 +152,45 @@ fun ViewContainer() {
                 }
             }
             MapScreen()
+
+            Spacer(modifier = Modifier.size(width = 0.dp, height = 5.dp))
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceAround
+
+            ) {
+                Row(
+                    modifier = Modifier
+                        .background(
+                            Color(R.color.safe_purple),
+                            shape = RoundedCornerShape(20.dp)
+                        ).size(width = 180.dp, height = 50.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
+
+                ) {
+
+                    CartelDistanciaDelPunto(distancia = 0.0)
+
+                }
+                Row(
+                    modifier = Modifier
+                        .background(
+                            Color(R.color.safe_purple),
+                            shape = RoundedCornerShape(20.dp)
+                        ).size(width = 180.dp, 50.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
+
+                ) {
+                    CartelLlegadaEstimada(tiempo = 0)
+                }
+
+            }
+
         }
     }
 
@@ -317,4 +349,41 @@ private fun ItemsDirecciones(direccion: String) {
         color = Color.White,
         modifier = Modifier.clickable { /*MECANISMO DE CAMBIO DE MAPA*/ }
     )
+}
+
+@Composable
+private fun CartelDistanciaDelPunto(distancia: Double) {
+
+    Text(
+        text = "Distancia del punto: ",
+        fontSize = 15.sp,
+        fontWeight = FontWeight.SemiBold,
+        color = Color.White
+    )
+
+    Text(
+        text = "$distancia",
+        fontSize = 15.sp,
+        fontWeight = FontWeight.SemiBold,
+        color = Color.White
+    )
+}
+
+@Composable
+private fun CartelLlegadaEstimada(tiempo: Int) {
+
+    Text(
+        text = "Llegada estimada: ",
+        fontSize = 15.sp,
+        fontWeight = FontWeight.SemiBold,
+        color = Color.White
+    )
+
+    Text(
+        text = "$tiempo",
+        fontSize = 15.sp,
+        fontWeight = FontWeight.SemiBold,
+        color = Color.White
+    )
+
 }
