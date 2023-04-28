@@ -38,7 +38,9 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -51,6 +53,7 @@ import ar.edu.unlam.mobile2.R
 import ar.edu.unlam.mobile2.pantallaMapa.data.BottomNavItem
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
+import com.google.maps.android.compose.Circle
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.MapProperties
 import com.google.maps.android.compose.MapType
@@ -90,6 +93,7 @@ fun MapScreen() {
                 color = MaterialTheme.colorScheme.inversePrimary,
                 shape = RoundedCornerShape(20.dp)
             )
+            .clip(shape = RoundedCornerShape(percent = 10))
     ) {
         GoogleMap(
             modifier = Modifier
@@ -202,7 +206,6 @@ fun ViewContainer() {
                 }
 
             }
-
         }
     }
 
