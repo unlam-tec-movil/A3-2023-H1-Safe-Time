@@ -4,9 +4,12 @@ import android.annotation.SuppressLint
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
+
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -44,7 +47,7 @@ fun ContactListScreen(navController: NavController) {
         topBar = { Toolbar() },
         bottomBar = { Bottombar(navController) }
     ) {
-        ContentHome(navController)
+        ContactListView()
     }
 }
 
@@ -61,44 +64,44 @@ fun ContactListView() {
 
 @Composable
 fun ItemContacto(contacto: Contact) {
-    Card(colors = CardDefaults.cardColors(Color.Blue), modifier = Modifier.fillMaxWidth()) {
-       /* Column() {
-            Text(text = contacto.nombre)
-            Text(text = contacto.telefono)
+    Card(colors = CardDefaults.cardColors(Color.Blue), modifier = Modifier.fillMaxWidth().height(100.dp).padding(8.dp)) {
+        Row (modifier = Modifier.padding(8.dp)){
+            Image(
+                painter = painterResource(contacto.imagen),
+                contentDescription = "Imagen del contacto",
+                modifier = Modifier
+                    .size(80.dp)
+                    .clip(CircleShape)
+                    .border(5.dp, Color.Cyan, CircleShape)
+                    .weight(1f)
 
+            )
 
-        }*/
-            Row(Modifier.padding(8.dp)) {
-                Image(
-                    painter = painterResource(contacto.imagen),
-                    contentDescription = "Imagen del contacto",
-                    modifier = Modifier
-                        .size(50.dp)
-                        .clip(CircleShape)
-                        .border(5.dp, Color.Cyan, CircleShape)
+            Column(Modifier.padding(8.dp).weight(3f)) {
+                Text(
+                    text = contacto.nombre,
+
                 )
-            Row(modifier = Modifier.padding(8.dp)) {
-                Column() {
-                    Text(text = contacto.nombre,
-                    modifier = Modifier.align(Alignment.Start))
-                    Text(text = contacto.telefono)
-                }
-
+                Text(text = contacto.telefono)
             }
-                Column() {
 
-                Icon(Icons.Default.Call, contentDescription = "Llamar" , modifier = Modifier.align(Alignment.End))
-                }
+            Icon(
+                Icons.Default.Call,
+                contentDescription = "Llamar",
+                modifier = Modifier.weight(1f).align(Alignment.CenterVertically)
+            )
 
-            }
+
+        }
     }
 }
+
 
 fun getContactos(): List<Contact> {
     return Contact.contacts
 }
 
-@Preview(showBackground = true)
+@Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun DefaultPreview() {
     ItemContacto(

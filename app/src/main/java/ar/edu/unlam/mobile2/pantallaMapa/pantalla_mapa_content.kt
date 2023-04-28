@@ -119,6 +119,7 @@ fun Bottombar(navController: NavController){
                     when(item.route){
                       "home"-> navController.navigate(route = AppScreens.HomeScreen.route)
                         "map"->navController.navigate(route = AppScreens.MapScreen.route)
+                        "contacts"->navController.navigate(route = AppScreens.ContactListScreen.route)
                     } },
                 icon = {
                     Icon(
