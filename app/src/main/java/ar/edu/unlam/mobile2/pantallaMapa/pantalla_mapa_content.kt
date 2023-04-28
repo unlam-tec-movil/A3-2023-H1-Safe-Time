@@ -40,7 +40,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -49,11 +48,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
+import androidx.navigation.NavHostController
 import ar.edu.unlam.mobile2.R
 import ar.edu.unlam.mobile2.pantallaMapa.data.BottomNavItem
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
-import com.google.maps.android.compose.Circle
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.MapProperties
 import com.google.maps.android.compose.MapType
@@ -62,18 +62,10 @@ import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.rememberCameraPositionState
 
-@Preview(showSystemUi = true, showBackground = true)
 @Composable
-private fun DefaultPreview() {
+fun PantallaMapa(navController: NavController) {
 
-    ViewContainer()
-}
-
-
-@Composable
-fun PantallaMapa() {
-
-    ViewContainer()
+    ViewContainer(navController)
 }
 
 @Composable
@@ -113,12 +105,12 @@ fun MapScreen() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ViewContainer() {
+fun ViewContainer(navController: NavController) {
 
     val context = LocalContext.current.applicationContext
     var listaState by rememberSaveable { mutableStateOf(true) }
 
-    Scaffold(topBar = { Toolbar() }, bottomBar = { Bottombar() }) {
+    Scaffold(topBar = { Toolbar() }, bottomBar = { Bottombar(navController) }) {
 
         Column(
             modifier = Modifier
@@ -213,7 +205,8 @@ fun ViewContainer() {
 }
 
 @Composable
-fun Bottombar(/*navController: NavController*/) {
+fun
+        Bottombar(navController: NavController) {
 
 
     //val backStackEntry = navController.currentBackStackEntryAsState()
