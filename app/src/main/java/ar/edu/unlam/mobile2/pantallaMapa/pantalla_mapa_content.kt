@@ -51,6 +51,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import ar.edu.unlam.mobile2.R
+import ar.edu.unlam.mobile2.navigation.AppScreens
 import ar.edu.unlam.mobile2.pantallaMapa.data.BottomNavItem
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
@@ -237,13 +238,15 @@ fun
 
 
         bottomNavItem.forEach { item ->
-            /*val selected = item.route == backbackStackEntry.value?.destination?.route*/
 
             NavigationBarItem(
-                selected = /*selected*/ false,
+                selected = false,
                 onClick = {
-                    Toast.makeText(context, "Click ${item.name}", Toast.LENGTH_SHORT).show()
-                },
+                    when(item.route){
+                        "home"-> navController.navigate(route = AppScreens.HomeScreen.route)
+                        "map"->navController.navigate(route = AppScreens.MapScreen.route)
+                        "contacts"->navController.navigate(route = AppScreens.ContactListScreen.route)
+                    } },
                 icon = {
                     Icon(
                         imageVector = item.icon,

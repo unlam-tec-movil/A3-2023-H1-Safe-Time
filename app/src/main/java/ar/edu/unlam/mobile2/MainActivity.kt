@@ -6,6 +6,8 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.navigation.NavController
+import ar.edu.unlam.mobile2.navigation.AppNavigation
 import ar.edu.unlam.mobile2.pantallaMapa.PantallaMapa
 import com.microsoft.appcenter.AppCenter
 import com.microsoft.appcenter.analytics.Analytics
@@ -28,7 +30,7 @@ class MainActivity : ComponentActivity() {
         Log.i("MainActivity", "onCreate")
         setContent {
             Surface(color = MaterialTheme.colorScheme.background) {
-                PantallaMapa()
+                AppNavigation()
             }
         }
     }

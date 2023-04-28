@@ -6,6 +6,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import ar.edu.unlam.mobile2.HomeScreen
 import ar.edu.unlam.mobile2.pantallaListaDeContactos.ui.ContactListScreen
+import ar.edu.unlam.mobile2.pantallaMapa.PantallaMapa
 import ar.edu.unlam.mobile2.pantallaMapa.ViewContainer
 
 @Composable
@@ -16,7 +17,7 @@ fun AppNavigation(){
             HomeScreen(navController)
         }
         composable(route = AppScreens.MapScreen.route){
-            ViewContainer(navController)
+            PantallaMapa(navController)
         }
         composable(route = AppScreens.ContactListScreen.route){
             ContactListScreen(navController)
