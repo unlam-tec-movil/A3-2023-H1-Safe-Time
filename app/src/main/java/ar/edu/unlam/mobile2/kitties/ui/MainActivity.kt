@@ -2,30 +2,12 @@ package ar.edu.unlam.mobile2.kitties.ui
 
 import android.os.Bundle
 import android.util.Log
-import android.view.Menu
-import android.view.MenuItem
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.width
-import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Observer
 import androidx.navigation.ui.AppBarConfiguration
-import ar.edu.unlam.mobile2.BuildConfig
-import ar.edu.unlam.mobile2.R
 import ar.edu.unlam.mobile2.databinding.ActivityMainBinding
-import coil.compose.SubcomposeAsyncImage
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -50,13 +32,14 @@ class MainActivity : /*AppCompatActivity()*/ ComponentActivity() {
                     CoroutineScope(Dispatchers.Main).launch {
                         Log.i("MainActivity", "Observer")
                         setContent {
-                            content(name = "Mundo")                        }
+                        }
                     }
                 }
             },
         )
     }
-
+}
+/*
     override fun onStart() {
         super.onStart()
         Log.i("MainActivity", "onStart")
@@ -145,3 +128,4 @@ class MainActivity : /*AppCompatActivity()*/ ComponentActivity() {
                 || super.onSupportNavigateUp()
     }*/
 }
+*/
