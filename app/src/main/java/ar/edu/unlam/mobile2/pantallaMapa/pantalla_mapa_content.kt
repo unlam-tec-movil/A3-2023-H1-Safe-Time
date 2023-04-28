@@ -4,6 +4,7 @@ import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -22,6 +23,7 @@ import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
@@ -65,7 +67,6 @@ private fun DefaultPreview() {
 }
 
 
-@Preview
 @Composable
 fun PantallaMapa() {
 
@@ -82,17 +83,27 @@ fun MapScreen() {
         position = CameraPosition.fromLatLngZoom(markerUNLAM, 16.6f)
     }
 
-    GoogleMap(
-        modifier = Modifier
-            .size(width = 380.dp, height = 500.dp)
-            .padding(10.dp),
-        cameraPositionState = initialCameraPositionState,
-        properties = mapProperties,
-        uiSettings = uiSettings
+    Box(
+        Modifier
+            .padding(top = 5.dp)
+            .background(
+                color = MaterialTheme.colorScheme.inversePrimary,
+                shape = RoundedCornerShape(20.dp)
+            )
     ) {
+        GoogleMap(
+            modifier = Modifier
+                .size(width = 380.dp, height = 500.dp)
+                .padding(8.dp),
+            cameraPositionState = initialCameraPositionState,
+            properties = mapProperties,
+            uiSettings = uiSettings
+        ) {
 
-        Marker(state = MarkerState(markerUNLAM))
+            Marker(state = MarkerState(markerUNLAM))
+        }
     }
+
 
 }
 
@@ -100,8 +111,6 @@ fun MapScreen() {
 @Composable
 fun ViewContainer() {
 
-    /*val scafoldState = rememberScrollState()
-    val coroutineScope = rememberCoroutineScope()*/
     val context = LocalContext.current.applicationContext
     var listaState by rememberSaveable { mutableStateOf(true) }
 
@@ -119,7 +128,7 @@ fun ViewContainer() {
             Row(
                 modifier = Modifier
                     .background(
-                        Color(R.color.safe_light_purple),
+                        MaterialTheme.colorScheme.primary,
                         shape = RoundedCornerShape(20.dp)
                     )
                     .padding(10.dp),
@@ -133,7 +142,7 @@ fun ViewContainer() {
                 Row(
                     modifier = Modifier
                         .background(
-                            Color(R.color.safe_purple),
+                            MaterialTheme.colorScheme.secondaryContainer,
                             shape = RoundedCornerShape(20.dp)
                         ),
                     verticalAlignment = Alignment.CenterVertically
@@ -142,7 +151,7 @@ fun ViewContainer() {
                     Icon(
                         imageVector = Icons.Rounded.ArrowDropDown,
                         contentDescription = "Abrir lista",
-                        tint = Color.White,
+                        tint = MaterialTheme.colorScheme.primary,
                         modifier = Modifier
                             .size(35.dp)
                             .clickable {
@@ -151,6 +160,7 @@ fun ViewContainer() {
                     )
                 }
             }
+
             MapScreen()
 
             Spacer(modifier = Modifier.size(width = 0.dp, height = 5.dp))
@@ -165,9 +175,10 @@ fun ViewContainer() {
                 Row(
                     modifier = Modifier
                         .background(
-                            Color(R.color.safe_purple),
+                            MaterialTheme.colorScheme.primary,
                             shape = RoundedCornerShape(20.dp)
-                        ).size(width = 180.dp, height = 50.dp),
+                        )
+                        .size(width = 180.dp, height = 50.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.Center
 
@@ -179,9 +190,10 @@ fun ViewContainer() {
                 Row(
                     modifier = Modifier
                         .background(
-                            Color(R.color.safe_purple),
+                            MaterialTheme.colorScheme.primary,
                             shape = RoundedCornerShape(20.dp)
-                        ).size(width = 180.dp, 50.dp),
+                        )
+                        .size(width = 180.dp, 50.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.Center
 
@@ -223,7 +235,7 @@ fun Bottombar(/*navController: NavController*/) {
     )
 
     NavigationBar(
-        containerColor = Color(R.color.safe_purple),
+        containerColor = MaterialTheme.colorScheme.primary,
         modifier = Modifier.size(width = 400.dp, height = 60.dp)
     ) {
 
@@ -275,7 +287,7 @@ fun Toolbar() {
                 )
             }
         },
-        colors = TopAppBarDefaults.smallTopAppBarColors(Color(R.color.safe_purple))/*TopAppBarDefaults.smallTopAppBarColors(containerColor = Blue)*/,
+        colors = TopAppBarDefaults.smallTopAppBarColors(MaterialTheme.colorScheme.primary)/*TopAppBarDefaults.smallTopAppBarColors(containerColor = Blue)*/,
         actions = {
             //Setting Icon
             TopAppBarActionButton(
@@ -323,7 +335,10 @@ private fun ListaDirecciones(state: Boolean) {
         verticalArrangement = Arrangement.spacedBy(4.dp),
         modifier = Modifier
             .padding(start = 4.dp)
-            .background(shape = RoundedCornerShape(20.dp), color = Color.Unspecified)
+            .background(
+                shape = RoundedCornerShape(20.dp),
+                color = MaterialTheme.colorScheme.secondaryContainer
+            )
             .size(width = 80.dp, if (state) 30.dp else 120.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
 
@@ -345,8 +360,8 @@ private fun ItemsDirecciones(direccion: String) {
     Text(
         text = direccion.uppercase(),
         fontSize = 18.sp,
-        fontWeight = FontWeight.Normal,
-        color = Color.White,
+        fontWeight = FontWeight.SemiBold,
+        color = MaterialTheme.colorScheme.onSecondaryContainer,
         modifier = Modifier.clickable { /*MECANISMO DE CAMBIO DE MAPA*/ }
     )
 }
