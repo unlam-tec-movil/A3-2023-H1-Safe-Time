@@ -6,7 +6,7 @@ import ar.edu.unlam.mobile2.R
 data class Contact(val nombre: String, val telefono: String, @DrawableRes val imagen: Int){
 
 
-    companion  object ContactDataProvider {
+    companion object ContactDataProvider {
         val contacts = listOf(
             Contact(
                 "Juan Perez",
