@@ -153,7 +153,6 @@ fun ContentHome(navController: NavController) {
             )
             {
                 Text(text = "EMERGENCIA", style = TextStyle(fontSize = 25.sp))
-
             }
 
 
