@@ -3,7 +3,9 @@ package ar.edu.unlam.mobile2.pantallaHome.domain.model
 import androidx.annotation.DrawableRes
 import ar.edu.unlam.mobile2.R
 
-data class Contact(val nombre: String, val telefono: String, @DrawableRes val imagen: Int){
+data class Contact(val nombre: String,
+                   val telefono: String,
+                   @DrawableRes val imagen: Int){
 
 
     companion  object ContactDataProvider {
@@ -11,7 +13,7 @@ data class Contact(val nombre: String, val telefono: String, @DrawableRes val im
             Contact(
                 "Juan Perez",
                 "555-555-1111",
-                R.drawable.ic_launcher_foreground
+                R.drawable.safetimelogo
             ),
             Contact(
                 "Maria Garcia",
