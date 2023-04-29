@@ -204,7 +204,8 @@ fun ViewContainer(navController: NavController) {
             }
         }
     }
-}
+    }
+
 
 @Composable
 fun Bottombar(navController: NavController) {

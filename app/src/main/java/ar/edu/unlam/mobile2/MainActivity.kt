@@ -5,18 +5,18 @@ import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.viewModels
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import ar.edu.unlam.mobile2.navigation.AppNavigation
+import ar.edu.unlam.mobile2.pantallaHome.ui.viewmodel.HomeViewModel
 import com.microsoft.appcenter.AppCenter
 import com.microsoft.appcenter.analytics.Analytics
 import com.microsoft.appcenter.crashes.Crashes
 
 
 class MainActivity : ComponentActivity() {
-
-
-
+    private val viewModel by viewModels<HomeViewModel>()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -31,7 +31,7 @@ class MainActivity : ComponentActivity() {
         Log.i("MainActivity", "onCreate")
         setContent {
             Surface(color = MaterialTheme.colorScheme.background) {
-                AppNavigation()
+                AppNavigation(viewModel)
             }
         }
     }

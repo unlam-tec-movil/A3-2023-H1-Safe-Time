@@ -44,15 +44,17 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import ar.edu.unlam.mobile2.dialogQR.QRDialog
 import ar.edu.unlam.mobile2.navigation.AppScreens
 import ar.edu.unlam.mobile2.pantallaHome.domain.model.Contact
+import ar.edu.unlam.mobile2.pantallaHome.ui.viewmodel.HomeViewModel
 import ar.edu.unlam.mobile2.pantallaMapa.Bottombar
 import ar.edu.unlam.mobile2.pantallaMapa.Toolbar
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen(navController: NavController) {
+fun HomeScreen(navController: NavController,viewModel: HomeViewModel) {
 
 
     Scaffold(
@@ -60,13 +62,13 @@ fun HomeScreen(navController: NavController) {
         bottomBar = { Bottombar(navController) }
     ) {
         Box(modifier = Modifier.padding(it)) {
-            ContentHome(navController)
+            ContentHome(navController,viewModel)
         }
     }
 }
 
 @Composable
-fun ContentHome(navController: NavController) {
+fun ContentHome(navController: NavController, viewModel: HomeViewModel) {
     val contacts = Contact.contacts
 
 
@@ -145,7 +147,7 @@ fun ContentHome(navController: NavController) {
 
 
             Button(
-                onClick = { /*TODO*/ }, modifier = Modifier
+                onClick = {viewModel.onEmergencyClick() }, modifier = Modifier
                     .height(height = 75.dp)
                     .padding(2.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = Color.Red),
@@ -153,6 +155,10 @@ fun ContentHome(navController: NavController) {
             )
             {
                 Text(text = "EMERGENCIA", style = TextStyle(fontSize = 25.sp))
+            }
+
+            if (viewModel.isDialogShown){
+                QRDialog(onDismiss = { viewModel.onDismissDialog() }, info = "${contacts.get(2).nombre} TELEFONO DE CONTACTO ${contacts.get(2).telefono}")
             }
 
 

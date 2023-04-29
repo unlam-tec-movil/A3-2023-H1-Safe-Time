@@ -23,8 +23,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Tab
-import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -41,13 +39,14 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import ar.edu.unlam.mobile2.pantallaHome.domain.model.Adress
 import ar.edu.unlam.mobile2.pantallaHome.domain.model.Contact
+import ar.edu.unlam.mobile2.pantallaHome.ui.viewmodel.HomeViewModel
 import ar.edu.unlam.mobile2.pantallaMapa.Bottombar
 import ar.edu.unlam.mobile2.pantallaMapa.Toolbar
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ContactListScreen(navController: NavController) {
+fun ContactListScreen(navController: NavController, viewModel: HomeViewModel) {
 
     var isContactSelected by remember { mutableStateOf(true) }
 
