@@ -8,7 +8,7 @@ data class Contact(val nombre: String,
                    @DrawableRes val imagen: Int){
 
 
-    companion  object ContactDataProvider {
+    companion object ContactDataProvider {
         val contacts = listOf(
             Contact(
                 "Juan Perez",

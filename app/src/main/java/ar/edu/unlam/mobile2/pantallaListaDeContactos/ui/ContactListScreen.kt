@@ -16,12 +16,15 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Call
+import androidx.compose.material.icons.rounded.LocationOn
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Tab
+import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -36,13 +39,17 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import ar.edu.unlam.mobile2.pantallaHome.domain.model.Adress
 import ar.edu.unlam.mobile2.pantallaHome.domain.model.Contact
 import ar.edu.unlam.mobile2.pantallaMapa.Bottombar
 import ar.edu.unlam.mobile2.pantallaMapa.Toolbar
 
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ContactListScreen(navController: NavController) {
+
+    var isContactSelected by remember { mutableStateOf(true) }
 
     Scaffold(
         topBar = { Toolbar() },
@@ -51,14 +58,14 @@ fun ContactListScreen(navController: NavController) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues = it)
-                .padding(top = 0.dp),
+                .padding(paddingValues = it),
             verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            BarraContactosDirecciones()
 
-            ContactListView()
+            isContactSelected = barraContactosDirecciones()
+            if (isContactSelected) ContactListView() else AdressListView()
+
         }
     }
 }
@@ -80,7 +87,9 @@ fun ItemContacto(contacto: Contact) {
         colors = CardDefaults.cardColors(MaterialTheme.colorScheme.secondary), modifier = Modifier
             .fillMaxWidth()
             .height(100.dp)
-            .padding(8.dp)
+            .padding(8.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 5.dp)
+
     ) {
         Row(modifier = Modifier.padding(8.dp)) {
             Image(
@@ -90,7 +99,6 @@ fun ItemContacto(contacto: Contact) {
                     .size(80.dp)
                     .clip(CircleShape)
                     .weight(1f)
-
             )
 
             Column(
@@ -100,9 +108,13 @@ fun ItemContacto(contacto: Contact) {
             ) {
                 Text(
                     text = contacto.nombre,
+                    fontSize = 22.sp
 
-                    )
-                Text(text = contacto.telefono)
+                )
+                Text(
+                    text = contacto.telefono,
+                    fontSize = 18.sp
+                )
             }
 
             Icon(
@@ -118,14 +130,75 @@ fun ItemContacto(contacto: Contact) {
     }
 }
 
+@Preview
+@Composable
+fun Prev() {
+
+    AdressListView()
+}
+
+@Composable
+fun AdressListView() {
+    LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        items(getDirecciones()) { adress ->
+            ItemDireccion(adress = adress)
+        }
+
+    }
+}
+
+@Composable
+fun ItemDireccion(adress: Adress) {
+
+    Card(
+        colors = CardDefaults.cardColors(MaterialTheme.colorScheme.secondary), modifier = Modifier
+            .fillMaxWidth()
+            .height(100.dp)
+            .padding(8.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 5.dp)
+
+    ) {
+        Row(modifier = Modifier.padding(8.dp), verticalAlignment = Alignment.CenterVertically) {
+
+            Column(
+                Modifier
+                    .padding(8.dp)
+                    .weight(3f)
+            ) {
+                Text(
+                    text = adress.nombre,
+                    fontSize = 24.sp
+                )
+                Text(
+                    text = adress.direccion,
+                    fontSize = 18.sp
+                )
+            }
+
+            Icon(
+                Icons.Rounded.LocationOn,
+                contentDescription = "Navegar",
+                modifier = Modifier
+                    .weight(1f)
+                    .align(Alignment.CenterVertically)
+                    .size(35.dp)
+            )
+
+
+        }
+    }
+}
 
 fun getContactos(): List<Contact> {
     return Contact.contacts
 }
 
-@Preview
+private fun getDirecciones(): List<Adress> {
+    return Adress.adress
+}
+
 @Composable
-private fun BarraContactosDirecciones() {
+private fun barraContactosDirecciones(): Boolean {
 
     val colorSelected = MaterialTheme.colorScheme.inversePrimary
     val colorUnselected = MaterialTheme.colorScheme.onPrimary
@@ -155,6 +228,6 @@ private fun BarraContactosDirecciones() {
             color = if (isContactSelected) colorUnselected else colorSelected
         )
     }
-
+    return isContactSelected
 
 }
