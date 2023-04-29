@@ -1,17 +1,17 @@
 package ar.edu.unlam.mobile2
 
+
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-<<<<<<<<< Temporary merge branch 1
-import ar.edu.unlam.mobile2.navigation.AppNavigation
-import ar.edu.unlam.mobile2.pantallaMapa.ViewContainer
-=========
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.runtime.Composable
-import ar.edu.unlam.mobile2.pantallaMapa.PantallaMapa
->>>>>>>>> Temporary merge branch 2
+import ar.edu.unlam.mobile2.navigation.AppNavigation
+import com.microsoft.appcenter.AppCenter
+import com.microsoft.appcenter.analytics.Analytics
+import com.microsoft.appcenter.crashes.Crashes
+
 
 class MainActivity : ComponentActivity() {
 
