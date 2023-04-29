@@ -1,6 +1,5 @@
 package ar.edu.unlam.mobile2
 
-import android.annotation.SuppressLint
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -52,7 +51,6 @@ import ar.edu.unlam.mobile2.pantallaMapa.Toolbar
 
 
 @OptIn(ExperimentalMaterial3Api::class)
-@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun HomeScreen(navController: NavController) {
 
@@ -64,7 +62,6 @@ fun HomeScreen(navController: NavController) {
         Box(modifier = Modifier.padding(it)) {
             ContentHome(navController)
         }
-
     }
 }
 
