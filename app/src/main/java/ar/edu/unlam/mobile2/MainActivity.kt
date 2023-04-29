@@ -4,16 +4,17 @@ import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.navigation.NavController
+<<<<<<<<< Temporary merge branch 1
 import ar.edu.unlam.mobile2.navigation.AppNavigation
+import ar.edu.unlam.mobile2.pantallaMapa.ViewContainer
+=========
+import androidx.compose.material3.Surface
+import androidx.compose.runtime.Composable
 import ar.edu.unlam.mobile2.pantallaMapa.PantallaMapa
-import com.microsoft.appcenter.AppCenter
-import com.microsoft.appcenter.analytics.Analytics
-import com.microsoft.appcenter.crashes.Crashes
+>>>>>>>>> Temporary merge branch 2
 
 class MainActivity : ComponentActivity() {
+
 
 
     override fun onCreate(savedInstanceState: Bundle?) {

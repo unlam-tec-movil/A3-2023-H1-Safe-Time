@@ -5,18 +5,22 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Call
 import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -32,6 +36,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -45,111 +50,114 @@ import ar.edu.unlam.mobile2.pantallaMapa.Toolbar
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-fun HomeScreen(navController: NavController){
+fun HomeScreen(navController: NavController) {
 
-        Scaffold(
-            topBar = { Toolbar() },
-            bottomBar = { Bottombar(navController) }
-        ){
-            ContentHome(navController)}
+
+    Scaffold(
+        topBar = { Toolbar() },
+        bottomBar = { Bottombar(navController) }
+    ) {
+        Box(modifier = Modifier.padding(it)) {
+            ContentHome(navController)
         }
 
+    }
+}
 
 @Composable
-fun ContentHome(navController: NavController){
+fun ContentHome(navController: NavController) {
+    val contacts = Contact.contacts
 
-    ContactList(navController)
-
-    }
-
-
-/*@Composable
-fun UbicationList() {
-    val contacts= Contact.contacts
 
     LazyColumn(
         modifier = Modifier
-            .height(60.dp)
-            .background(Color.Gray),
-        horizontalAlignment = Alignment.Start
-    ) {
-        items(contacts){
-            ContactItem(contact = it)
-        }
-    }
-}*/
-
-
-//@Preview(showBackground = true)
-@Composable
-fun ContactList(navController: NavController) {
-    val contacts= Contact.contacts
-LazyColumn(
-    modifier = Modifier
-        .fillMaxWidth()
-        .fillMaxHeight(),
-    verticalArrangement = Arrangement.Center,
-    horizontalAlignment = Alignment.CenterHorizontally
-){
-
-item {
-    Text(text = "CONTACTOS DE EMERGENCIA",
-        modifier = Modifier
             .fillMaxWidth()
-            .padding(5.dp),
-        fontFamily = FontFamily.Monospace,
-        textAlign = TextAlign.Center,
-        fontSize = 24.sp
+            .fillMaxHeight(),
+        verticalArrangement = Arrangement.spacedBy(15.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+
+        item {
+            Text(
+                text = "Contactos de emergencia",
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(2.dp),
+                fontFamily = FontFamily.SansSerif,
+                textAlign = TextAlign.Start,
+                fontSize = 24.sp,
+                textDecoration = TextDecoration.Underline,
+                style = TextStyle(fontWeight = FontWeight.SemiBold)
 
             )
-}
+        }
 
-    item {
-        LazyRow(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(5.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(5.dp)    ) {
-            items(contacts){
-                ContactItem(contact = it)
+        item {
+            LazyRow(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(2.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(20.dp)
+            ) {
+                items(contacts) {
+                    ContactItem(contact = it)
+                }
             }
         }
-    }
 
-    item {
-        Text(text = "UBICACIONES RAPIDAS",
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(5.dp),
-            fontFamily = FontFamily.Monospace,
-            textAlign = TextAlign.Center,
-            fontSize = 24.sp
+        item {
+            Text(
+                text = "Ubicaciones Rapidas",
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(2.dp),
+                fontFamily = FontFamily.SansSerif,
+                textAlign = TextAlign.Start,
+                fontSize = 24.sp,
+                textDecoration = TextDecoration.Underline,
+                style = TextStyle(fontWeight = FontWeight.SemiBold)
 
-        )
-    }
+            )
+        }
 
-    item {
-        LazyRow(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(5.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(5.dp)    ) {
-            items(contacts){
-                UbicationItem(contact = it, navController)
+        item {
+            LazyRow(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(2.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(20.dp)
+            ) {
+                items(contacts) {
+                    UbicationItem(contact = it, navController)
+                }
             }
-        }
-    }
 
-    item {
-        Button(onClick = { /*TODO*/ }, modifier = Modifier.height(Dp(75F)))
-        {
-        Text(text = "BOTON DE PANICO")
 
         }
+
+        item {
+            Divider(modifier = Modifier.width(360.dp))
+        }
+        item {
+
+
+            Button(
+                onClick = { /*TODO*/ }, modifier = Modifier
+                    .height(height = 75.dp)
+                    .padding(2.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = Color.Red),
+                shape = RoundedCornerShape(8.dp)
+            )
+            {
+                Text(text = "EMERGENCIA", style = TextStyle(fontSize = 25.sp))
+
+            }
+
+
+        }
     }
-}
 
 }
 
@@ -159,80 +167,98 @@ item {
 @Composable
 fun ContactItem(contact: Contact) {
 
-    Card(onClick = { /*TODO*/ }) {
-        Column(
-            modifier = Modifier
-                .height(165.dp)
+    Card(
+        modifier = Modifier
+            .height(150.dp)
+            .width(120.dp)
+            .clip(RoundedCornerShape(20.dp))
+            ,
+        colors = CardDefaults.cardColors(Color(R.color.safe_purple)),
+        onClick = {}
+    ) {
+        Image(
 
-                .background(color = Color.Red),
+            painter = painterResource(contact.imagen),
+            contentDescription = contact.nombre,
+            contentScale = ContentScale.Crop,
+            modifier = Modifier
+                .size(64.dp)
+                .align(Alignment.CenterHorizontally)
+                .clip(CircleShape)
+                .background(Color.Black)
+                .border(1.dp, Color.White, CircleShape)
+
+        )
+        Text(
+            text = contact.nombre,
+            fontWeight = FontWeight.Bold,
+            color = Color.White,
+            modifier = Modifier.align(Alignment.CenterHorizontally)
+        )
+        Text(
+            text = contact.telefono,
+            color = Color.White,
+            modifier = Modifier
+                .padding(4.dp)
+                .align(Alignment.CenterHorizontally)
+        )
+        IconButton(
+            onClick = { /* Acción de la llamada */ },
+            modifier = Modifier.align(Alignment.CenterHorizontally)
         ) {
-            Image(
-                painter = painterResource(contact.imagen),
-                contentDescription = contact.nombre,
-                modifier = Modifier
-                    .size(64.dp)
-                    .align(Alignment.CenterHorizontally)
-            )
-            Column(
-                modifier = Modifier
-                    .padding(start = 16.dp)
-                    .align(Alignment.CenterHorizontally)
-            ) {
-                Text(text = contact.nombre, fontWeight = FontWeight.Bold, color = Color.White)
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(text = contact.telefono, color = Color.White, modifier = Modifier.padding(4.dp))
-            }
-            Spacer(modifier = Modifier.height(4.dp))
-            Spacer(modifier = Modifier.weight(3f))
-            IconButton(
-                onClick = { /* Acción de la llamada */ },
-                modifier = Modifier.align(Alignment.CenterHorizontally)
-            ) {
-                Icon(Icons.Default.Call, contentDescription = "Llamar" )
-            }
+            Icon(Icons.Default.Call, contentDescription = "Llamar")
         }
     }
-
 }
+
+
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun UbicationItem(contact: Contact,navController: NavController) {
+fun UbicationItem(contact: Contact, navController: NavController) {
 
-    Card(onClick = { /*TODO*/ }) {
-        Column(
+    Card(
+        elevation = CardDefaults.cardElevation(0.dp),
+        modifier = Modifier
+            .height(150.dp)
+            .width(120.dp)
+            .clip(RoundedCornerShape(20.dp)),
+        colors = CardDefaults.cardColors(Color(R.color.safe_purple)),
+        onClick = {}
+    ) {
+        Image(
+            painter = painterResource(contact.imagen),
+            contentDescription = contact.nombre,
+            contentScale = ContentScale.Crop,
             modifier = Modifier
-                .height(165.dp)
-
-                .background(color = Color.Green),
+                .size(64.dp)
+                .align(Alignment.CenterHorizontally)
+                .clip(CircleShape)
+                .border(1.dp, Color.White, CircleShape)
+        )
+        Text(
+            text = contact.nombre,
+            fontWeight = FontWeight.Bold,
+            color = Color.White,
+            modifier = Modifier.align(Alignment.CenterHorizontally)
+        )
+        Text(
+            text = contact.telefono,
+            color = Color.White,
+            modifier = Modifier
+                .padding(4.dp)
+                .align(Alignment.CenterHorizontally)
+        )
+        IconButton(
+            onClick = { navController.navigate(route = AppScreens.MapScreen.route) },
+            modifier = Modifier.align(Alignment.CenterHorizontally)
         ) {
-            Image(
-                painter = painterResource(contact.imagen),
-                contentDescription = contact.nombre,
-                modifier = Modifier
-                    .size(64.dp)
-                    .align(Alignment.CenterHorizontally)
-            )
-            Column(
-                modifier = Modifier
-                    .padding(start = 16.dp)
-                    .align(Alignment.CenterHorizontally)
-            ) {
-                Text(text = contact.nombre, fontWeight = FontWeight.Bold, color = Color.White)
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(text = contact.telefono, color = Color.White, modifier = Modifier.padding(4.dp))
-            }
-            Spacer(modifier = Modifier.height(4.dp))
-            Spacer(modifier = Modifier.weight(3f))
-            IconButton(
-                onClick = { navController.navigate(route = AppScreens.MapScreen.route) },
-                modifier = Modifier.align(Alignment.CenterHorizontally)
-            ) {
-                Icon(Icons.Default.LocationOn, contentDescription = "Llamar" )
-            }
+            Icon(Icons.Default.LocationOn, contentDescription = "Llamar")
         }
     }
 
 }
+
+
 

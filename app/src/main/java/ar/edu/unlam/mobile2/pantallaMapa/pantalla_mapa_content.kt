@@ -1,15 +1,21 @@
 package ar.edu.unlam.mobile2.pantallaMapa
 
 import android.widget.Toast
+<<<<<<<<< Temporary merge branch 1
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
+=========
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+>>>>>>>>> Temporary merge branch 2
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -23,7 +29,6 @@ import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
@@ -38,21 +43,28 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.modifier.modifierLocalMapOf
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import androidx.navigation.NavHostController
+import androidx.navigation.compose.currentBackStackEntryAsState
+import ar.edu.unlam.mobile2.HomeScreen
 import ar.edu.unlam.mobile2.R
 import ar.edu.unlam.mobile2.navigation.AppScreens
 import ar.edu.unlam.mobile2.pantallaMapa.data.BottomNavItem
+<<<<<<<<< Temporary merge branch 1
+import com.google.android.gms.maps.GoogleMap
+import com.google.maps.android.compose.GoogleMap
+import com.google.maps.android.compose.MapProperties
+=========
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.GoogleMap
@@ -108,6 +120,21 @@ fun MapScreen() {
 @Composable
 fun ViewContainer(navController: NavController) {
 
+<<<<<<<<< Temporary merge branch 1
+    Scaffold(
+        topBar = { Toolbar() },
+        content = { Content() },
+        bottomBar = { Bottombar(navController) }
+    )
+
+}
+
+
+
+
+=========
+    /*val scafoldState = rememberScrollState()
+    val coroutineScope = rememberCoroutineScope()*/
     val context = LocalContext.current.applicationContext
     var listaState by rememberSaveable { mutableStateOf(true) }
 
@@ -205,6 +232,7 @@ fun ViewContainer(navController: NavController) {
 
 }
 
+>>>>>>>>> Temporary merge branch 2
 @Composable
 fun
         Bottombar(navController: NavController) {
