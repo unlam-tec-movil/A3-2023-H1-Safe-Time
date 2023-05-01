@@ -1,5 +1,10 @@
 package ar.edu.unlam.mobile2
 
+import android.Manifest
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.net.Uri
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -35,6 +40,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
@@ -43,6 +49,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat
+import androidx.core.content.ContextCompat.startActivity
 import androidx.navigation.NavController
 import ar.edu.unlam.mobile2.dialogQR.QRDialog
 import ar.edu.unlam.mobile2.navigation.AppScreens
@@ -50,11 +58,13 @@ import ar.edu.unlam.mobile2.pantallaHome.domain.model.Contact
 import ar.edu.unlam.mobile2.pantallaHome.ui.viewmodel.HomeViewModel
 import ar.edu.unlam.mobile2.pantallaMapa.Bottombar
 import ar.edu.unlam.mobile2.pantallaMapa.Toolbar
-
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.isGranted
+import com.google.accompanist.permissions.rememberPermissionState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen(navController: NavController,viewModel: HomeViewModel) {
+fun HomeScreen(navController: NavController, viewModel: HomeViewModel) {
 
 
     Scaffold(
@@ -62,7 +72,7 @@ fun HomeScreen(navController: NavController,viewModel: HomeViewModel) {
         bottomBar = { Bottombar(navController) }
     ) {
         Box(modifier = Modifier.padding(it)) {
-            ContentHome(navController,viewModel)
+            ContentHome(navController, viewModel)
         }
     }
 }
@@ -147,7 +157,7 @@ fun ContentHome(navController: NavController, viewModel: HomeViewModel) {
 
 
             Button(
-                onClick = {viewModel.onEmergencyClick() }, modifier = Modifier
+                onClick = { viewModel.onEmergencyClick() }, modifier = Modifier
                     .height(height = 75.dp)
                     .padding(2.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = Color.Red),
@@ -157,8 +167,11 @@ fun ContentHome(navController: NavController, viewModel: HomeViewModel) {
                 Text(text = "EMERGENCIA", style = TextStyle(fontSize = 25.sp))
             }
 
-            if (viewModel.isDialogShown){
-                QRDialog(onDismiss = { viewModel.onDismissDialog() }, info = "${contacts.get(2).nombre} TELEFONO DE CONTACTO ${contacts.get(2).telefono}")
+            if (viewModel.isDialogShown) {
+                QRDialog(
+                    onDismiss = { viewModel.onDismissDialog() },
+                    info = "${contacts.get(2).nombre} TELEFONO DE CONTACTO ${contacts.get(2).telefono}"
+                )
             }
 
 
@@ -168,17 +181,19 @@ fun ContentHome(navController: NavController, viewModel: HomeViewModel) {
 }
 
 
-
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalPermissionsApi::class)
 @Composable
 fun ContactItem(contact: Contact) {
+    val callPermissionState = rememberPermissionState(Manifest.permission.CALL_PHONE)
+    val context = LocalContext.current
+    val intent = Intent(Intent.ACTION_CALL)
+    intent.data = Uri.parse("tel:${contact.telefono}")
 
     Card(
         modifier = Modifier
             .height(150.dp)
             .width(120.dp)
-            .clip(RoundedCornerShape(20.dp))
-            ,
+            .clip(RoundedCornerShape(20.dp)),
         colors = CardDefaults.cardColors(Color(R.color.safe_purple)),
         onClick = {}
     ) {
@@ -209,15 +224,19 @@ fun ContactItem(contact: Contact) {
                 .align(Alignment.CenterHorizontally)
         )
         IconButton(
-            onClick = { /* Acción de la llamada */ },
+            onClick = {
+                if (callPermissionState.status.isGranted) {
+                    context.startActivity(intent)
+                } else {
+                    callPermissionState.launchPermissionRequest()
+                }
+            },
             modifier = Modifier.align(Alignment.CenterHorizontally)
         ) {
             Icon(Icons.Default.Call, contentDescription = "Llamar")
         }
     }
 }
-
-
 
 
 @OptIn(ExperimentalMaterial3Api::class)
