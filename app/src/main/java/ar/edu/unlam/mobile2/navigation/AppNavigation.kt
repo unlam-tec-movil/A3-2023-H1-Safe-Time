@@ -14,12 +14,15 @@ fun AppNavigation(viewModel: HomeViewModel) {
     val navController = rememberNavController()
     NavHost(navController = navController, startDestination =AppScreens.HomeScreen.route){
         composable(route = AppScreens.HomeScreen.route){
+            viewModel.screenUbication = "home_screen"
             HomeScreen(navController,viewModel)
         }
         composable(route = AppScreens.MapScreen.route){
-            PantallaMapa(navController)
+            viewModel.screenUbication = "map_screen"
+            PantallaMapa(navController,viewModel)
         }
         composable(route = AppScreens.ContactListScreen.route){
+            viewModel.screenUbication = "list_screen"
             ContactListScreen(navController,viewModel)
         }
     }

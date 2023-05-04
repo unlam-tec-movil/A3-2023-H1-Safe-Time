@@ -11,8 +11,8 @@ data class Contact(val nombre: String,
     companion object ContactDataProvider {
         val contacts = listOf(
             Contact(
-                "Juan Perez",
-                "555-555-1111",
+                "Tatiana Salina",
+                "5555555555",
                 R.drawable.safetimelogo
             ),
             Contact(

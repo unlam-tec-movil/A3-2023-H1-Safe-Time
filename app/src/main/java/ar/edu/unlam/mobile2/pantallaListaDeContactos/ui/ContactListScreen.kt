@@ -52,7 +52,7 @@ fun ContactListScreen(navController: NavController, viewModel: HomeViewModel) {
 
     Scaffold(
         topBar = { Toolbar() },
-        bottomBar = { Bottombar(navController) }
+        bottomBar = { Bottombar(navController,viewModel) }
     ) {
         Column(
             modifier = Modifier

@@ -52,6 +52,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import ar.edu.unlam.mobile2.R
 import ar.edu.unlam.mobile2.navigation.AppScreens
+import ar.edu.unlam.mobile2.pantallaHome.ui.viewmodel.HomeViewModel
 import ar.edu.unlam.mobile2.pantallaMapa.data.BottomNavItem
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
@@ -66,9 +67,9 @@ import com.google.maps.android.compose.rememberCameraPositionState
 
 
 @Composable
-fun PantallaMapa(navController: NavController) {
+fun PantallaMapa(navController: NavController,viewModel: HomeViewModel) {
 
-    ViewContainer(navController)
+    ViewContainer(navController,viewModel)
 }
 
 @Composable
@@ -108,14 +109,14 @@ fun MapScreen() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ViewContainer(navController: NavController) {
+fun ViewContainer(navController: NavController,viewModel: HomeViewModel) {
 
     /*val scafoldState = rememberScrollState()
     val coroutineScope = rememberCoroutineScope()*/
     val context = LocalContext.current.applicationContext
     var listaState by rememberSaveable { mutableStateOf(true) }
 
-    Scaffold(topBar = { Toolbar() }, bottomBar = { Bottombar(navController) }) {
+    Scaffold(topBar = { Toolbar() }, bottomBar = { Bottombar(navController, viewModel) }) {
 
         Column(
             modifier = Modifier
@@ -208,7 +209,7 @@ fun ViewContainer(navController: NavController) {
 
 
 @Composable
-fun Bottombar(navController: NavController) {
+fun Bottombar(navController: NavController,viewModel: HomeViewModel) {
 
 
     //val backStackEntry = navController.currentBackStackEntryAsState()
@@ -217,17 +218,17 @@ fun Bottombar(navController: NavController) {
 
         BottomNavItem(
             name = "Map",
-            route = "map",
+            route = "map_screen",
             icon = Icons.Rounded.LocationOn
         ),
         BottomNavItem(
             name = "Home",
-            route = "home",
+            route = "home_screen",
             icon = Icons.Rounded.Home
         ),
         BottomNavItem(
             name = "Agenda",
-            route = "contacts",
+            route = "list_screen",
             Icons.Rounded.Call
         )
     )
@@ -243,11 +244,14 @@ fun Bottombar(navController: NavController) {
             NavigationBarItem(
                 selected = false,
                 onClick = {
-                    when(item.route){
-                        "home"-> navController.navigate(route = AppScreens.HomeScreen.route)
-                        "map"->navController.navigate(route = AppScreens.MapScreen.route)
-                        "contacts"->navController.navigate(route = AppScreens.ContactListScreen.route)
-                    } },
+                    if(viewModel.screenUbication!=item.route){
+                        when(item.route){
+                            "home_screen"-> navController.navigate(route = AppScreens.HomeScreen.route)
+                            "map_screen"->navController.navigate(route = AppScreens.MapScreen.route)
+                            "list_screen"->navController.navigate(route = AppScreens.ContactListScreen.route)
+                        }
+                    }
+                     },
                 icon = {
                     Icon(
                         imageVector = item.icon,

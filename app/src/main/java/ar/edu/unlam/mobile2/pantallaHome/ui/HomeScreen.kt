@@ -2,9 +2,7 @@ package ar.edu.unlam.mobile2
 
 import android.Manifest
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.net.Uri
-import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -49,8 +47,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.content.ContextCompat
-import androidx.core.content.ContextCompat.startActivity
 import androidx.navigation.NavController
 import ar.edu.unlam.mobile2.dialogQR.QRDialog
 import ar.edu.unlam.mobile2.navigation.AppScreens
@@ -69,7 +65,7 @@ fun HomeScreen(navController: NavController, viewModel: HomeViewModel) {
 
     Scaffold(
         topBar = { Toolbar() },
-        bottomBar = { Bottombar(navController) }
+        bottomBar = { Bottombar(navController,viewModel) }
     ) {
         Box(modifier = Modifier.padding(it)) {
             ContentHome(navController, viewModel)
@@ -184,7 +180,7 @@ fun ContentHome(navController: NavController, viewModel: HomeViewModel) {
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalPermissionsApi::class)
 @Composable
 fun ContactItem(contact: Contact) {
-    val callPermissionState = rememberPermissionState(Manifest.permission.CALL_PHONE)
+   val callPermissionState = rememberPermissionState(Manifest.permission.CALL_PHONE)
     val context = LocalContext.current
     val intent = Intent(Intent.ACTION_CALL)
     intent.data = Uri.parse("tel:${contact.telefono}")
@@ -225,11 +221,11 @@ fun ContactItem(contact: Contact) {
         )
         IconButton(
             onClick = {
-                if (callPermissionState.status.isGranted) {
+             if (callPermissionState.status.isGranted) {
                     context.startActivity(intent)
-                } else {
-                    callPermissionState.launchPermissionRequest()
-                }
+           } else {
+                 callPermissionState.launchPermissionRequest()
+              }
             },
             modifier = Modifier.align(Alignment.CenterHorizontally)
         ) {

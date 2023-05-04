@@ -6,6 +6,9 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 
 class HomeViewModel:ViewModel() {
+
+    var screenUbication by mutableStateOf("home_screenn")
+
     var isDialogShown by mutableStateOf(false)
         private set
 
