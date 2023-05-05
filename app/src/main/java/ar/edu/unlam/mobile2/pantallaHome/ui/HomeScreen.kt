@@ -20,6 +20,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Call
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material3.Button
@@ -87,90 +88,138 @@ fun ContentHome(navController: NavController, viewModel: HomeViewModel) {
     ) {
 
         item {
-            Text(
-                text = "Contactos de emergencia",
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(2.dp),
-                fontFamily = FontFamily.SansSerif,
-                textAlign = TextAlign.Start,
-                fontSize = 24.sp,
-                textDecoration = TextDecoration.Underline,
-                style = TextStyle(fontWeight = FontWeight.SemiBold)
-
-            )
+            TextoContactos()
         }
 
         item {
-            LazyRow(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(2.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(20.dp)
-            ) {
-                items(contacts) {
-                    ContactItem(contact = it)
-                }
-            }
+           FilaContactos(contacts)
         }
 
         item {
-            Text(
-                text = "Ubicaciones Rapidas",
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(2.dp),
-                fontFamily = FontFamily.SansSerif,
-                textAlign = TextAlign.Start,
-                fontSize = 24.sp,
-                textDecoration = TextDecoration.Underline,
-                style = TextStyle(fontWeight = FontWeight.SemiBold)
-
-            )
+           TextoUbicaciones()
         }
 
         item {
-            LazyRow(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(2.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(20.dp)
-            ) {
-                items(contacts) {
-                    UbicationItem(contact = it, navController)
-                }
-            }
-
-
+            FilaUbicaciones(contacts,navController)
         }
 
         item {
             Divider(modifier = Modifier.width(360.dp))
         }
         item {
+            BotonEmergencia(viewModel,contacts)
+        }
+    }
+
+}
 
 
-            Button(
-                onClick = { viewModel.onEmergencyClick() }, modifier = Modifier
-                    .height(height = 75.dp)
-                    .padding(2.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Color.Red),
-                shape = RoundedCornerShape(8.dp)
-            )
-            {
-                Text(text = "EMERGENCIA", style = TextStyle(fontSize = 25.sp))
+@Composable
+fun BotonEmergencia(viewModel: HomeViewModel, contacts: List<Contact>) {
+
+    Button(
+        onClick = { viewModel.onEmergencyClick() }, modifier = Modifier
+            .height(height = 75.dp)
+            .padding(2.dp),
+        colors = ButtonDefaults.buttonColors(containerColor = Color.Red),
+        shape = RoundedCornerShape(8.dp)
+    )
+    {
+        Text(text = "EMERGENCIA", style = TextStyle(fontSize = 25.sp))
+    }
+
+    if (viewModel.isDialogShown) {
+        QRDialog(
+            onDismiss = { viewModel.onDismissDialog() },
+            info = "${contacts.get(2).nombre} TELEFONO DE CONTACTO ${contacts.get(2).telefono}"
+        )
+    }
+}
+
+
+@Composable
+fun FilaUbicaciones(contacts: List<Contact>, navController: NavController) {
+    LazyRow(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(2.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(20.dp)
+    ) {
+        items(contacts) {
+            UbicationItem(contact = it, navController)
+        }
+
+        item {
+            IconButton(
+                onClick = { /* Manejar el clic del botón */ },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(4.dp)
+                    .background(Color.LightGray, shape = RoundedCornerShape(70.dp))
+                    .clip(shape = RoundedCornerShape(70.dp))
+            ) {
+                Icon(Icons.Default.Add,contentDescription = "agregar" )
             }
+        }
+    }
+}
 
-            if (viewModel.isDialogShown) {
-                QRDialog(
-                    onDismiss = { viewModel.onDismissDialog() },
-                    info = "${contacts.get(2).nombre} TELEFONO DE CONTACTO ${contacts.get(2).telefono}"
-                )
+@Composable
+fun TextoUbicaciones() {
+    Text(
+        text = "Ubicaciones Rapidas",
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(2.dp),
+        fontFamily = FontFamily.SansSerif,
+        textAlign = TextAlign.Start,
+        fontSize = 24.sp,
+        textDecoration = TextDecoration.Underline,
+        style = TextStyle(fontWeight = FontWeight.SemiBold)
+
+    )
+}
+
+@Composable
+fun TextoContactos() {
+    Text(
+        text = "Contactos de emergencia",
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(2.dp),
+        fontFamily = FontFamily.SansSerif,
+        textAlign = TextAlign.Start,
+        fontSize = 24.sp,
+        textDecoration = TextDecoration.Underline,
+        style = TextStyle(fontWeight = FontWeight.SemiBold)
+
+    )
+}
+
+@Composable
+fun FilaContactos(contacts: List<Contact>) {
+    LazyRow(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(2.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(20.dp)
+    ) {
+        items(contacts) {
+            ContactItem(contact = it)
+        }
+        item {
+            IconButton(
+                onClick = { /* Manejar el clic del botón */ },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(4.dp)
+                    .background(Color.LightGray, shape = RoundedCornerShape(70.dp))
+                    .clip(shape = RoundedCornerShape(70.dp))
+            ) {
+                Icon(Icons.Default.Add,contentDescription = "agregar" )
             }
-
-
         }
     }
 
