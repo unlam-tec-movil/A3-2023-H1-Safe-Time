@@ -28,16 +28,24 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Divider
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.PointerEventType
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -92,7 +100,7 @@ fun ContentHome(navController: NavController, viewModel: HomeViewModel) {
         }
 
         item {
-           FilaContactos(contacts)
+           FilaContactos(contacts,navController)
         }
 
         item {
@@ -128,7 +136,7 @@ fun BotonEmergencia(viewModel: HomeViewModel, contacts: List<Contact>) {
         Text(text = "EMERGENCIA", style = TextStyle(fontSize = 25.sp))
     }
 
-    if (viewModel.isDialogShown) {
+  if (viewModel.isDialogShown) {
         QRDialog(
             onDismiss = { viewModel.onDismissDialog() },
             info = "${contacts.get(2).nombre} TELEFONO DE CONTACTO ${contacts.get(2).telefono}"
@@ -152,7 +160,7 @@ fun FilaUbicaciones(contacts: List<Contact>, navController: NavController) {
 
         item {
             IconButton(
-                onClick = { /* Manejar el clic del botón */ },
+                onClick = {navController.navigate(route = AppScreens.ContactListScreen.route)  },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(4.dp)
@@ -198,7 +206,8 @@ fun TextoContactos() {
 }
 
 @Composable
-fun FilaContactos(contacts: List<Contact>) {
+fun FilaContactos(contacts: List<Contact>,navController: NavController) {
+
     LazyRow(
         modifier = Modifier
             .fillMaxWidth()
@@ -209,126 +218,138 @@ fun FilaContactos(contacts: List<Contact>) {
         items(contacts) {
             ContactItem(contact = it)
         }
+
+
         item {
             IconButton(
-                onClick = { /* Manejar el clic del botón */ },
+                onClick = { navController.navigate(route = AppScreens.ContactListScreen.route )},
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(4.dp)
                     .background(Color.LightGray, shape = RoundedCornerShape(70.dp))
                     .clip(shape = RoundedCornerShape(70.dp))
             ) {
-                Icon(Icons.Default.Add,contentDescription = "agregar" )
+                Icon(Icons.Default.Add, contentDescription = "agregar")
+            }
+        }
+    }
+}
+
+
+
+
+    @OptIn(ExperimentalPermissionsApi::class)
+    @Composable
+    fun ContactItem(contact: Contact) {
+
+
+        val callPermissionState = rememberPermissionState(Manifest.permission.CALL_PHONE)
+        val context = LocalContext.current
+        val intent = Intent(Intent.ACTION_CALL)
+        intent.data = Uri.parse("tel:${contact.telefono}")
+
+        Card(
+            modifier = Modifier
+                .height(150.dp)
+                .width(120.dp)
+                .clip(RoundedCornerShape(20.dp)),
+            colors = CardDefaults.cardColors(Color(R.color.safe_purple)),
+        ) {
+
+
+            Image(
+
+                painter = painterResource(contact.imagen),
+                contentDescription = contact.nombre,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier
+                    .size(64.dp)
+                    .align(Alignment.CenterHorizontally)
+                    .clip(CircleShape)
+                    .background(Color.Black)
+                    .border(1.dp, Color.White, CircleShape)
+
+            )
+            Text(
+                text = contact.nombre,
+                fontWeight = FontWeight.Bold,
+                color = Color.White,
+                modifier = Modifier.align(Alignment.CenterHorizontally)
+            )
+            Text(
+                text = contact.telefono,
+                color = Color.White,
+                modifier = Modifier
+                    .padding(4.dp)
+                    .align(Alignment.CenterHorizontally)
+            )
+            IconButton(
+                onClick = {
+                    if (callPermissionState.status.isGranted) {
+                        context.startActivity(intent)
+                    } else {
+                        callPermissionState.launchPermissionRequest()
+                    }
+                },
+                modifier = Modifier.align(Alignment.CenterHorizontally)
+            ) {
+                Icon(Icons.Default.Call, contentDescription = "Llamar")
+            }
+        }
+
+
+    }
+
+
+
+    @OptIn(ExperimentalMaterial3Api::class)
+    @Composable
+    fun UbicationItem(contact: Contact, navController: NavController) {
+
+        Card(
+            elevation = CardDefaults.cardElevation(0.dp),
+            modifier = Modifier
+                .height(150.dp)
+                .width(120.dp)
+                .clip(RoundedCornerShape(20.dp)),
+            colors = CardDefaults.cardColors(Color(R.color.safe_purple)),
+            onClick = {}
+        ) {
+            Image(
+                painter = painterResource(contact.imagen),
+                contentDescription = contact.nombre,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier
+                    .size(64.dp)
+                    .align(Alignment.CenterHorizontally)
+                    .clip(CircleShape)
+                    .border(1.dp, Color.White, CircleShape)
+            )
+            Text(
+                text = contact.nombre,
+                fontWeight = FontWeight.Bold,
+                color = Color.White,
+                modifier = Modifier.align(Alignment.CenterHorizontally)
+            )
+            Text(
+                text = contact.telefono,
+                color = Color.White,
+                modifier = Modifier
+                    .padding(4.dp)
+                    .align(Alignment.CenterHorizontally)
+            )
+            IconButton(
+                onClick = { navController.navigate(route = AppScreens.MapScreen.route) },
+                modifier = Modifier.align(Alignment.CenterHorizontally)
+            ) {
+                Icon(Icons.Default.LocationOn, contentDescription = "Llamar")
             }
         }
     }
 
-}
 
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalPermissionsApi::class)
-@Composable
-fun ContactItem(contact: Contact) {
-   val callPermissionState = rememberPermissionState(Manifest.permission.CALL_PHONE)
-    val context = LocalContext.current
-    val intent = Intent(Intent.ACTION_CALL)
-    intent.data = Uri.parse("tel:${contact.telefono}")
 
-    Card(
-        modifier = Modifier
-            .height(150.dp)
-            .width(120.dp)
-            .clip(RoundedCornerShape(20.dp)),
-        colors = CardDefaults.cardColors(Color(R.color.safe_purple)),
-        onClick = {}
-    ) {
-        Image(
-
-            painter = painterResource(contact.imagen),
-            contentDescription = contact.nombre,
-            contentScale = ContentScale.Crop,
-            modifier = Modifier
-                .size(64.dp)
-                .align(Alignment.CenterHorizontally)
-                .clip(CircleShape)
-                .background(Color.Black)
-                .border(1.dp, Color.White, CircleShape)
-
-        )
-        Text(
-            text = contact.nombre,
-            fontWeight = FontWeight.Bold,
-            color = Color.White,
-            modifier = Modifier.align(Alignment.CenterHorizontally)
-        )
-        Text(
-            text = contact.telefono,
-            color = Color.White,
-            modifier = Modifier
-                .padding(4.dp)
-                .align(Alignment.CenterHorizontally)
-        )
-        IconButton(
-            onClick = {
-             if (callPermissionState.status.isGranted) {
-                    context.startActivity(intent)
-           } else {
-                 callPermissionState.launchPermissionRequest()
-              }
-            },
-            modifier = Modifier.align(Alignment.CenterHorizontally)
-        ) {
-            Icon(Icons.Default.Call, contentDescription = "Llamar")
-        }
-    }
-}
-
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun UbicationItem(contact: Contact, navController: NavController) {
-
-    Card(
-        elevation = CardDefaults.cardElevation(0.dp),
-        modifier = Modifier
-            .height(150.dp)
-            .width(120.dp)
-            .clip(RoundedCornerShape(20.dp)),
-        colors = CardDefaults.cardColors(Color(R.color.safe_purple)),
-        onClick = {}
-    ) {
-        Image(
-            painter = painterResource(contact.imagen),
-            contentDescription = contact.nombre,
-            contentScale = ContentScale.Crop,
-            modifier = Modifier
-                .size(64.dp)
-                .align(Alignment.CenterHorizontally)
-                .clip(CircleShape)
-                .border(1.dp, Color.White, CircleShape)
-        )
-        Text(
-            text = contact.nombre,
-            fontWeight = FontWeight.Bold,
-            color = Color.White,
-            modifier = Modifier.align(Alignment.CenterHorizontally)
-        )
-        Text(
-            text = contact.telefono,
-            color = Color.White,
-            modifier = Modifier
-                .padding(4.dp)
-                .align(Alignment.CenterHorizontally)
-        )
-        IconButton(
-            onClick = { navController.navigate(route = AppScreens.MapScreen.route) },
-            modifier = Modifier.align(Alignment.CenterHorizontally)
-        ) {
-            Icon(Icons.Default.LocationOn, contentDescription = "Llamar")
-        }
-    }
-
-}
 
 
 

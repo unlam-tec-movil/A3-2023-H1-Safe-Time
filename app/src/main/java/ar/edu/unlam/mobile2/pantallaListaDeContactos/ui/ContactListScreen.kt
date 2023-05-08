@@ -32,6 +32,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.focus.onFocusEvent
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -80,14 +82,17 @@ fun ContactListView() {
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ItemContacto(contacto: Contact) {
     Card(
         colors = CardDefaults.cardColors(MaterialTheme.colorScheme.secondary), modifier = Modifier
             .fillMaxWidth()
             .height(100.dp)
-            .padding(8.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 5.dp)
+            .padding(8.dp)
+            .onFocusEvent {  },
+        elevation = CardDefaults.cardElevation(defaultElevation = 5.dp),
+        onClick = {}
 
     ) {
         Row(modifier = Modifier.padding(8.dp)) {
