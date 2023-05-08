@@ -71,7 +71,6 @@ import com.google.accompanist.permissions.rememberPermissionState
 @Composable
 fun HomeScreen(navController: NavController, viewModel: HomeViewModel) {
 
-
     Scaffold(
         topBar = { Toolbar() },
         bottomBar = { Bottombar(navController,viewModel) }
