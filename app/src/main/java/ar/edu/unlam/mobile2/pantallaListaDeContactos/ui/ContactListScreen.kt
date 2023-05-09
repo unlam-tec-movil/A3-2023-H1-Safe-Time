@@ -1,7 +1,7 @@
 package ar.edu.unlam.mobile2.pantallaListaDeContactos.ui
 
+import androidx.compose.material.Tab
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -23,6 +23,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -32,9 +33,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.focus.onFocusEvent
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -50,11 +51,9 @@ import ar.edu.unlam.mobile2.pantallaMapa.Toolbar
 @Composable
 fun ContactListScreen(navController: NavController, viewModel: HomeViewModel) {
 
-    var isContactSelected by remember { mutableStateOf(true) }
-
     Scaffold(
         topBar = { Toolbar() },
-        bottomBar = { Bottombar(navController,viewModel) }
+        bottomBar = { Bottombar(navController, viewModel) }
     ) {
         Column(
             modifier = Modifier
@@ -64,9 +63,7 @@ fun ContactListScreen(navController: NavController, viewModel: HomeViewModel) {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
 
-            isContactSelected = barraContactosDirecciones()
-            if (isContactSelected) ContactListView() else AdressListView()
-
+            TabContactosDirecciones()
         }
     }
 }
@@ -86,11 +83,12 @@ fun ContactListView() {
 @Composable
 fun ItemContacto(contacto: Contact) {
     Card(
-        colors = CardDefaults.cardColors(MaterialTheme.colorScheme.secondary), modifier = Modifier
+        colors = CardDefaults.cardColors(MaterialTheme.colorScheme.inversePrimary),
+        modifier = Modifier
             .fillMaxWidth()
             .height(100.dp)
             .padding(8.dp)
-            .onFocusEvent {  },
+            .onFocusEvent { },
         elevation = CardDefaults.cardElevation(defaultElevation = 5.dp),
         onClick = {}
 
@@ -112,12 +110,16 @@ fun ItemContacto(contacto: Contact) {
             ) {
                 Text(
                     text = contacto.nombre,
-                    fontSize = 22.sp
+                    fontSize = 22.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer
 
                 )
                 Text(
                     text = contacto.telefono,
-                    fontSize = 18.sp
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer
                 )
             }
 
@@ -127,18 +129,14 @@ fun ItemContacto(contacto: Contact) {
                 modifier = Modifier
                     .weight(1f)
                     .align(Alignment.CenterVertically)
+                    .size(35.dp)
+                    .clickable { /*TODO*/ },
+                tint = MaterialTheme.colorScheme.surfaceTint
             )
 
 
         }
     }
-}
-
-@Preview
-@Composable
-fun Prev() {
-
-    AdressListView()
 }
 
 @Composable
@@ -155,7 +153,8 @@ fun AdressListView() {
 fun ItemDireccion(adress: Adress) {
 
     Card(
-        colors = CardDefaults.cardColors(MaterialTheme.colorScheme.secondary), modifier = Modifier
+        colors = CardDefaults.cardColors(MaterialTheme.colorScheme.inversePrimary),
+        modifier = Modifier
             .fillMaxWidth()
             .height(100.dp)
             .padding(8.dp),
@@ -171,11 +170,15 @@ fun ItemDireccion(adress: Adress) {
             ) {
                 Text(
                     text = adress.nombre,
-                    fontSize = 24.sp
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer
                 )
                 Text(
                     text = adress.direccion,
-                    fontSize = 18.sp
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer
                 )
             }
 
@@ -185,7 +188,9 @@ fun ItemDireccion(adress: Adress) {
                 modifier = Modifier
                     .weight(1f)
                     .align(Alignment.CenterVertically)
-                    .size(35.dp)
+                    .size(40.dp)
+                    .clickable { /*TODO*/ },
+                tint = MaterialTheme.colorScheme.surfaceTint
             )
 
 
@@ -201,37 +206,40 @@ private fun getDirecciones(): List<Adress> {
     return Adress.adress
 }
 
+
 @Composable
-private fun barraContactosDirecciones(): Boolean {
+fun TabContactosDirecciones() {
 
-    val colorSelected = MaterialTheme.colorScheme.inversePrimary
-    val colorUnselected = MaterialTheme.colorScheme.onPrimary
+    var tabIndex by remember { mutableStateOf(0) }
 
-    var isContactSelected by remember { mutableStateOf(true) }
+    val tabs = listOf("CONTACTOS", "DIRECCIONES")
 
-    Row(
-        Modifier
-            .fillMaxWidth()
-            .background(color = MaterialTheme.colorScheme.primary)
-            .padding(bottom = 5.dp),
-        horizontalArrangement = Arrangement.SpaceEvenly,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
+    Column(modifier = Modifier.fillMaxWidth()) {
+        TabRow(
+            selectedTabIndex = tabIndex,
+            containerColor = MaterialTheme.colorScheme.primary
+        ) {
+            tabs.forEachIndexed { index, title ->
+                Tab(
+                    selected = tabIndex == index,
+                    onClick = { tabIndex = index },
+                    text = {
+                        Text(
+                            text = title,
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = MaterialTheme.colorScheme.onPrimary
+                        )
+                    },
+                    selectedContentColor = MaterialTheme.colorScheme.onPrimary,
+                    unselectedContentColor = MaterialTheme.colorScheme.secondaryContainer
+                )
+            }
+        }
 
-        Text(
-            text = "CONTACTOS", fontSize = 20.sp, modifier = Modifier.clickable {
-                isContactSelected = true
-            },
-            color = if (isContactSelected) colorSelected else colorUnselected
-        )
-
-        Text(
-            text = "DIRECCIONES", fontSize = 20.sp, modifier = Modifier.clickable {
-                isContactSelected = false
-            },
-            color = if (isContactSelected) colorUnselected else colorSelected
-        )
+        when (tabIndex) {
+            0 -> ContactListView()
+            1 -> AdressListView()
+        }
     }
-    return isContactSelected
-
 }
