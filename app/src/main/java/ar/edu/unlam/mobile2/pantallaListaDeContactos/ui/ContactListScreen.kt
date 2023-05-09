@@ -43,8 +43,8 @@ import androidx.navigation.NavController
 import ar.edu.unlam.mobile2.pantallaHome.domain.model.Adress
 import ar.edu.unlam.mobile2.pantallaHome.domain.model.Contact
 import ar.edu.unlam.mobile2.pantallaHome.ui.viewmodel.HomeViewModel
-import ar.edu.unlam.mobile2.pantallaMapa.Bottombar
-import ar.edu.unlam.mobile2.pantallaMapa.Toolbar
+import ar.edu.unlam.mobile2.pantallaMapa.ui.Bottombar
+import ar.edu.unlam.mobile2.pantallaMapa.ui.Toolbar
 
 
 @OptIn(ExperimentalMaterial3Api::class)
