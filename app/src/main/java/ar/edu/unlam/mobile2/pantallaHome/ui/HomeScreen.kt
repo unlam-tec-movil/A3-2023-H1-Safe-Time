@@ -170,7 +170,7 @@ fun FilaUbicaciones(contacts: List<Contact>, navController: NavController) {
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(4.dp)
-                    .background(Color.LightGray, shape = RoundedCornerShape(70.dp))
+                    .background(MaterialTheme.colorScheme.primaryContainer, shape = RoundedCornerShape(70.dp))
                     .clip(shape = RoundedCornerShape(70.dp))
             ) {
                 Icon(Icons.Default.Add, contentDescription = "agregar")
@@ -234,7 +234,7 @@ fun FilaContactos(contacts: List<Contact>, navController: NavController) {
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(4.dp)
-                    .background(Color.LightGray, shape = RoundedCornerShape(70.dp))
+                    .background(MaterialTheme.colorScheme.primaryContainer, shape = RoundedCornerShape(70.dp))
                     .clip(shape = RoundedCornerShape(70.dp))
             ) {
                 Icon(Icons.Default.Add, contentDescription = "agregar")
