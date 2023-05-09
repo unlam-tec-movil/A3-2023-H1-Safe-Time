@@ -118,7 +118,7 @@ fun ContentHome(navController: NavController, viewModel: HomeViewModel) {
         }
 
         item {
-            Divider(modifier = Modifier.width(360.dp))
+            Divider(modifier = Modifier.width(360.dp), thickness = 2.dp)
         }
         item {
             BotonEmergencia(viewModel, contacts)
@@ -135,7 +135,7 @@ fun BotonEmergencia(viewModel: HomeViewModel, contacts: List<Contact>) {
         onClick = { viewModel.onEmergencyClick() }, modifier = Modifier
             .height(height = 75.dp)
             .padding(2.dp),
-        colors = ButtonDefaults.buttonColors(containerColor = Color.Red),
+        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error),
         shape = RoundedCornerShape(8.dp)
     )
     {
@@ -170,7 +170,10 @@ fun FilaUbicaciones(contacts: List<Contact>, navController: NavController) {
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(4.dp)
-                    .background(MaterialTheme.colorScheme.primaryContainer, shape = RoundedCornerShape(70.dp))
+                    .background(
+                        MaterialTheme.colorScheme.primaryContainer,
+                        shape = RoundedCornerShape(70.dp)
+                    )
                     .clip(shape = RoundedCornerShape(70.dp))
             ) {
                 Icon(Icons.Default.Add, contentDescription = "agregar")
@@ -233,7 +236,10 @@ fun FilaContactos(contacts: List<Contact>, navController: NavController) {
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(4.dp)
-                    .background(MaterialTheme.colorScheme.primaryContainer, shape = RoundedCornerShape(70.dp))
+                    .background(
+                        MaterialTheme.colorScheme.primaryContainer,
+                        shape = RoundedCornerShape(70.dp)
+                    )
                     .clip(shape = RoundedCornerShape(70.dp))
             ) {
                 Icon(Icons.Default.Add, contentDescription = "agregar")
@@ -255,7 +261,7 @@ fun ContactItem(contact: Contact) {
 
     Card(
         modifier = Modifier
-            .size(width = 145.dp, height = 170.dp)
+            .size(width = 145.dp, height = 180.dp)
             .clip(RoundedCornerShape(20.dp)),
         elevation = CardDefaults.elevatedCardElevation(10.dp),
         colors = CardDefaults.cardColors(MaterialTheme.colorScheme.primary),
@@ -299,7 +305,7 @@ fun ContactItem(contact: Contact) {
             },
             modifier = Modifier.align(Alignment.CenterHorizontally)
         ) {
-            Icon(Icons.Default.Call, contentDescription = "Llamar")
+            Icon(Icons.Default.Call, contentDescription = "Llamar", modifier = Modifier.size(45.dp))
         }
     }
 
@@ -312,7 +318,7 @@ fun UbicationItem(contact: Contact, navController: NavController) {
 
     Card(
         modifier = Modifier
-            .size(width = 140.dp, height = 160.dp)
+            .size(width = 145.dp, height = 180.dp)
             .clip(RoundedCornerShape(20.dp)),
         elevation = CardDefaults.elevatedCardElevation(10.dp),
         colors = CardDefaults.cardColors(MaterialTheme.colorScheme.primary),
@@ -349,7 +355,11 @@ fun UbicationItem(contact: Contact, navController: NavController) {
             onClick = { navController.navigate(route = AppScreens.MapScreen.route) },
             modifier = Modifier.align(Alignment.CenterHorizontally)
         ) {
-            Icon(Icons.Default.LocationOn, contentDescription = "Llamar")
+            Icon(
+                Icons.Default.LocationOn,
+                contentDescription = "Llamar",
+                modifier = Modifier.size(45.dp)
+            )
         }
     }
 }
