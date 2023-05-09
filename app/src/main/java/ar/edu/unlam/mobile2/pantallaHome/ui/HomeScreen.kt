@@ -227,7 +227,6 @@ fun FilaContactos(contacts: List<Contact>, navController: NavController) {
             ContactItem(contact = it)
         }
 
-
         item {
             IconButton(
                 onClick = { navController.navigate(route = AppScreens.ContactListScreen.route) },
