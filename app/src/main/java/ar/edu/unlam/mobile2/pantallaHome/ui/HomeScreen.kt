@@ -8,7 +8,10 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -33,6 +36,7 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -73,9 +77,15 @@ fun HomeScreen(navController: NavController, viewModel: HomeViewModel) {
 
     Scaffold(
         topBar = { Toolbar() },
-        bottomBar = { Bottombar(navController,viewModel) }
+        bottomBar = { Bottombar(navController, viewModel) }
     ) {
-        Box(modifier = Modifier.padding(it)) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(it)
+                .padding(0.5.dp),
+            contentAlignment = Alignment.Center
+        ) {
             ContentHome(navController, viewModel)
         }
     }
@@ -87,9 +97,6 @@ fun ContentHome(navController: NavController, viewModel: HomeViewModel) {
 
 
     LazyColumn(
-        modifier = Modifier
-            .fillMaxWidth()
-            .fillMaxHeight(),
         verticalArrangement = Arrangement.spacedBy(15.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -99,22 +106,22 @@ fun ContentHome(navController: NavController, viewModel: HomeViewModel) {
         }
 
         item {
-           FilaContactos(contacts,navController)
+            FilaContactos(contacts, navController)
         }
 
         item {
-           TextoUbicaciones()
+            TextoUbicaciones()
         }
 
         item {
-            FilaUbicaciones(contacts,navController)
+            FilaUbicaciones(contacts, navController)
         }
 
         item {
             Divider(modifier = Modifier.width(360.dp))
         }
         item {
-            BotonEmergencia(viewModel,contacts)
+            BotonEmergencia(viewModel, contacts)
         }
     }
 
@@ -135,7 +142,7 @@ fun BotonEmergencia(viewModel: HomeViewModel, contacts: List<Contact>) {
         Text(text = "EMERGENCIA", style = TextStyle(fontSize = 25.sp))
     }
 
-  if (viewModel.isDialogShown) {
+    if (viewModel.isDialogShown) {
         QRDialog(
             onDismiss = { viewModel.onDismissDialog() },
             info = "${contacts.get(2).nombre} TELEFONO DE CONTACTO ${contacts.get(2).telefono}"
@@ -159,14 +166,14 @@ fun FilaUbicaciones(contacts: List<Contact>, navController: NavController) {
 
         item {
             IconButton(
-                onClick = {navController.navigate(route = AppScreens.ContactListScreen.route)  },
+                onClick = { navController.navigate(route = AppScreens.ContactListScreen.route) },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(4.dp)
                     .background(Color.LightGray, shape = RoundedCornerShape(70.dp))
                     .clip(shape = RoundedCornerShape(70.dp))
             ) {
-                Icon(Icons.Default.Add,contentDescription = "agregar" )
+                Icon(Icons.Default.Add, contentDescription = "agregar")
             }
         }
     }
@@ -178,12 +185,13 @@ fun TextoUbicaciones() {
         text = "Ubicaciones Rapidas",
         modifier = Modifier
             .fillMaxWidth()
-            .padding(2.dp),
+            .padding(start = 10.dp),
         fontFamily = FontFamily.SansSerif,
         textAlign = TextAlign.Start,
-        fontSize = 24.sp,
+        fontSize = 28.sp,
+        color = MaterialTheme.colorScheme.onBackground,
         textDecoration = TextDecoration.Underline,
-        style = TextStyle(fontWeight = FontWeight.SemiBold)
+        style = TextStyle(fontWeight = FontWeight.Bold)
 
     )
 }
@@ -194,18 +202,19 @@ fun TextoContactos() {
         text = "Contactos de emergencia",
         modifier = Modifier
             .fillMaxWidth()
-            .padding(2.dp),
+            .padding(start = 10.dp),
         fontFamily = FontFamily.SansSerif,
         textAlign = TextAlign.Start,
-        fontSize = 24.sp,
+        fontSize = 28.sp,
+        color = MaterialTheme.colorScheme.onBackground,
         textDecoration = TextDecoration.Underline,
-        style = TextStyle(fontWeight = FontWeight.SemiBold)
+        style = TextStyle(fontWeight = FontWeight.Bold)
 
     )
 }
 
 @Composable
-fun FilaContactos(contacts: List<Contact>,navController: NavController) {
+fun FilaContactos(contacts: List<Contact>, navController: NavController) {
 
     LazyRow(
         modifier = Modifier
@@ -221,7 +230,7 @@ fun FilaContactos(contacts: List<Contact>,navController: NavController) {
 
         item {
             IconButton(
-                onClick = { navController.navigate(route = AppScreens.ContactListScreen.route )},
+                onClick = { navController.navigate(route = AppScreens.ContactListScreen.route) },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(4.dp)
@@ -235,116 +244,116 @@ fun FilaContactos(contacts: List<Contact>,navController: NavController) {
 }
 
 
+@OptIn(ExperimentalPermissionsApi::class)
+@Composable
+fun ContactItem(contact: Contact) {
 
 
-    @OptIn(ExperimentalPermissionsApi::class)
-    @Composable
-    fun ContactItem(contact: Contact) {
+    val callPermissionState = rememberPermissionState(Manifest.permission.CALL_PHONE)
+    val context = LocalContext.current
+    val intent = Intent(Intent.ACTION_CALL)
+    intent.data = Uri.parse("tel:${contact.telefono}")
 
+    Card(
+        modifier = Modifier
+            .size(width = 145.dp, height = 170.dp)
+            .clip(RoundedCornerShape(20.dp)),
+        elevation = CardDefaults.elevatedCardElevation(10.dp),
+        colors = CardDefaults.cardColors(MaterialTheme.colorScheme.primary),
+    ) {
 
-        val callPermissionState = rememberPermissionState(Manifest.permission.CALL_PHONE)
-        val context = LocalContext.current
-        val intent = Intent(Intent.ACTION_CALL)
-        intent.data = Uri.parse("tel:${contact.telefono}")
+        Spacer(modifier = Modifier.padding(top = 5.dp))
 
-        Card(
+        Image(
+            painter = painterResource(contact.imagen),
+            contentDescription = contact.nombre,
+            contentScale = ContentScale.Crop,
             modifier = Modifier
-                .height(150.dp)
-                .width(120.dp)
-                .clip(RoundedCornerShape(20.dp)),
-            colors = CardDefaults.cardColors(Color(R.color.safe_purple)),
-        ) {
+                .size(64.dp)
+                .align(Alignment.CenterHorizontally)
+                .padding(1.dp)
+                .clip(CircleShape)
+                .background(MaterialTheme.colorScheme.background)
+                .border(2.dp, MaterialTheme.colorScheme.secondaryContainer, CircleShape)
 
-
-            Image(
-
-                painter = painterResource(contact.imagen),
-                contentDescription = contact.nombre,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .size(64.dp)
-                    .align(Alignment.CenterHorizontally)
-                    .clip(CircleShape)
-                    .background(Color.Black)
-                    .border(1.dp, Color.White, CircleShape)
-
-            )
-            Text(
-                text = contact.nombre,
-                fontWeight = FontWeight.Bold,
-                color = Color.White,
-                modifier = Modifier.align(Alignment.CenterHorizontally)
-            )
-            Text(
-                text = contact.telefono,
-                color = Color.White,
-                modifier = Modifier
-                    .padding(4.dp)
-                    .align(Alignment.CenterHorizontally)
-            )
-            IconButton(
-                onClick = {
-                    if (callPermissionState.status.isGranted) {
-                        context.startActivity(intent)
-                    } else {
-                        callPermissionState.launchPermissionRequest()
-                    }
-                },
-                modifier = Modifier.align(Alignment.CenterHorizontally)
-            ) {
-                Icon(Icons.Default.Call, contentDescription = "Llamar")
-            }
-        }
-
-
-    }
-
-
-
-    @OptIn(ExperimentalMaterial3Api::class)
-    @Composable
-    fun UbicationItem(contact: Contact, navController: NavController) {
-
-        Card(
-            elevation = CardDefaults.cardElevation(0.dp),
+        )
+        Text(
+            text = contact.nombre,
+            fontWeight = FontWeight.Bold,
+            color = Color.White,
+            modifier = Modifier.align(Alignment.CenterHorizontally)
+        )
+        Text(
+            text = contact.telefono,
+            color = Color.White,
             modifier = Modifier
-                .height(150.dp)
-                .width(120.dp)
-                .clip(RoundedCornerShape(20.dp)),
-            colors = CardDefaults.cardColors(Color(R.color.safe_purple)),
-            onClick = {}
+                .padding(4.dp)
+                .align(Alignment.CenterHorizontally)
+        )
+        IconButton(
+            onClick = {
+                if (callPermissionState.status.isGranted) {
+                    context.startActivity(intent)
+                } else {
+                    callPermissionState.launchPermissionRequest()
+                }
+            },
+            modifier = Modifier.align(Alignment.CenterHorizontally)
         ) {
-            Image(
-                painter = painterResource(contact.imagen),
-                contentDescription = contact.nombre,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .size(64.dp)
-                    .align(Alignment.CenterHorizontally)
-                    .clip(CircleShape)
-                    .border(1.dp, Color.White, CircleShape)
-            )
-            Text(
-                text = contact.nombre,
-                fontWeight = FontWeight.Bold,
-                color = Color.White,
-                modifier = Modifier.align(Alignment.CenterHorizontally)
-            )
-            Text(
-                text = contact.telefono,
-                color = Color.White,
-                modifier = Modifier
-                    .padding(4.dp)
-                    .align(Alignment.CenterHorizontally)
-            )
-            IconButton(
-                onClick = { navController.navigate(route = AppScreens.MapScreen.route) },
-                modifier = Modifier.align(Alignment.CenterHorizontally)
-            ) {
-                Icon(Icons.Default.LocationOn, contentDescription = "Llamar")
-            }
+            Icon(Icons.Default.Call, contentDescription = "Llamar")
         }
     }
+
+
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun UbicationItem(contact: Contact, navController: NavController) {
+
+    Card(
+        modifier = Modifier
+            .size(width = 140.dp, height = 160.dp)
+            .clip(RoundedCornerShape(20.dp)),
+        elevation = CardDefaults.elevatedCardElevation(10.dp),
+        colors = CardDefaults.cardColors(MaterialTheme.colorScheme.primary),
+        onClick = {}
+    ) {
+        Spacer(modifier = Modifier.padding(top = 5.dp))
+
+        Image(
+            painter = painterResource(contact.imagen),
+            contentDescription = contact.nombre,
+            contentScale = ContentScale.Crop,
+            modifier = Modifier
+                .size(64.dp)
+                .align(Alignment.CenterHorizontally)
+                .padding(1.dp)
+                .clip(CircleShape)
+                .background(MaterialTheme.colorScheme.background)
+                .border(2.dp, MaterialTheme.colorScheme.secondaryContainer, CircleShape)
+        )
+        Text(
+            text = contact.nombre,
+            fontWeight = FontWeight.Bold,
+            color = Color.White,
+            modifier = Modifier.align(Alignment.CenterHorizontally)
+        )
+        Text(
+            text = contact.telefono,
+            color = Color.White,
+            modifier = Modifier
+                .padding(4.dp)
+                .align(Alignment.CenterHorizontally)
+        )
+        IconButton(
+            onClick = { navController.navigate(route = AppScreens.MapScreen.route) },
+            modifier = Modifier.align(Alignment.CenterHorizontally)
+        ) {
+            Icon(Icons.Default.LocationOn, contentDescription = "Llamar")
+        }
+    }
+}
 
 
 
