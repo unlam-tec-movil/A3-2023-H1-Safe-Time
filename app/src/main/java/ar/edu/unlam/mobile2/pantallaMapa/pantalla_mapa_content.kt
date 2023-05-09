@@ -65,11 +65,10 @@ import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.rememberCameraPositionState
 
 
-
 @Composable
-fun PantallaMapa(navController: NavController,viewModel: HomeViewModel) {
+fun PantallaMapa(navController: NavController, viewModel: HomeViewModel) {
 
-    ViewContainer(navController,viewModel)
+    ViewContainer(navController, viewModel)
 }
 
 @Composable
@@ -109,16 +108,14 @@ fun MapScreen() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ViewContainer(navController: NavController,viewModel: HomeViewModel) {
+fun ViewContainer(navController: NavController, viewModel: HomeViewModel) {
 
-    /*val scafoldState = rememberScrollState()
-    val coroutineScope = rememberCoroutineScope()*/
     val context = LocalContext.current.applicationContext
     var listaState by rememberSaveable { mutableStateOf(true) }
 
     Scaffold(topBar = { Toolbar() }, bottomBar = { Bottombar(navController, viewModel) }) {
 
-        Column(
+        LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues = it)
@@ -127,92 +124,98 @@ fun ViewContainer(navController: NavController,viewModel: HomeViewModel) {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
 
-            Row(
-                modifier = Modifier
-                    .background(
-                        MaterialTheme.colorScheme.primary,
-                        shape = RoundedCornerShape(20.dp)
-                    )
-                    .padding(10.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(10.dp)
-
-            ) {
-
-                TextoViajes()
-
+            item {
                 Row(
                     modifier = Modifier
                         .background(
-                            MaterialTheme.colorScheme.secondaryContainer,
+                            MaterialTheme.colorScheme.primary,
                             shape = RoundedCornerShape(20.dp)
-                        ),
-                    verticalAlignment = Alignment.CenterVertically
+                        )
+                        .padding(10.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+
                 ) {
-                    ListaDirecciones(listaState)
-                    Icon(
-                        imageVector = Icons.Rounded.ArrowDropDown,
-                        contentDescription = "Abrir lista",
-                        tint = MaterialTheme.colorScheme.primary,
+
+                    TextoViajes()
+
+                    Row(
                         modifier = Modifier
-                            .size(35.dp)
-                            .clickable {
-                                listaState = !listaState
-                            }
-                    )
+                            .background(
+                                MaterialTheme.colorScheme.secondaryContainer,
+                                shape = RoundedCornerShape(20.dp)
+                            ),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        ListaDirecciones(listaState)
+                        Icon(
+                            imageVector = Icons.Rounded.ArrowDropDown,
+                            contentDescription = "Abrir lista",
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier
+                                .size(35.dp)
+                                .clickable {
+                                    listaState = !listaState
+                                }
+                        )
+                    }
                 }
             }
 
-            MapScreen()
+            item {
+                MapScreen()
+            }
 
-            Spacer(modifier = Modifier.size(width = 0.dp, height = 5.dp))
+            item {
+                Spacer(modifier = Modifier.size(width = 0.dp, height = 5.dp))
+            }
 
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceAround
-
-            ) {
+            item {
                 Row(
                     modifier = Modifier
-                        .background(
-                            MaterialTheme.colorScheme.primary,
-                            shape = RoundedCornerShape(20.dp)
-                        )
-                        .size(width = 180.dp, height = 50.dp),
+                        .fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Center
+                    horizontalArrangement = Arrangement.SpaceAround
 
                 ) {
+                    Row(
+                        modifier = Modifier
+                            .background(
+                                MaterialTheme.colorScheme.primary,
+                                shape = RoundedCornerShape(20.dp)
+                            )
+                            .size(width = 180.dp, height = 50.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center
 
-                    CartelDistanciaDelPunto(distancia = 0.0)
+                    ) {
 
-                }
-                Row(
-                    modifier = Modifier
-                        .background(
-                            MaterialTheme.colorScheme.primary,
-                            shape = RoundedCornerShape(20.dp)
-                        )
-                        .size(width = 180.dp, 50.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Center
+                        CartelDistanciaDelPunto(distancia = 0.0)
 
-                ) {
-                    CartelLlegadaEstimada(tiempo = 0)
+                    }
+                    Row(
+                        modifier = Modifier
+                            .background(
+                                MaterialTheme.colorScheme.primary,
+                                shape = RoundedCornerShape(20.dp)
+                            )
+                            .size(width = 180.dp, 50.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center
+
+                    ) {
+                        CartelLlegadaEstimada(tiempo = 0)
+                    }
                 }
             }
         }
     }
-    }
+}
 
 
 @Composable
-fun Bottombar(navController: NavController,viewModel: HomeViewModel) {
+fun Bottombar(navController: NavController, viewModel: HomeViewModel) {
 
-
-    //val backStackEntry = navController.currentBackStackEntryAsState()
     val context = LocalContext.current
     val bottomNavItem = listOf(
 
@@ -235,7 +238,9 @@ fun Bottombar(navController: NavController,viewModel: HomeViewModel) {
 
     NavigationBar(
         containerColor = MaterialTheme.colorScheme.primary,
-        modifier = Modifier.fillMaxWidth().height(height = 60.dp)
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(height = 60.dp)
     ) {
 
 
@@ -244,14 +249,14 @@ fun Bottombar(navController: NavController,viewModel: HomeViewModel) {
             NavigationBarItem(
                 selected = false,
                 onClick = {
-                    if(viewModel.screenUbication!=item.route){
-                        when(item.route){
-                            "home_screen"-> navController.navigate(route = AppScreens.HomeScreen.route)
-                            "map_screen"->navController.navigate(route = AppScreens.MapScreen.route)
-                            "list_screen"->navController.navigate(route = AppScreens.ContactListScreen.route)
+                    if (viewModel.screenUbication != item.route) {
+                        when (item.route) {
+                            "home_screen" -> navController.navigate(route = AppScreens.HomeScreen.route)
+                            "map_screen" -> navController.navigate(route = AppScreens.MapScreen.route)
+                            "list_screen" -> navController.navigate(route = AppScreens.ContactListScreen.route)
                         }
                     }
-                     },
+                },
                 icon = {
                     Icon(
                         imageVector = item.icon,
