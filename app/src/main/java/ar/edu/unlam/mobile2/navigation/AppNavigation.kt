@@ -8,7 +8,7 @@ import ar.edu.unlam.mobile2.HomeScreen
 import ar.edu.unlam.mobile2.pantallaConfiguracion.ConfiguracionQRScreen
 import ar.edu.unlam.mobile2.pantallaHome.ui.viewmodel.HomeViewModel
 import ar.edu.unlam.mobile2.pantallaListaDeContactos.ui.ContactListScreen
-import ar.edu.unlam.mobile2.pantallaMapa.PantallaMapa
+import ar.edu.unlam.mobile2.pantallaMapa.ui.PantallaMapa
 
 @Composable
 fun AppNavigation(viewModel: HomeViewModel) {
