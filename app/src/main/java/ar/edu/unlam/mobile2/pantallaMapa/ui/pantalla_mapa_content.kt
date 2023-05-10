@@ -325,32 +325,6 @@ private fun TextoViajes() {
 }
 
 @Composable
-private fun ListaDirecciones(state: Boolean) {
-
-    LazyColumn(
-        verticalArrangement = Arrangement.spacedBy(4.dp),
-        modifier = Modifier
-            .padding(start = 4.dp)
-            .background(
-                shape = RoundedCornerShape(20.dp),
-                color = MaterialTheme.colorScheme.secondaryContainer
-            )
-            .size(width = 80.dp, if (state) 30.dp else 120.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-
-        ) {
-        item {
-            ItemsDirecciones("UNLAM")
-            ItemsDirecciones("Escuela")
-            ItemsDirecciones("Hospital")
-            ItemsDirecciones("Abuela")
-            ItemsDirecciones("Mama")
-        }
-    }
-
-}
-
-@Composable
 private fun ItemsDirecciones(direccion: String) {
 
     Text(
@@ -407,8 +381,8 @@ private fun selectorDeUbicacionesRegistradas(listaMarcadores: List<Marcador>): M
 
     val options: List<Marcador> = listaMarcadores
 
-    var mSelectedUbi by remember { mutableStateOf(MarcadorRepo.ubicaciones[0]) }
-    var mSelectedText by remember { mutableStateOf("") }
+    var mSelectedUbi by remember { mutableStateOf(listaMarcadores[0]) }
+    var mSelectedText by remember { mutableStateOf(listaMarcadores[0].nombre) }
 
     var mTextFieldSize by remember { mutableStateOf(Size.Zero) }
 
@@ -432,7 +406,7 @@ private fun selectorDeUbicacionesRegistradas(listaMarcadores: List<Marcador>): M
             ),
             label = {
                 Text(
-                    "Ubicacion",
+                    "Viajar a",
                     color = MaterialTheme.colorScheme.primary
                 )
             },
