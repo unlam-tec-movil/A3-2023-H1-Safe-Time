@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -59,7 +60,7 @@ fun ConfiguracionQRScreen(navController:NavController,viewModel:HomeViewModel) {
                     modifier = Modifier.padding(bottom = 16.dp)
                 )
 
-                TextField(
+                OutlinedTextField(
                     value = nombre.value,
                     onValueChange = { nombre.value = it },
                     label = { Text("Nombre (familiar o conocido)") },
@@ -68,7 +69,7 @@ fun ConfiguracionQRScreen(navController:NavController,viewModel:HomeViewModel) {
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                TextField(
+                OutlinedTextField(
                     value = apellido.value,
                     onValueChange = { apellido.value = it },
                     label = { Text("Apellido") },
@@ -77,19 +78,19 @@ fun ConfiguracionQRScreen(navController:NavController,viewModel:HomeViewModel) {
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                TextField(
+                OutlinedTextField(
                     value = numero.value,
                     onValueChange = { numero.value = it },
-                    label = { Text("Número a quien llamar") },
+                    label = { Text("Número de emergencia") },
                     modifier = Modifier.fillMaxWidth()
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                TextField(
+                OutlinedTextField(
                     value = direccion.value,
                     onValueChange = { direccion.value = it },
-                    label = { Text("Dirección de a dónde ir en caso de estar perdido") },
+                    label = { Text("Dirección de emergencia") },
                     modifier = Modifier.fillMaxWidth()
                 )
 
