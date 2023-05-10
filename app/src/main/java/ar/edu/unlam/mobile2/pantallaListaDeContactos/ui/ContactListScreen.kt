@@ -139,6 +139,7 @@ fun ItemContacto(contacto: Contact) {
                 Icon(
                     Icons.Default.Call,
                     contentDescription = "Llamar",
+                    tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.size(45.dp)
                 )
 
@@ -197,6 +198,7 @@ fun ItemContacto(contacto: Contact) {
                     Icon(
                         Icons.Default.LocationOn,
                         contentDescription = "Llamar",
+                        tint = MaterialTheme.colorScheme.primary ,
                         modifier = Modifier.size(45.dp)
                     )
 
