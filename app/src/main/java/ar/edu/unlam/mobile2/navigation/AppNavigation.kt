@@ -5,6 +5,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import ar.edu.unlam.mobile2.HomeScreen
+import ar.edu.unlam.mobile2.pantallaConfiguracion.ConfiguracionQRScreen
 import ar.edu.unlam.mobile2.pantallaHome.ui.viewmodel.HomeViewModel
 import ar.edu.unlam.mobile2.pantallaListaDeContactos.ui.ContactListScreen
 import ar.edu.unlam.mobile2.pantallaMapa.PantallaMapa
@@ -25,5 +26,12 @@ fun AppNavigation(viewModel: HomeViewModel) {
             viewModel.screenUbication = "list_screen"
             ContactListScreen(navController,viewModel)
         }
+
+        composable(route = AppScreens.InfoQrScreen.route){
+            viewModel.screenUbication = "infoQr_screen"
+            ConfiguracionQRScreen(navController,viewModel)
+        }
+
+
     }
 }

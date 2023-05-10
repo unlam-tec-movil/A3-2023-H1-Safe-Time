@@ -113,7 +113,7 @@ fun ViewContainer(navController: NavController, viewModel: HomeViewModel) {
     val context = LocalContext.current.applicationContext
     var listaState by rememberSaveable { mutableStateOf(true) }
 
-    Scaffold(topBar = { Toolbar() }, bottomBar = { Bottombar(navController, viewModel) }) {
+    Scaffold(topBar = { Toolbar(navController) }, bottomBar = { Bottombar(navController, viewModel) }) {
 
         LazyColumn(
             modifier = Modifier
@@ -254,6 +254,7 @@ fun Bottombar(navController: NavController, viewModel: HomeViewModel) {
                             "home_screen" -> navController.navigate(route = AppScreens.HomeScreen.route)
                             "map_screen" -> navController.navigate(route = AppScreens.MapScreen.route)
                             "list_screen" -> navController.navigate(route = AppScreens.ContactListScreen.route)
+                            "infoQr_screen" -> navController.navigate(route = AppScreens.InfoQrScreen.route)
                         }
                     }
                 },
@@ -272,7 +273,7 @@ fun Bottombar(navController: NavController, viewModel: HomeViewModel) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun Toolbar() {
+fun Toolbar(navController: NavController) {
     val context = LocalContext.current
     TopAppBar(
         title = {
@@ -301,10 +302,9 @@ fun Toolbar() {
             //Setting Icon
             TopAppBarActionButton(
                 imageVector = Icons.Rounded.Settings,
-                description = "Settings Icon"
-            ) {
-                Toast.makeText(context, "Setting click", Toast.LENGTH_SHORT).show()
-            }
+                description = "Settings Icon",
+                onClick = {navController.navigate(route = AppScreens.InfoQrScreen.route)}
+            )
         }
     )
 }

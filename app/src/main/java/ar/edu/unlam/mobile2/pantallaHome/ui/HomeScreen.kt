@@ -76,7 +76,7 @@ import com.google.accompanist.permissions.rememberPermissionState
 fun HomeScreen(navController: NavController, viewModel: HomeViewModel) {
 
     Scaffold(
-        topBar = { Toolbar() },
+        topBar = { Toolbar(navController) },
         bottomBar = { Bottombar(navController, viewModel) }
     ) {
         Box(
@@ -145,7 +145,7 @@ fun BotonEmergencia(viewModel: HomeViewModel, contacts: List<Contact>) {
     if (viewModel.isDialogShown) {
         QRDialog(
             onDismiss = { viewModel.onDismissDialog() },
-            info = "${contacts.get(2).nombre} TELEFONO DE CONTACTO ${contacts.get(2).telefono}"
+            info = viewModel.infoQr
         )
     }
 }
