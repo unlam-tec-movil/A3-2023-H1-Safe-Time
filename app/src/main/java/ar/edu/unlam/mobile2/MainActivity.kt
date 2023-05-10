@@ -22,12 +22,12 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         //INTEGRACION DE APPCENTER
-        AppCenter.start(
+        /*AppCenter.start(
             application,
             "0a6e59c922abcfd3bc3ded3870661ccfae411c45",
             Analytics::class.java,
             Crashes::class.java
-        )
+        )*/
 
         Log.i("MainActivity", "onCreate")
         setContent {
