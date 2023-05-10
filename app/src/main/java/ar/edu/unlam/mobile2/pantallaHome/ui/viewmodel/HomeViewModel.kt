@@ -6,6 +6,7 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 
 class HomeViewModel:ViewModel() {
+    var infoQr by mutableStateOf("DEBE LLENAR EL FORMULARIO")
 
     var screenUbication by mutableStateOf("home_screenn")
 
