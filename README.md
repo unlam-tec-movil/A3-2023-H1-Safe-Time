@@ -7,6 +7,9 @@ basada en las recomendaciones de [Android][1].
 
 La aplicación consume [The Cat API], una api que retorna una foto de un gato al azar.
 
+
+cambio
+
 ## Estructura
 
 ### Data
