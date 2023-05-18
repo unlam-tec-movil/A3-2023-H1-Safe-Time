@@ -2,7 +2,10 @@ package ar.edu.unlam.mobile2
 
 import android.Manifest
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -36,6 +39,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -50,6 +54,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat
 import androidx.navigation.NavController
 import ar.edu.unlam.mobile2.dialogQR.QRDialog
 import ar.edu.unlam.mobile2.navigation.AppScreens
@@ -242,12 +247,17 @@ fun FilaContactos(contacts: List<Contact>, navController: NavController) {
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun ContactItem(contact: Contact) {
-
-
-    val callPermissionState = rememberPermissionState(Manifest.permission.CALL_PHONE)
     val context = LocalContext.current
-    val intent = Intent(Intent.ACTION_CALL)
-    intent.data = Uri.parse("tel:${contact.telefono}")
+    val intent = remember { Intent(Intent.ACTION_CALL) }
+    intent.data = remember { Uri.parse("tel:${contact.telefono}") }
+
+    val launcher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            context.startActivity(intent)
+        }
+    }
 
     Card(
         modifier = Modifier
@@ -256,7 +266,6 @@ fun ContactItem(contact: Contact) {
         elevation = CardDefaults.elevatedCardElevation(10.dp),
         colors = CardDefaults.cardColors(MaterialTheme.colorScheme.primary),
     ) {
-
         Spacer(modifier = Modifier.padding(top = 5.dp))
 
         Image(
@@ -270,14 +279,15 @@ fun ContactItem(contact: Contact) {
                 .clip(CircleShape)
                 .background(MaterialTheme.colorScheme.background)
                 .border(2.dp, MaterialTheme.colorScheme.secondaryContainer, CircleShape)
-
         )
+
         Text(
             text = contact.nombre,
             fontWeight = FontWeight.Bold,
             color = Color.White,
             modifier = Modifier.align(Alignment.CenterHorizontally)
         )
+
         Text(
             text = contact.telefono,
             color = Color.White,
@@ -285,12 +295,17 @@ fun ContactItem(contact: Contact) {
                 .padding(4.dp)
                 .align(Alignment.CenterHorizontally)
         )
+
         IconButton(
             onClick = {
-                if (callPermissionState.status.isGranted) {
-                    context.startActivity(intent)
+                if (ContextCompat.checkSelfPermission(
+                        context,
+                        Manifest.permission.CALL_PHONE
+                    ) == PackageManager.PERMISSION_GRANTED
+                ) {
+                    context.startActivity(Intent.createChooser(intent, "Llamar"))
                 } else {
-                    callPermissionState.launchPermissionRequest()
+                    launcher.launch(Manifest.permission.CALL_PHONE)
                 }
             },
             modifier = Modifier.align(Alignment.CenterHorizontally)
@@ -298,8 +313,6 @@ fun ContactItem(contact: Contact) {
             Icon(Icons.Default.Call, contentDescription = "Llamar", modifier = Modifier.size(45.dp))
         }
     }
-
-
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
