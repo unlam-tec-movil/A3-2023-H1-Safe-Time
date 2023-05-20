@@ -11,6 +11,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -18,15 +19,19 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.DropdownMenu
+import androidx.compose.material.DropdownMenuItem
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Call
 import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -39,7 +44,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -54,6 +62,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.zIndex
 import androidx.core.content.ContextCompat
 import androidx.navigation.NavController
 import ar.edu.unlam.mobile2.dialogQR.QRDialog
@@ -62,9 +71,6 @@ import ar.edu.unlam.mobile2.pantallaHome.domain.model.Contact
 import ar.edu.unlam.mobile2.pantallaHome.ui.viewmodel.HomeViewModel
 import ar.edu.unlam.mobile2.pantallaMapa.ui.Bottombar
 import ar.edu.unlam.mobile2.pantallaMapa.ui.Toolbar
-import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import com.google.accompanist.permissions.isGranted
-import com.google.accompanist.permissions.rememberPermissionState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -213,7 +219,6 @@ fun TextoContactos() {
 
 @Composable
 fun FilaContactos(contacts: List<Contact>, navController: NavController) {
-
     LazyRow(
         modifier = Modifier
             .fillMaxWidth()
@@ -229,7 +234,6 @@ fun FilaContactos(contacts: List<Contact>, navController: NavController) {
             IconButton(
                 onClick = { navController.navigate(route = AppScreens.ContactListScreen.route) },
                 modifier = Modifier
-                    .fillMaxWidth()
                     .padding(4.dp)
                     .background(
                         MaterialTheme.colorScheme.primaryContainer,
@@ -244,7 +248,7 @@ fun FilaContactos(contacts: List<Contact>, navController: NavController) {
 }
 
 
-@OptIn(ExperimentalPermissionsApi::class)
+
 @Composable
 fun ContactItem(contact: Contact) {
     val context = LocalContext.current
@@ -259,61 +263,121 @@ fun ContactItem(contact: Contact) {
         }
     }
 
-    Card(
-        modifier = Modifier
-            .size(width = 145.dp, height = 180.dp)
-            .clip(RoundedCornerShape(20.dp)),
-        elevation = CardDefaults.elevatedCardElevation(10.dp),
-        colors = CardDefaults.cardColors(MaterialTheme.colorScheme.primary),
-    ) {
-        Spacer(modifier = Modifier.padding(top = 5.dp))
+    var isMenuExpanded by remember { mutableStateOf(false) }
 
-        Image(
-            painter = painterResource(contact.imagen),
-            contentDescription = contact.nombre,
-            contentScale = ContentScale.Crop,
+    Box(Modifier.fillMaxSize()) {
+        Card(
             modifier = Modifier
-                .size(64.dp)
-                .align(Alignment.CenterHorizontally)
-                .padding(1.dp)
-                .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.background)
-                .border(2.dp, MaterialTheme.colorScheme.secondaryContainer, CircleShape)
-        )
-
-        Text(
-            text = contact.nombre,
-            fontWeight = FontWeight.Bold,
-            color = Color.White,
-            modifier = Modifier.align(Alignment.CenterHorizontally)
-        )
-
-        Text(
-            text = contact.telefono,
-            color = Color.White,
-            modifier = Modifier
-                .padding(4.dp)
-                .align(Alignment.CenterHorizontally)
-        )
-
-        IconButton(
-            onClick = {
-                if (ContextCompat.checkSelfPermission(
-                        context,
-                        Manifest.permission.CALL_PHONE
-                    ) == PackageManager.PERMISSION_GRANTED
-                ) {
-                    context.startActivity(Intent.createChooser(intent, "Llamar"))
-                } else {
-                    launcher.launch(Manifest.permission.CALL_PHONE)
-                }
-            },
-            modifier = Modifier.align(Alignment.CenterHorizontally)
+                .size(width = 145.dp, height = 180.dp)
+                .clip(RoundedCornerShape(20.dp)),
+            elevation = CardDefaults.elevatedCardElevation(10.dp),
+            colors = CardDefaults.cardColors(MaterialTheme.colorScheme.primary),
         ) {
-            Icon(Icons.Default.Call, contentDescription = "Llamar", modifier = Modifier.size(45.dp))
+            Box {
+                Column(
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    Spacer(modifier = Modifier.weight(1f))
+
+                    Image(
+                        painter = painterResource(contact.imagen),
+                        contentDescription = contact.nombre,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier
+                            .size(64.dp)
+                            .align(Alignment.CenterHorizontally)
+                            .padding(bottom = 1.dp)
+                            .clip(CircleShape)
+                            .background(MaterialTheme.colorScheme.background)
+                            .border(2.dp, MaterialTheme.colorScheme.secondaryContainer, CircleShape)
+                    )
+
+                    Text(
+                        text = contact.nombre,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White,
+                        modifier = Modifier.align(Alignment.CenterHorizontally)
+                    )
+
+                    Text(
+                        text = contact.telefono,
+                        color = Color.White,
+                        modifier = Modifier
+                            .padding(4.dp)
+                            .align(Alignment.CenterHorizontally)
+                    )
+
+                    IconButton(
+                        onClick = {
+                            if (ContextCompat.checkSelfPermission(
+                                    context,
+                                    Manifest.permission.CALL_PHONE
+                                ) == PackageManager.PERMISSION_GRANTED
+                            ) {
+                                context.startActivity(Intent.createChooser(intent, "Llamar"))
+                            } else {
+                                launcher.launch(Manifest.permission.CALL_PHONE)
+                            }
+                        },
+                        modifier = Modifier.align(Alignment.CenterHorizontally)
+                    ) {
+                        Icon(
+                            Icons.Default.Call,
+                            contentDescription = "Llamar",
+                            modifier = Modifier.size(45.dp)
+                        )
+                    }
+                }
+
+
+            }
+        }
+        if (isMenuExpanded) {
+            Box(
+                modifier = Modifier
+                    .align(Alignment.TopStart)
+                    .padding(end = 8.dp)
+            ) {
+                DropdownMenu(
+                    expanded = true,
+                    onDismissRequest = { isMenuExpanded = false }
+                ) {
+                    DropdownMenuItem(onClick = {
+                        // Realizar acción de editar
+                        isMenuExpanded = false
+                    }) {
+                        Text("Editar")
+                    }
+                    DropdownMenuItem(onClick = {
+                        // Realizar acción de eliminar
+                        isMenuExpanded = false
+                    }) {
+                        Text("Eliminar")
+                    }
+                }
+            }
+        }
+        IconButton(
+            onClick = { isMenuExpanded = !isMenuExpanded },
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .padding()
+        ) {
+            Icon(Icons.Default.MoreVert, contentDescription = "Más opciones")
         }
     }
 }
+
+
+
+
+
+
+
+
+
+
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
