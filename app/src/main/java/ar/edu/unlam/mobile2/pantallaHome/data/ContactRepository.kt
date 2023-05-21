@@ -83,13 +83,17 @@ class ContactRepository {
         )
     }
 
-    fun getContactList(): List<Contact> {
-        return contactosDeEmergencia
-    }
-
     // Elimina un contacto de la lista
     fun deleteContact(contact: Contact) {
-            contactosDeEmergencia.remove(contact)
+        contactosDeEmergencia.remove(contact)
+    }
+
+    fun getContactos(): List<Contact> {
+        return ubicaciones
+    }
+
+    fun getContactosEmergenciaList(): List<Contact> {
+        return contactosDeEmergencia
     }
 }
 

@@ -19,7 +19,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -45,6 +44,8 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -62,12 +63,13 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.zIndex
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
 import ar.edu.unlam.mobile2.dialogQR.QRDialog
 import ar.edu.unlam.mobile2.navigation.AppScreens
 import ar.edu.unlam.mobile2.pantallaHome.domain.model.Contact
+import ar.edu.unlam.mobile2.pantallaHome.domain.model.Contact.ContactDataProvider.contacts
 import ar.edu.unlam.mobile2.pantallaHome.ui.viewmodel.HomeViewModel
 import ar.edu.unlam.mobile2.pantallaMapa.ui.Bottombar
 import ar.edu.unlam.mobile2.pantallaMapa.ui.Toolbar
@@ -94,9 +96,6 @@ fun HomeScreen(navController: NavController, viewModel: HomeViewModel) {
 
 @Composable
 fun ContentHome(navController: NavController, viewModel: HomeViewModel) {
-    val contacts = Contact.contacts
-
-
     LazyColumn(
         verticalArrangement = Arrangement.spacedBy(15.dp),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -107,7 +106,7 @@ fun ContentHome(navController: NavController, viewModel: HomeViewModel) {
         }
 
         item {
-            FilaContactos(contacts, navController)
+            FilaContactos(viewModel,navController)
         }
 
         item {
@@ -115,14 +114,14 @@ fun ContentHome(navController: NavController, viewModel: HomeViewModel) {
         }
 
         item {
-            FilaUbicaciones(contacts, navController)
+            FilaUbicaciones(viewModel,navController)
         }
 
         item {
             Divider(modifier = Modifier.width(360.dp), thickness = 2.dp)
         }
         item {
-            BotonEmergencia(viewModel, contacts)
+            BotonEmergencia(viewModel)
         }
     }
 
@@ -130,7 +129,7 @@ fun ContentHome(navController: NavController, viewModel: HomeViewModel) {
 
 
 @Composable
-fun BotonEmergencia(viewModel: HomeViewModel, contacts: List<Contact>) {
+fun BotonEmergencia(viewModel: HomeViewModel) {
 
     Button(
         onClick = { viewModel.onEmergencyClick() }, modifier = Modifier
@@ -153,7 +152,8 @@ fun BotonEmergencia(viewModel: HomeViewModel, contacts: List<Contact>) {
 
 
 @Composable
-fun FilaUbicaciones(contacts: List<Contact>, navController: NavController) {
+fun FilaUbicaciones(viewModel: HomeViewModel, navController: NavController) {
+    val contacts = contacts
     LazyRow(
         modifier = Modifier
             .fillMaxWidth()
@@ -218,7 +218,10 @@ fun TextoContactos() {
 }
 
 @Composable
-fun FilaContactos(contacts: List<Contact>, navController: NavController) {
+fun FilaContactos(viewModel:HomeViewModel, navController: NavController) {
+
+    val contacts by viewModel.contactos.observeAsState(initial = emptyList())
+
     LazyRow(
         modifier = Modifier
             .fillMaxWidth()
@@ -226,9 +229,12 @@ fun FilaContactos(contacts: List<Contact>, navController: NavController) {
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(20.dp)
     ) {
-        items(contacts) {
-            ContactItem(contact = it)
-        }
+
+        items(contacts) {contact ->
+                    ContactItem(
+                        contact = contact,
+                        viewModel = viewModel) }
+
 
         item {
             IconButton(
@@ -250,7 +256,10 @@ fun FilaContactos(contacts: List<Contact>, navController: NavController) {
 
 
 @Composable
-fun ContactItem(contact: Contact) {
+fun ContactItem(
+    contact: Contact,
+    viewModel: HomeViewModel,
+) {
     val context = LocalContext.current
     val intent = remember { Intent(Intent.ACTION_CALL) }
     intent.data = remember { Uri.parse("tel:${contact.telefono}") }
@@ -349,7 +358,7 @@ fun ContactItem(contact: Contact) {
                         Text("Editar")
                     }
                     DropdownMenuItem(onClick = {
-                        // Realizar acción de eliminar
+                        viewModel.eliminarContacto(contact)
                         isMenuExpanded = false
                     }) {
                         Text("Eliminar")
