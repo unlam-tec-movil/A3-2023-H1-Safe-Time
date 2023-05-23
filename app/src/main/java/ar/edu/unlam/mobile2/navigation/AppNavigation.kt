@@ -13,6 +13,7 @@ import ar.edu.unlam.mobile2.pantallaMapa.ui.PantallaMapa
 @Composable
 fun AppNavigation(viewModel: HomeViewModel) {
     val navController = rememberNavController()
+    val tab = viewModel.tabPestañas
     NavHost(navController = navController, startDestination =AppScreens.HomeScreen.route){
         composable(route = AppScreens.HomeScreen.route){
             viewModel.screenUbication = "home_screen"
@@ -24,7 +25,9 @@ fun AppNavigation(viewModel: HomeViewModel) {
         }
         composable(route = AppScreens.ContactListScreen.route){
             viewModel.screenUbication = "list_screen"
-            ContactListScreen(navController,viewModel)
+            if (tab != null) {
+                ContactListScreen(navController,viewModel, tab )
+            }
         }
 
         composable(route = AppScreens.InfoQrScreen.route){

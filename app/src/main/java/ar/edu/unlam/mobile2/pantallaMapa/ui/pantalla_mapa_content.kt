@@ -40,6 +40,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -146,7 +147,7 @@ fun ViewContainer(navController: NavController, viewModel: HomeViewModel) {
         ) {
 
             item {
-                mUbicacionSeleccionada = selectorDeUbicacionesRegistradas(MarcadorRepo.ubicaciones)
+                mUbicacionSeleccionada = selectorDeUbicacionesRegistradas(MarcadorRepo.ubicaciones,viewModel)
             }
 
             item {
@@ -375,13 +376,13 @@ private fun CartelLlegadaEstimada(tiempo: Int) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun selectorDeUbicacionesRegistradas(listaMarcadores: List<Marcador>): Marcador {
+private fun selectorDeUbicacionesRegistradas(listaMarcadores: List<Marcador>,viewModel: HomeViewModel): Marcador {
 
     var mExpanded by remember { mutableStateOf(false) }
 
     val options: List<Marcador> = listaMarcadores
 
-    var mSelectedUbi by remember { mutableStateOf(listaMarcadores[0]) }
+    val mSelectedUbi by viewModel.ubicacionMapa.observeAsState(initial = MarcadorRepo.ubicaciones[1])
     var mSelectedText by remember { mutableStateOf(listaMarcadores[0].nombre) }
 
     var mTextFieldSize by remember { mutableStateOf(Size.Zero) }
@@ -391,7 +392,7 @@ private fun selectorDeUbicacionesRegistradas(listaMarcadores: List<Marcador>): M
     Column(modifier = Modifier.padding(horizontal = 10.dp, vertical = 2.dp)) {
 
         OutlinedTextField(
-            value = mSelectedText,
+            value = mSelectedUbi.nombre,
             onValueChange = { mSelectedText = it },
             modifier = Modifier
                 .fillMaxWidth()
@@ -427,7 +428,9 @@ private fun selectorDeUbicacionesRegistradas(listaMarcadores: List<Marcador>): M
                     onClick = {
                         mSelectedText = opcion.nombre
                         mExpanded = false
-                        mSelectedUbi = opcion
+                       // mSelectedUbi = opcion
+                        viewModel.nuevaUbicacionSeleccionadaEnMapa(opcion)
+
                     },
                     text = { Text(text = opcion.nombre) })
             }

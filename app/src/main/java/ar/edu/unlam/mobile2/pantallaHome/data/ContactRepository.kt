@@ -92,7 +92,7 @@ class ContactRepository {
         return ubicaciones
     }
 
-    fun getContactosEmergenciaList(): List<Contact> {
+    fun getContactosEmergenciaList(): MutableList<Contact> {
         return contactosDeEmergencia
     }
 }
