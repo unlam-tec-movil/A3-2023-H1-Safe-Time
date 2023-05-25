@@ -1,7 +1,7 @@
 package ar.edu.unlam.mobile2.pantallaHome.data
 
 import ar.edu.unlam.mobile2.R
-import ar.edu.unlam.mobile2.pantallaHome.domain.model.Contact
+import ar.edu.unlam.mobile2.pantallaHome.data.model.Contact
 
 class ContactRepository {
     companion object ContactDataProvider {
@@ -93,7 +93,11 @@ class ContactRepository {
     }
 
     fun getContactosEmergenciaList(): MutableList<Contact> {
-        return contactosDeEmergencia
+        return contactosDeEmergencia.toMutableList()
+    }
+
+    fun agregarContactoEmergencia(contacts: List<Contact>) {
+        contactosDeEmergencia.addAll(contacts)
     }
 }
 

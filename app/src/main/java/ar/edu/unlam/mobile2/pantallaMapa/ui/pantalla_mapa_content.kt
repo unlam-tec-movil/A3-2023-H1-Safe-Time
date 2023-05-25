@@ -1,6 +1,5 @@
 package ar.edu.unlam.mobile2.pantallaMapa.ui
 
-import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -38,12 +37,10 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -66,8 +63,7 @@ import ar.edu.unlam.mobile2.navigation.AppScreens
 import ar.edu.unlam.mobile2.pantallaHome.ui.viewmodel.HomeViewModel
 import ar.edu.unlam.mobile2.pantallaMapa.data.BottomNavItem
 import ar.edu.unlam.mobile2.pantallaMapa.data.repository.Marcador
-import ar.edu.unlam.mobile2.pantallaMapa.data.repository.MarcadorRepo
-import com.google.android.gms.maps.CameraUpdateFactory
+import ar.edu.unlam.mobile2.pantallaMapa.data.repository.MarcadorRepository
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.CameraPositionState
@@ -77,12 +73,11 @@ import com.google.maps.android.compose.MapType
 import com.google.maps.android.compose.MapUiSettings
 import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.MarkerState
-import com.google.maps.android.compose.rememberCameraPositionState
-import com.google.maps.android.compose.rememberMarkerState
 
 
 @Composable
 fun PantallaMapa(navController: NavController, viewModel: HomeViewModel) {
+
 
     ViewContainer(navController, viewModel)
 }
@@ -132,7 +127,7 @@ fun ViewContainer(navController: NavController, viewModel: HomeViewModel) {
 
     LocalContext.current.applicationContext
     var mUbicacionSeleccionada by remember {
-        mutableStateOf(MarcadorRepo.ubicaciones[2])
+        mutableStateOf(MarcadorRepository.ubicaciones[1])
     }
 
     Scaffold(topBar = { Toolbar(navController) }, bottomBar = { Bottombar(navController, viewModel) }) {
@@ -147,7 +142,7 @@ fun ViewContainer(navController: NavController, viewModel: HomeViewModel) {
         ) {
 
             item {
-                mUbicacionSeleccionada = selectorDeUbicacionesRegistradas(MarcadorRepo.ubicaciones,viewModel)
+                mUbicacionSeleccionada = selectorDeUbicacionesRegistradas(MarcadorRepository.ubicaciones,viewModel)
             }
 
             item {
@@ -382,7 +377,7 @@ private fun selectorDeUbicacionesRegistradas(listaMarcadores: List<Marcador>,vie
 
     val options: List<Marcador> = listaMarcadores
 
-    val mSelectedUbi by viewModel.ubicacionMapa.observeAsState(initial = MarcadorRepo.ubicaciones[1])
+    val mSelectedUbi by viewModel.ubicacionMapa.observeAsState(initial = MarcadorRepository.ubicaciones[1])
     var mSelectedText by remember { mutableStateOf(listaMarcadores[0].nombre) }
 
     var mTextFieldSize by remember { mutableStateOf(Size.Zero) }

@@ -66,7 +66,7 @@ import androidx.core.content.ContextCompat
 import androidx.navigation.NavController
 import ar.edu.unlam.mobile2.dialogQR.QRDialog
 import ar.edu.unlam.mobile2.navigation.AppScreens
-import ar.edu.unlam.mobile2.pantallaHome.domain.model.Contact
+import ar.edu.unlam.mobile2.pantallaHome.data.model.Contact
 import ar.edu.unlam.mobile2.pantallaHome.ui.viewmodel.HomeViewModel
 import ar.edu.unlam.mobile2.pantallaMapa.data.repository.Marcador
 import ar.edu.unlam.mobile2.pantallaMapa.ui.Bottombar
@@ -94,6 +94,22 @@ fun HomeScreen(navController: NavController, viewModel: HomeViewModel) {
 
 @Composable
 fun ContentHome(navController: NavController, viewModel: HomeViewModel) {
+    val contacts by viewModel.contactosEmergencia.observeAsState(initial = emptyList())
+    val ubicacion by viewModel.ubicacionesRapidas.observeAsState(initial = emptyList())
+
+    val context = LocalContext.current
+    val intent = remember { Intent(Intent.ACTION_CALL) }
+
+
+    val launcher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            context.startActivity(intent)
+        }
+    }
+
+
     LazyColumn(
         verticalArrangement = Arrangement.spacedBy(15.dp),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -104,7 +120,23 @@ fun ContentHome(navController: NavController, viewModel: HomeViewModel) {
         }
 
         item {
-            FilaContactos(viewModel,navController)
+
+            FilaContactos(contacts,
+                onClickAgregar = { viewModel.definirPestaña(0)
+                navController.navigate(route = AppScreens.ContactListScreen.route)},
+
+                onClickLlamar = {
+                    intent.data =  Uri.parse("tel:${it}")
+                    if (ContextCompat.checkSelfPermission(
+                    context,
+                    Manifest.permission.CALL_PHONE
+                ) == PackageManager.PERMISSION_GRANTED
+            ) {
+                context.startActivity(Intent.createChooser(intent, "Llamar"))
+            } else {
+                launcher.launch(Manifest.permission.CALL_PHONE)
+            }},
+                onClickEliminarContacto = { viewModel.eliminarContacto(it)})
         }
 
         item {
@@ -112,8 +144,20 @@ fun ContentHome(navController: NavController, viewModel: HomeViewModel) {
         }
 
         item {
-            FilaUbicaciones(viewModel,navController)
+
+            FilaUbicaciones(ubicacion,
+                onClickAgregar = {
+                viewModel.definirPestaña(1)
+                navController.navigate(route = AppScreens.ContactListScreen.route) },
+                onClickIrMapa = {
+                viewModel.nuevaUbicacionSeleccionadaEnMapa(it)
+                navController.navigate(route =AppScreens.MapScreen.route)
+            },
+                onClickEliminarUbicacion = {viewModel.eliminarUbicacion(it)}
+            )
+
         }
+
 
         item {
             Divider(modifier = Modifier.width(360.dp), thickness = 2.dp)
@@ -149,40 +193,6 @@ fun BotonEmergencia(viewModel: HomeViewModel) {
 }
 
 
-@Composable
-fun FilaUbicaciones(viewModel: HomeViewModel, navController: NavController) {
-    val ubicacion by viewModel.ubicacionesRapidas.observeAsState(initial = emptyList())
-    LazyRow(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(2.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(20.dp)
-    ) {
-        items(ubicacion) {
-            UbicationItem(ubicacion = it, navController,viewModel)
-        }
-
-        item {
-            IconButton(
-                onClick = {
-
-                    viewModel.definirPestaña(1)
-                    navController.navigate(route = AppScreens.ContactListScreen.route) },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(4.dp)
-                    .background(
-                        MaterialTheme.colorScheme.primaryContainer,
-                        shape = RoundedCornerShape(70.dp)
-                    )
-                    .clip(shape = RoundedCornerShape(70.dp))
-            ) {
-                Icon(Icons.Default.Add, contentDescription = "agregar")
-            }
-        }
-    }
-}
 
 @Composable
 fun TextoUbicaciones() {
@@ -219,9 +229,11 @@ fun TextoContactos() {
 }
 
 @Composable
-fun FilaContactos(viewModel:HomeViewModel, navController: NavController) {
-    val contacts by viewModel.contactosEmergencia.observeAsState(initial = emptyList())
-
+fun FilaContactos(contacts: List<Contact>,
+                  onClickAgregar:()->Unit,
+                  onClickLlamar: (numero:String) -> Unit,
+                  onClickEliminarContacto: (contacto: Contact) -> Unit
+) {
     LazyRow(
         modifier = Modifier
             .fillMaxWidth()
@@ -231,14 +243,18 @@ fun FilaContactos(viewModel:HomeViewModel, navController: NavController) {
     ) {
 
         items(contacts) {
-            ContactItem(contact = it , viewModel)
+            ContactItem(
+                contact = it,
+                onClickLlamar ={onClickLlamar(it.telefono)},
+                onClickEliminarContacto = { onClickEliminarContacto(it) }
+            )
         }
 
         item {
             IconButton(
                 onClick = {
-                    viewModel.definirPestaña(0)
-                    navController.navigate(route = AppScreens.ContactListScreen.route) },
+                    onClickAgregar()
+                },
                 modifier = Modifier
                     .padding(4.dp)
                     .background(
@@ -254,24 +270,12 @@ fun FilaContactos(viewModel:HomeViewModel, navController: NavController) {
 }
 
 
-
 @Composable
 fun ContactItem(
     contact: Contact,
-    viewModel: HomeViewModel
+    onClickLlamar:()->Unit,
+    onClickEliminarContacto:()->Unit
 ) {
-    val context = LocalContext.current
-    val intent = remember { Intent(Intent.ACTION_CALL) }
-    intent.data = remember { Uri.parse("tel:${contact.telefono}") }
-
-    val launcher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.RequestPermission()
-    ) { isGranted ->
-        if (isGranted) {
-            context.startActivity(intent)
-        }
-    }
-
     var isMenuExpanded by remember { mutableStateOf(false) }
 
     Box(Modifier.fillMaxSize()) {
@@ -318,15 +322,7 @@ fun ContactItem(
 
                     IconButton(
                         onClick = {
-                            if (ContextCompat.checkSelfPermission(
-                                    context,
-                                    Manifest.permission.CALL_PHONE
-                                ) == PackageManager.PERMISSION_GRANTED
-                            ) {
-                                context.startActivity(Intent.createChooser(intent, "Llamar"))
-                            } else {
-                                launcher.launch(Manifest.permission.CALL_PHONE)
-                            }
+                           onClickLlamar()
                         },
                         modifier = Modifier.align(Alignment.CenterHorizontally)
                     ) {
@@ -358,7 +354,7 @@ fun ContactItem(
                         Text("Editar")
                     }
                     DropdownMenuItem(onClick = {
-                        viewModel.eliminarContacto(contact)
+                        onClickEliminarContacto()
                         isMenuExpanded = false
                     }) {
                         Text("Eliminar")
@@ -377,9 +373,57 @@ fun ContactItem(
     }
 }
 
+
+
+@Composable
+fun FilaUbicaciones(ubicacion: List<Marcador>,
+                    onClickAgregar: () -> Unit,
+                    onClickEliminarUbicacion: (ubicacion:Marcador) -> Unit,
+                    onClickIrMapa: (ubicacion: Marcador) -> Unit
+) {
+
+    LazyRow(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(2.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(20.dp)
+    ) {
+        items(ubicacion) {
+            UbicationItem(
+                ubicacion = it,
+                onClickIrMapa = {onClickIrMapa(it)},
+                onClickEliminarUbicacion={onClickEliminarUbicacion(it)}
+            )
+        }
+
+        item {
+            IconButton(
+                onClick = {
+                    onClickAgregar()
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(4.dp)
+                    .background(
+                        MaterialTheme.colorScheme.primaryContainer,
+                        shape = RoundedCornerShape(70.dp)
+                    )
+                    .clip(shape = RoundedCornerShape(70.dp))
+            ) {
+                Icon(Icons.Default.Add, contentDescription = "agregar")
+            }
+        }
+    }
+}
+
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun UbicationItem(ubicacion: Marcador, navController: NavController, viewModel:HomeViewModel) {
+fun UbicationItem(ubicacion: Marcador,
+                  onClickIrMapa: () -> Unit,
+                  onClickEliminarUbicacion: () -> Unit
+) {
 
     Box(modifier = Modifier.fillMaxSize()) {
 
@@ -410,8 +454,8 @@ fun UbicationItem(ubicacion: Marcador, navController: NavController, viewModel:H
             )
             IconButton(
                 onClick = {
-                    viewModel.nuevaUbicacionSeleccionadaEnMapa(ubicacion)
-                    navController.navigate(route = AppScreens.MapScreen.route) },
+                   onClickIrMapa()
+                },
                 modifier = Modifier.align(Alignment.CenterHorizontally)
             ) {
                 Icon(
@@ -438,7 +482,7 @@ fun UbicationItem(ubicacion: Marcador, navController: NavController, viewModel:H
                         Text("Editar")
                     }
                     DropdownMenuItem(onClick = {
-                        viewModel.eliminarUbicacion(ubicacion)
+                       onClickEliminarUbicacion()
                         isMenuExpanded = false
                     }) {
                         Text("Eliminar")

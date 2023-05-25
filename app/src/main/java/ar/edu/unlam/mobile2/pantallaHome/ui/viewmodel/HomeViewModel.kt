@@ -8,14 +8,17 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import ar.edu.unlam.mobile2.pantallaHome.data.ContactRepository
-import ar.edu.unlam.mobile2.pantallaHome.domain.model.Contact
+import ar.edu.unlam.mobile2.pantallaHome.data.model.Contact
 import ar.edu.unlam.mobile2.pantallaMapa.data.repository.Marcador
-import ar.edu.unlam.mobile2.pantallaMapa.data.repository.MarcadorRepo
+import ar.edu.unlam.mobile2.pantallaMapa.data.repository.MarcadorRepository
+import com.google.android.gms.maps.model.LatLng
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 class HomeViewModel:ViewModel() {
     private val contactRepository = ContactRepository()
+    private val ubicacionRepository = MarcadorRepository()
 
     private val _contactosEmergencia = MutableLiveData(emptyList<Contact>())
     val contactosEmergencia: LiveData<List<Contact>> = _contactosEmergencia
@@ -29,6 +32,9 @@ class HomeViewModel:ViewModel() {
     val selectedContacts = MutableStateFlow<List<Contact>>(emptyList())
     val selectedAddresses = MutableStateFlow<List<Marcador>>(emptyList())
 
+    private val _locationState = MutableStateFlow<LatLng?>(null)
+    val locationState: StateFlow<LatLng?> = _locationState
+
 
     var infoQr by mutableStateOf("DEBE LLENAR EL FORMULARIO")
     var screenUbication by mutableStateOf("home_screenn")
@@ -38,7 +44,7 @@ class HomeViewModel:ViewModel() {
     init {
         viewModelScope.launch {
             _contactosEmergencia.value = contactRepository.getContactosEmergenciaList()
-            _ubicacionesRapidas.value = MarcadorRepo.ubicaciones
+            _ubicacionesRapidas.value = ubicacionRepository.getUbicacionesRapidas()
         }
     }
 
@@ -67,21 +73,25 @@ class HomeViewModel:ViewModel() {
 
     fun eliminarContacto(contact: Contact) {
         viewModelScope.launch {
-            _contactosEmergencia.value = _contactosEmergencia.value?.minus(contact)
+            contactRepository.deleteContact(contact)
+            _contactosEmergencia.value = contactRepository.getContactosEmergenciaList()
         }
     }
     fun eliminarUbicacion(ubicacion: Marcador) {
         viewModelScope.launch {
-            _ubicacionesRapidas.value = _ubicacionesRapidas.value?.minus(ubicacion)
+            ubicacionRepository.borrarUbicacion(ubicacion)
+            _ubicacionesRapidas.value = ubicacionRepository.getUbicacionesRapidas()
         }
     }
 
     fun agregarContactosSeleccionados() {
-        _contactosEmergencia.value = contactosEmergencia.value?.plus(selectedContacts.value)
+        contactRepository.agregarContactoEmergencia(selectedContacts.value)
+        _contactosEmergencia.value=contactRepository.getContactosEmergenciaList()
         selectedContacts.value = emptyList()
     }
     fun agregarUbicacionesSeleccionadas() {
-       _ubicacionesRapidas.value = ubicacionesRapidas.value?.plus(selectedAddresses.value)
+      ubicacionRepository.agregarUbicacion(selectedAddresses.value)
+        _ubicacionesRapidas.value= ubicacionRepository.getUbicacionesRapidas()
         selectedAddresses.value = emptyList()
     }
 

@@ -1,4 +1,4 @@
-package ar.edu.unlam.mobile2.pantallaHome.domain.model
+package ar.edu.unlam.mobile2.pantallaHome.data.model
 
 data class Adress(
     val nombre: String,

@@ -25,9 +25,7 @@ fun AppNavigation(viewModel: HomeViewModel) {
         }
         composable(route = AppScreens.ContactListScreen.route){
             viewModel.screenUbication = "list_screen"
-            if (tab != null) {
-                ContactListScreen(navController,viewModel, tab )
-            }
+            ContactListScreen(navController,viewModel, tab )
         }
 
         composable(route = AppScreens.InfoQrScreen.route){

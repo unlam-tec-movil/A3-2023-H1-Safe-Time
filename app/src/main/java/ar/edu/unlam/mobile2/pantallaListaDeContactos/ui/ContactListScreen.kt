@@ -1,5 +1,6 @@
 package ar.edu.unlam.mobile2.pantallaListaDeContactos.ui
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.net.Uri
 import androidx.compose.animation.AnimatedVisibility
@@ -38,7 +39,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.onFocusEvent
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.modifier.modifierLocalConsumer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -47,18 +47,17 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import ar.edu.unlam.mobile2.navigation.AppScreens
-import ar.edu.unlam.mobile2.pantallaHome.domain.model.Adress
-import ar.edu.unlam.mobile2.pantallaHome.domain.model.Contact
+import ar.edu.unlam.mobile2.pantallaHome.data.model.Contact
 import ar.edu.unlam.mobile2.pantallaHome.ui.viewmodel.HomeViewModel
 import ar.edu.unlam.mobile2.pantallaMapa.data.repository.Marcador
-import ar.edu.unlam.mobile2.pantallaMapa.data.repository.MarcadorRepo
+import ar.edu.unlam.mobile2.pantallaMapa.data.repository.MarcadorRepository
 import ar.edu.unlam.mobile2.pantallaMapa.ui.Bottombar
 import ar.edu.unlam.mobile2.pantallaMapa.ui.Toolbar
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ContactListScreen(navController: NavController, viewModel: HomeViewModel,tab: Int) {
+fun ContactListScreen(navController: NavController, viewModel: HomeViewModel, tab: Int) {
 
     Scaffold(
         topBar = { Toolbar(navController) },
@@ -72,7 +71,7 @@ fun ContactListScreen(navController: NavController, viewModel: HomeViewModel,tab
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
 
-            TabContactosDirecciones(navController,viewModel,tab)
+            TabContactosDirecciones(navController, viewModel, tab)
         }
     }
 }
@@ -90,12 +89,13 @@ fun ContactListView(viewModel: HomeViewModel, navController: NavController) {
             }
         }
 
-        BotonAgregarSeleccionados(viewModel = viewModel, navController =navController )
+        BotonAgregarSeleccionados(viewModel = viewModel, navController = navController)
     }
 }
 
+@SuppressLint("StateFlowValueCalledInComposition")
 @Composable
-fun BotonAgregarSeleccionados(viewModel: HomeViewModel,navController: NavController){
+fun BotonAgregarSeleccionados(viewModel: HomeViewModel, navController: NavController) {
     val selectedContacts = viewModel.selectedContacts.collectAsState()
     val selectedUbication = viewModel.selectedAddresses.collectAsState()
 
@@ -103,31 +103,32 @@ fun BotonAgregarSeleccionados(viewModel: HomeViewModel,navController: NavControl
 
 
         AnimatedVisibility(
-             selectedUbication.value.isNotEmpty() || selectedContacts.value.isNotEmpty() ,
+            selectedUbication.value.isNotEmpty() || selectedContacts.value.isNotEmpty(),
             modifier = Modifier
-                .align(Alignment.BottomEnd),
+                .align(Alignment.BottomEnd)
         ) {
             FloatingActionButton(
-                contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                contentColor = Color.Gray,
+
                 onClick = {
-                    if (viewModel.selectedContacts.value.isNotEmpty()){
+                    if (viewModel.selectedContacts.value.isNotEmpty()) {
                         viewModel.agregarContactosSeleccionados()
                         navController.navigate(AppScreens.HomeScreen.route)
-                    }else{
+                    } else {
                         viewModel.agregarUbicacionesSeleccionadas()
                         navController.navigate(AppScreens.HomeScreen.route)
                     }
-
-
                 },
                 modifier = Modifier
                     .align(Alignment.Center)
                     .padding(16.dp)
-                    .size(200.dp, 60.dp)
+                    .size(200.dp, 60.dp),
+
             ) {
-                if (viewModel.selectedContacts.value.isNotEmpty()){
+
+                if (viewModel.selectedContacts.value.isNotEmpty()) {
                     Text(text = "Agregar a contactos de emergencia", textAlign = TextAlign.Center)
-                }else{
+                } else {
                     Text(text = "Agregar a ubicaciones rapidas", textAlign = TextAlign.Center)
                 }
 
@@ -139,7 +140,7 @@ fun BotonAgregarSeleccionados(viewModel: HomeViewModel,navController: NavControl
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ItemContacto(contacto: Contact,viewModel: HomeViewModel){
+fun ItemContacto(contacto: Contact, viewModel: HomeViewModel) {
 
     val isSelected = rememberSaveable { mutableStateOf(false) }
 
@@ -161,10 +162,10 @@ fun ItemContacto(contacto: Contact,viewModel: HomeViewModel){
             .onFocusEvent {},
         elevation = CardDefaults.cardElevation(defaultElevation = 5.dp),
         onClick = {
-            isSelected.value=!isSelected.value
-            if (isSelected.value){
+            isSelected.value = !isSelected.value
+            if (isSelected.value) {
                 viewModel.contactoSeleccionado(contacto)
-            }else{
+            } else {
                 viewModel.contactoDesSeleccionado(contacto)
             }
 
@@ -215,135 +216,139 @@ fun ItemContacto(contacto: Contact,viewModel: HomeViewModel){
         }
     }
 }
-    @Composable
-    fun AdressListView(navController: NavController,viewModel: HomeViewModel) {
 
-Box(modifier = Modifier.fillMaxSize()){
-    LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        items(getDirecciones()) { adress ->
-            ItemDireccion(ubicacion = adress, navController, viewModel)
+@Composable
+fun AdressListView(navController: NavController, viewModel: HomeViewModel) {
+
+    Box(modifier = Modifier.fillMaxSize()) {
+        LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            items(getDirecciones()) { adress ->
+                ItemDireccion(ubicacion = adress, navController, viewModel)
+            }
+
         }
-
+        BotonAgregarSeleccionados(viewModel = viewModel, navController = navController)
     }
-    BotonAgregarSeleccionados(viewModel = viewModel, navController =navController )
+
 }
 
-    }
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ItemDireccion(ubicacion: Marcador, navController: NavController, viewModel: HomeViewModel) {
 
-    @OptIn(ExperimentalMaterial3Api::class)
-    @Composable
-    fun ItemDireccion(ubicacion: Marcador,navController: NavController,viewModel: HomeViewModel) {
+    val isSelected = rememberSaveable { mutableStateOf(false) }
 
-        val isSelected = rememberSaveable { mutableStateOf(false) }
-
-        Card(
-            colors = if (isSelected.value) {
-                CardDefaults.cardColors(MaterialTheme.colorScheme.primary)
+    Card(
+        colors = if (isSelected.value) {
+            CardDefaults.cardColors(MaterialTheme.colorScheme.primary)
+        } else {
+            CardDefaults.cardColors(MaterialTheme.colorScheme.inversePrimary)
+        },
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(100.dp)
+            .padding(8.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 5.dp),
+        onClick = {
+            isSelected.value = !isSelected.value
+            if (isSelected.value) {
+                viewModel.ubicacionSeleccionada(ubicacion)
             } else {
-                CardDefaults.cardColors(MaterialTheme.colorScheme.inversePrimary)
-            },
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(100.dp)
-                .padding(8.dp),
-            elevation = CardDefaults.cardElevation(defaultElevation = 5.dp),
-            onClick = {
-                isSelected.value=!isSelected.value
-                if (isSelected.value){
-                    viewModel.ubicacionSeleccionada(ubicacion)
-                }else{
-                    viewModel.ubicacionDesSeleccionada(ubicacion)
-                }
-
+                viewModel.ubicacionDesSeleccionada(ubicacion)
             }
 
-        ) {
-            Row(modifier = Modifier.padding(8.dp), verticalAlignment = Alignment.CenterVertically) {
+        }
 
-                Column(
-                    Modifier
-                        .padding(8.dp)
-                        .weight(3f)
-                ) {
-                    Text(
-                        text = ubicacion.nombre,
-                        fontSize = 24.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer
-                    )
-                    Text(
-                        text = ubicacion.latLng.toString(),
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer
-                    )
-                }
+    ) {
+        Row(modifier = Modifier.padding(8.dp), verticalAlignment = Alignment.CenterVertically) {
 
-                IconButton(
-                    onClick = { navController.navigate(route = AppScreens.MapScreen.route) },
-                ) {
-                    Icon(
-                        Icons.Default.LocationOn,
-                        contentDescription = "Llamar",
-                        tint = MaterialTheme.colorScheme.primary ,
-                        modifier = Modifier.size(45.dp)
-                    )
+            Column(
+                Modifier
+                    .padding(8.dp)
+                    .weight(3f)
+            ) {
+                Text(
+                    text = ubicacion.nombre,
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                )
+                Text(
+                    text = ubicacion.latLng.toString(),
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                )
+            }
 
-                }
+            IconButton(
+                onClick = {
+                    viewModel.nuevaUbicacionSeleccionadaEnMapa(ubicacion)
+                    navController.navigate(route = AppScreens.MapScreen.route) },
+            ) {
+                Icon(
+                    Icons.Default.LocationOn,
+                    contentDescription = "Llamar",
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(45.dp)
+                )
+
             }
         }
     }
+}
 
 
-        fun getContactos(): List<Contact> {
-            return Contact.contacts
-        }
+fun getContactos(): List<Contact> {
+    return Contact.contacts
+}
 
-        private fun getDirecciones(): List<Marcador> {
-            return MarcadorRepo.ubicaciones
-        }
+private fun getDirecciones(): List<Marcador> {
+    return MarcadorRepository.ubicaciones
+}
 
 
-        @Composable
-        fun TabContactosDirecciones(navController: NavController,viewModel: HomeViewModel,tab:Int=0) {
+@Composable
+fun TabContactosDirecciones(navController: NavController, viewModel: HomeViewModel, tab: Int = 0) {
 
-            var tabIndex by remember { mutableStateOf(tab) }
+    var tabIndex by remember { mutableStateOf(tab) }
 
-            val tabs = listOf("CONTACTOS", "DIRECCIONES")
+    val tabs = listOf("CONTACTOS", "DIRECCIONES")
 
-            Column(modifier = Modifier.fillMaxWidth()) {
-                TabRow(
-                    selectedTabIndex = tabIndex,
-                    containerColor = MaterialTheme.colorScheme.primary
-                ) {
-                    tabs.forEachIndexed { index, title ->
-                        Tab(
-                            selected = tabIndex == index,
-                            onClick = { tabIndex = index },
-                            text = {
-                                Text(
-                                    text = title,
-                                    fontSize = 20.sp,
-                                    fontWeight = FontWeight.SemiBold,
-                                    color = MaterialTheme.colorScheme.onPrimary
-                                )
-                            },
-                            selectedContentColor = MaterialTheme.colorScheme.onPrimary,
-                            unselectedContentColor = MaterialTheme.colorScheme.secondaryContainer
+    Column(modifier = Modifier.fillMaxWidth()) {
+        TabRow(
+            selectedTabIndex = tabIndex,
+            containerColor = MaterialTheme.colorScheme.primary
+        ) {
+            tabs.forEachIndexed { index, title ->
+                Tab(
+                    selected = tabIndex == index,
+                    onClick = { tabIndex = index },
+                    text = {
+                        Text(
+                            text = title,
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = MaterialTheme.colorScheme.onPrimary
                         )
-                    }
-                }
-
-                when (tabIndex) {
-                    0 ->{
-                        viewModel.limpiarSeleccionados()
-                        ContactListView(viewModel,navController)
-                    }
-                    1 -> {
-                        viewModel.limpiarSeleccionados()
-                        AdressListView(navController,viewModel)
-                    }
-                }
+                    },
+                    selectedContentColor = MaterialTheme.colorScheme.onPrimary,
+                    unselectedContentColor = MaterialTheme.colorScheme.secondaryContainer
+                )
             }
         }
+
+        when (tabIndex) {
+            0 -> {
+                viewModel.limpiarSeleccionados()
+                ContactListView(viewModel, navController)
+            }
+
+            1 -> {
+                viewModel.limpiarSeleccionados()
+                AdressListView(navController, viewModel)
+            }
+        }
+    }
+}
 
