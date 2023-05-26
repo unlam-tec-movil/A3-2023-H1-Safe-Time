@@ -122,21 +122,24 @@ fun ContentHome(navController: NavController, viewModel: HomeViewModel) {
         item {
 
             FilaContactos(contacts,
-                onClickAgregar = { viewModel.definirPestaña(0)
-                navController.navigate(route = AppScreens.ContactListScreen.route)},
+                onClickAgregar = {
+                    viewModel.definirPestaña(0)
+                    navController.navigate(route = AppScreens.ContactListScreen.route)
+                },
 
                 onClickLlamar = {
-                    intent.data =  Uri.parse("tel:${it}")
+                    intent.data = Uri.parse("tel:${it}")
                     if (ContextCompat.checkSelfPermission(
-                    context,
-                    Manifest.permission.CALL_PHONE
-                ) == PackageManager.PERMISSION_GRANTED
-            ) {
-                context.startActivity(Intent.createChooser(intent, "Llamar"))
-            } else {
-                launcher.launch(Manifest.permission.CALL_PHONE)
-            }},
-                onClickEliminarContacto = { viewModel.eliminarContacto(it)})
+                            context,
+                            Manifest.permission.CALL_PHONE
+                        ) == PackageManager.PERMISSION_GRANTED
+                    ) {
+                        context.startActivity(Intent.createChooser(intent, "Llamar"))
+                    } else {
+                        launcher.launch(Manifest.permission.CALL_PHONE)
+                    }
+                },
+                onClickEliminarContacto = { viewModel.eliminarContactoEmergencia(it) })
         }
 
         item {
@@ -147,13 +150,14 @@ fun ContentHome(navController: NavController, viewModel: HomeViewModel) {
 
             FilaUbicaciones(ubicacion,
                 onClickAgregar = {
-                viewModel.definirPestaña(1)
-                navController.navigate(route = AppScreens.ContactListScreen.route) },
+                    viewModel.definirPestaña(1)
+                    navController.navigate(route = AppScreens.ContactListScreen.route)
+                },
                 onClickIrMapa = {
-                viewModel.nuevaUbicacionSeleccionadaEnMapa(it)
-                navController.navigate(route =AppScreens.MapScreen.route)
-            },
-                onClickEliminarUbicacion = {viewModel.eliminarUbicacion(it)}
+                    viewModel.nuevaUbicacionSeleccionadaEnMapa(it)
+                    navController.navigate(route = AppScreens.MapScreen.route)
+                },
+                onClickEliminarUbicacion = { viewModel.eliminarUbicacionRapida(it) }
             )
 
         }
@@ -193,7 +197,6 @@ fun BotonEmergencia(viewModel: HomeViewModel) {
 }
 
 
-
 @Composable
 fun TextoUbicaciones() {
     Text(
@@ -229,10 +232,11 @@ fun TextoContactos() {
 }
 
 @Composable
-fun FilaContactos(contacts: List<Contact>,
-                  onClickAgregar:()->Unit,
-                  onClickLlamar: (numero:String) -> Unit,
-                  onClickEliminarContacto: (contacto: Contact) -> Unit
+fun FilaContactos(
+    contacts: List<Contact>,
+    onClickAgregar: () -> Unit,
+    onClickLlamar: (numero: String) -> Unit,
+    onClickEliminarContacto: (contacto: Contact) -> Unit
 ) {
     LazyRow(
         modifier = Modifier
@@ -245,7 +249,7 @@ fun FilaContactos(contacts: List<Contact>,
         items(contacts) {
             ContactItem(
                 contact = it,
-                onClickLlamar ={onClickLlamar(it.telefono)},
+                onClickLlamar = { onClickLlamar(it.telefono) },
                 onClickEliminarContacto = { onClickEliminarContacto(it) }
             )
         }
@@ -273,8 +277,8 @@ fun FilaContactos(contacts: List<Contact>,
 @Composable
 fun ContactItem(
     contact: Contact,
-    onClickLlamar:()->Unit,
-    onClickEliminarContacto:()->Unit
+    onClickLlamar: () -> Unit,
+    onClickEliminarContacto: () -> Unit
 ) {
     var isMenuExpanded by remember { mutableStateOf(false) }
 
@@ -322,7 +326,7 @@ fun ContactItem(
 
                     IconButton(
                         onClick = {
-                           onClickLlamar()
+                            onClickLlamar()
                         },
                         modifier = Modifier.align(Alignment.CenterHorizontally)
                     ) {
@@ -374,12 +378,12 @@ fun ContactItem(
 }
 
 
-
 @Composable
-fun FilaUbicaciones(ubicacion: List<Marcador>,
-                    onClickAgregar: () -> Unit,
-                    onClickEliminarUbicacion: (ubicacion:Marcador) -> Unit,
-                    onClickIrMapa: (ubicacion: Marcador) -> Unit
+fun FilaUbicaciones(
+    ubicacion: List<Marcador>,
+    onClickAgregar: () -> Unit,
+    onClickEliminarUbicacion: (ubicacion: Marcador) -> Unit,
+    onClickIrMapa: (ubicacion: Marcador) -> Unit
 ) {
 
     LazyRow(
@@ -392,8 +396,8 @@ fun FilaUbicaciones(ubicacion: List<Marcador>,
         items(ubicacion) {
             UbicationItem(
                 ubicacion = it,
-                onClickIrMapa = {onClickIrMapa(it)},
-                onClickEliminarUbicacion={onClickEliminarUbicacion(it)}
+                onClickIrMapa = { onClickIrMapa(it) },
+                onClickEliminarUbicacion = { onClickEliminarUbicacion(it) }
             )
         }
 
@@ -420,9 +424,10 @@ fun FilaUbicaciones(ubicacion: List<Marcador>,
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun UbicationItem(ubicacion: Marcador,
-                  onClickIrMapa: () -> Unit,
-                  onClickEliminarUbicacion: () -> Unit
+fun UbicationItem(
+    ubicacion: Marcador,
+    onClickIrMapa: () -> Unit,
+    onClickEliminarUbicacion: () -> Unit
 ) {
 
     Box(modifier = Modifier.fillMaxSize()) {
@@ -454,7 +459,7 @@ fun UbicationItem(ubicacion: Marcador,
             )
             IconButton(
                 onClick = {
-                   onClickIrMapa()
+                    onClickIrMapa()
                 },
                 modifier = Modifier.align(Alignment.CenterHorizontally)
             ) {
@@ -482,7 +487,7 @@ fun UbicationItem(ubicacion: Marcador,
                         Text("Editar")
                     }
                     DropdownMenuItem(onClick = {
-                       onClickEliminarUbicacion()
+                        onClickEliminarUbicacion()
                         isMenuExpanded = false
                     }) {
                         Text("Eliminar")

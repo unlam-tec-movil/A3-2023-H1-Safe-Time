@@ -17,8 +17,12 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 class HomeViewModel:ViewModel() {
+
     private val contactRepository = ContactRepository()
     private val ubicacionRepository = MarcadorRepository()
+
+    private val _contactos = MutableLiveData(emptyList<Contact>())
+    val contactos: LiveData<List<Contact>> = _contactos
 
     private val _contactosEmergencia = MutableLiveData(emptyList<Contact>())
     val contactosEmergencia: LiveData<List<Contact>> = _contactosEmergencia
@@ -39,12 +43,15 @@ class HomeViewModel:ViewModel() {
     var infoQr by mutableStateOf("DEBE LLENAR EL FORMULARIO")
     var screenUbication by mutableStateOf("home_screenn")
     var tabPestañas by mutableStateOf(0)
+
+    var isButtomShow = MutableLiveData(false)
     var isDialogShown by mutableStateOf(false)
         private set
     init {
         viewModelScope.launch {
             _contactosEmergencia.value = contactRepository.getContactosEmergenciaList()
             _ubicacionesRapidas.value = ubicacionRepository.getUbicacionesRapidas()
+            _contactos.value = contactRepository.getContactos()
         }
     }
 
@@ -59,6 +66,9 @@ class HomeViewModel:ViewModel() {
 
     fun contactoSeleccionado(contacto: Contact) {
         selectedContacts.value = selectedContacts.value + contacto
+        if (selectedContacts.value.isNotEmpty()||selectedAddresses.value.isNotEmpty()){
+            isButtomShow.value=true
+        }
     }
     fun ubicacionSeleccionada(ubicacion: Marcador) {
         selectedAddresses.value = selectedAddresses.value + ubicacion
@@ -66,18 +76,19 @@ class HomeViewModel:ViewModel() {
 
     fun contactoDesSeleccionado(contacto: Contact) {
         selectedContacts.value = selectedContacts.value - contacto
+
     }
 
 
 
 
-    fun eliminarContacto(contact: Contact) {
+    fun eliminarContactoEmergencia(contact: Contact) {
         viewModelScope.launch {
             contactRepository.deleteContact(contact)
             _contactosEmergencia.value = contactRepository.getContactosEmergenciaList()
         }
     }
-    fun eliminarUbicacion(ubicacion: Marcador) {
+    fun eliminarUbicacionRapida(ubicacion: Marcador) {
         viewModelScope.launch {
             ubicacionRepository.borrarUbicacion(ubicacion)
             _ubicacionesRapidas.value = ubicacionRepository.getUbicacionesRapidas()
