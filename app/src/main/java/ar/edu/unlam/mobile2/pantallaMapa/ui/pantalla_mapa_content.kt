@@ -14,7 +14,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
@@ -97,6 +99,7 @@ fun MapScreen(currentUbication: LatLng) {
                 shape = RoundedCornerShape(20.dp)
             )
             .clip(shape = RoundedCornerShape(percent = 10))
+
     ) {
         GoogleMap(
             modifier = Modifier
@@ -106,7 +109,6 @@ fun MapScreen(currentUbication: LatLng) {
             properties = mapProperties,
             uiSettings = uiSettings
         ) {
-
             Marker(state = MarkerState(currentUbication))
         }
     }
@@ -130,70 +132,76 @@ fun ViewContainer(navController: NavController, viewModel: HomeViewModel) {
         mutableStateOf(MarcadorRepository.ubicaciones[1])
     }
 
-    Scaffold(topBar = { Toolbar(navController) }, bottomBar = { Bottombar(navController, viewModel) }) {
+    Scaffold(
+        topBar = { Toolbar(navController) },
+        bottomBar = { Bottombar(navController, viewModel) }) {
 
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues = it)
-                .padding(top = 15.dp),
-            verticalArrangement = Arrangement.Top,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
 
-            item {
-                mUbicacionSeleccionada = selectorDeUbicacionesRegistradas(MarcadorRepository.ubicaciones,viewModel)
-            }
 
-            item {
-                MapScreen(mUbicacionSeleccionada.latLng)
-            }
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues = it)
+                    .padding(top = 15.dp),
+                verticalArrangement = Arrangement.Top,
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
 
-            item {
-                Spacer(modifier = Modifier.size(width = 0.dp, height = 5.dp))
-            }
+                item {
+                    mUbicacionSeleccionada =
+                        selectorDeUbicacionesRegistradas(MarcadorRepository.ubicaciones, viewModel)
+                }
 
-            item {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceAround
+                item {
+                    MapScreen(mUbicacionSeleccionada.latLng)
+                }
 
-                ) {
+                item {
+                    Spacer(modifier = Modifier.size(width = 0.dp, height = 5.dp))
+                }
+
+                item {
                     Row(
                         modifier = Modifier
-                            .background(
-                                MaterialTheme.colorScheme.primary,
-                                shape = RoundedCornerShape(20.dp)
-                            )
-                            .size(width = 180.dp, height = 50.dp),
+                            .fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Center
+                        horizontalArrangement = Arrangement.SpaceAround
 
                     ) {
+                        Row(
+                            modifier = Modifier
+                                .background(
+                                    MaterialTheme.colorScheme.primary,
+                                    shape = RoundedCornerShape(20.dp)
+                                )
+                                .size(width = 180.dp, height = 50.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Center
 
-                        CartelDistanciaDelPunto(distancia = 0.0)
+                        ) {
 
-                    }
-                    Row(
-                        modifier = Modifier
-                            .background(
-                                MaterialTheme.colorScheme.primary,
-                                shape = RoundedCornerShape(20.dp)
-                            )
-                            .size(width = 180.dp, 50.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Center
+                            CartelDistanciaDelPunto(distancia = 0.0)
 
-                    ) {
-                        CartelLlegadaEstimada(tiempo = 0)
+                        }
+                        Row(
+                            modifier = Modifier
+                                .background(
+                                    MaterialTheme.colorScheme.primary,
+                                    shape = RoundedCornerShape(20.dp)
+                                )
+                                .size(width = 180.dp, 50.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Center
+
+                        ) {
+                            CartelLlegadaEstimada(tiempo = 0)
+                        }
                     }
                 }
             }
         }
     }
-}
+
 
 
 @Composable

@@ -47,6 +47,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -96,6 +97,7 @@ fun HomeScreen(navController: NavController, viewModel: HomeViewModel) {
 fun ContentHome(navController: NavController, viewModel: HomeViewModel) {
     val contacts by viewModel.contactosEmergencia.observeAsState(initial = emptyList())
     val ubicacion by viewModel.ubicacionesRapidas.observeAsState(initial = emptyList())
+    val isDialogShow by viewModel.isDialogShown.observeAsState(initial = false)
 
     val context = LocalContext.current
     val intent = remember { Intent(Intent.ACTION_CALL) }
@@ -149,7 +151,7 @@ fun ContentHome(navController: NavController, viewModel: HomeViewModel) {
         item {
 
             FilaUbicaciones(ubicacion,
-                onClickAgregar = {
+                onClickAgregarUbi = {
                     viewModel.definirPestaña(1)
                     navController.navigate(route = AppScreens.ContactListScreen.route)
                 },
@@ -162,12 +164,16 @@ fun ContentHome(navController: NavController, viewModel: HomeViewModel) {
 
         }
 
-
         item {
             Divider(modifier = Modifier.width(360.dp), thickness = 2.dp)
         }
         item {
-            BotonEmergencia(viewModel)
+            BotonEmergencia(
+                onClickEmergencia = {viewModel.onEmergencyClick()},
+                isDialogShown = isDialogShow,
+                onDismissDialog = { viewModel.onDismissDialog()},
+                infoQR = viewModel.infoQr
+            )
         }
     }
 
@@ -175,10 +181,15 @@ fun ContentHome(navController: NavController, viewModel: HomeViewModel) {
 
 
 @Composable
-fun BotonEmergencia(viewModel: HomeViewModel) {
+fun BotonEmergencia(
+    onClickEmergencia:()->Unit,
+    isDialogShown:Boolean,
+    onDismissDialog:()-> Unit,
+    infoQR: String,
+) {
 
     Button(
-        onClick = { viewModel.onEmergencyClick() }, modifier = Modifier
+        onClick = { onClickEmergencia() }, modifier = Modifier
             .height(height = 75.dp)
             .padding(2.dp),
         colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error),
@@ -188,31 +199,16 @@ fun BotonEmergencia(viewModel: HomeViewModel) {
         Text(text = "EMERGENCIA", style = TextStyle(fontSize = 25.sp))
     }
 
-    if (viewModel.isDialogShown) {
+    if (isDialogShown) {
         QRDialog(
-            onDismiss = { viewModel.onDismissDialog() },
-            info = viewModel.infoQr
+            onDismiss = { onDismissDialog() },
+            info = infoQR
         )
     }
 }
 
 
-@Composable
-fun TextoUbicaciones() {
-    Text(
-        text = "Ubicaciones Rapidas",
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(start = 10.dp),
-        fontFamily = FontFamily.SansSerif,
-        textAlign = TextAlign.Start,
-        fontSize = 28.sp,
-        color = MaterialTheme.colorScheme.onBackground,
-        textDecoration = TextDecoration.Underline,
-        style = TextStyle(fontWeight = FontWeight.Bold)
 
-    )
-}
 
 @Composable
 fun TextoContactos() {
@@ -377,11 +373,27 @@ fun ContactItem(
     }
 }
 
+@Composable
+fun TextoUbicaciones() {
+    Text(
+        text = "Ubicaciones Rapidas",
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = 10.dp),
+        fontFamily = FontFamily.SansSerif,
+        textAlign = TextAlign.Start,
+        fontSize = 28.sp,
+        color = MaterialTheme.colorScheme.onBackground,
+        textDecoration = TextDecoration.Underline,
+        style = TextStyle(fontWeight = FontWeight.Bold)
+
+    )
+}
 
 @Composable
 fun FilaUbicaciones(
     ubicacion: List<Marcador>,
-    onClickAgregar: () -> Unit,
+    onClickAgregarUbi: () -> Unit,
     onClickEliminarUbicacion: (ubicacion: Marcador) -> Unit,
     onClickIrMapa: (ubicacion: Marcador) -> Unit
 ) {
@@ -404,7 +416,7 @@ fun FilaUbicaciones(
         item {
             IconButton(
                 onClick = {
-                    onClickAgregar()
+                    onClickAgregarUbi()
                 },
                 modifier = Modifier
                     .fillMaxWidth()

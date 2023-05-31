@@ -41,11 +41,15 @@ class HomeViewModel:ViewModel() {
 
 
     var infoQr by mutableStateOf("DEBE LLENAR EL FORMULARIO")
+
     var screenUbication by mutableStateOf("home_screenn")
-    var tabPestañas by mutableStateOf(0)
+
+    var tabPestañas = MutableLiveData(0)
 
     var isButtomShow = MutableLiveData(false)
-    var isDialogShown by mutableStateOf(false)
+
+    var textButtomAgregarSeleccionados = MutableLiveData("")
+    var isDialogShown = MutableLiveData(false)
         private set
     init {
         viewModelScope.launch {
@@ -57,29 +61,41 @@ class HomeViewModel:ViewModel() {
 
 
     fun onEmergencyClick() {
-        isDialogShown = true
+        isDialogShown.value=true
     }
 
     fun onDismissDialog() {
-        isDialogShown = false
+        isDialogShown.value = false
     }
 
     fun contactoSeleccionado(contacto: Contact) {
         selectedContacts.value = selectedContacts.value + contacto
-        if (selectedContacts.value.isNotEmpty()||selectedAddresses.value.isNotEmpty()){
+        textButtomAgregarSeleccionados.value="Agregar a contactos de emergencia"
             isButtomShow.value=true
-        }
-    }
-    fun ubicacionSeleccionada(ubicacion: Marcador) {
-        selectedAddresses.value = selectedAddresses.value + ubicacion
+
     }
 
     fun contactoDesSeleccionado(contacto: Contact) {
         selectedContacts.value = selectedContacts.value - contacto
+        if (selectedContacts.value.isEmpty()){
+            isButtomShow.value=false
+        }
 
     }
 
+    fun ubicacionSeleccionada(ubicacion: Marcador) {
+        selectedAddresses.value = selectedAddresses.value + ubicacion
+        textButtomAgregarSeleccionados.value="Agregar a ubicaciones rapidas"
+        isButtomShow.value=true
+    }
 
+    fun ubicacionDesSeleccionada(ubicacion: Marcador) {
+        selectedAddresses.value = selectedAddresses.value - ubicacion
+        if (selectedAddresses.value.isEmpty()){
+            isButtomShow.value=false
+        }
+
+    }
 
 
     fun eliminarContactoEmergencia(contact: Contact) {
@@ -95,25 +111,22 @@ class HomeViewModel:ViewModel() {
         }
     }
 
-    fun agregarContactosSeleccionados() {
-        contactRepository.agregarContactoEmergencia(selectedContacts.value)
-        _contactosEmergencia.value=contactRepository.getContactosEmergenciaList()
-        selectedContacts.value = emptyList()
-    }
-    fun agregarUbicacionesSeleccionadas() {
-      ubicacionRepository.agregarUbicacion(selectedAddresses.value)
-        _ubicacionesRapidas.value= ubicacionRepository.getUbicacionesRapidas()
-        selectedAddresses.value = emptyList()
-    }
-
-    fun ubicacionDesSeleccionada(ubicacion: Marcador) {
-        selectedAddresses.value = selectedAddresses.value - ubicacion
-
+    fun agregarSeleccionados(valor: Int) {
+        if (valor==0){
+            contactRepository.agregarContactoEmergencia(selectedContacts.value)
+            _contactosEmergencia.value=contactRepository.getContactosEmergenciaList()
+            selectedContacts.value = emptyList()
+        }else{
+            ubicacionRepository.agregarUbicacion(selectedAddresses.value)
+            _ubicacionesRapidas.value= ubicacionRepository.getUbicacionesRapidas()
+            selectedAddresses.value = emptyList()
+        }
     }
 
     fun limpiarSeleccionados() {
-        selectedAddresses.value = emptyList()
-        selectedContacts.value = emptyList()
+        selectedAddresses.value -= selectedAddresses.value
+        selectedContacts.value -= selectedContacts.value
+        isButtomShow.value=false
     }
 
     fun nuevaUbicacionSeleccionadaEnMapa(ubicacion: Marcador) {
@@ -121,7 +134,7 @@ class HomeViewModel:ViewModel() {
     }
 
     fun definirPestaña(tab: Int) {
-        tabPestañas=tab
+        tabPestañas.value=tab
     }
 
 }
