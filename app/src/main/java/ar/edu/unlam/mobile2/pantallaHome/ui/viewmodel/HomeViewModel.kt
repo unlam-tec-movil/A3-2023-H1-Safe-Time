@@ -111,7 +111,7 @@ class HomeViewModel:ViewModel() {
         }
     }
 
-    fun agregarSeleccionados(valor: Int) {
+   /* fun agregarSeleccionados(valor: Int) {
         if (valor==0){
             contactRepository.agregarContactoEmergencia(selectedContacts.value)
             _contactosEmergencia.value=contactRepository.getContactosEmergenciaList()
@@ -119,6 +119,18 @@ class HomeViewModel:ViewModel() {
         }else{
             ubicacionRepository.agregarUbicacion(selectedAddresses.value)
             _ubicacionesRapidas.value= ubicacionRepository.getUbicacionesRapidas()
+            selectedAddresses.value = emptyList()
+        }
+    }*/
+
+    fun agregarSeleccionados(valor: Int) {
+        if (valor == 0) {
+            contactRepository.agregarContactoEmergencia(selectedContacts.value)
+            _contactosEmergencia.value = contactRepository.getContactosEmergenciaList()
+            selectedContacts.value = emptyList()
+        } else {
+            ubicacionRepository.agregarUbicacion(selectedAddresses.value)
+            _ubicacionesRapidas.value = ubicacionRepository.getUbicacionesRapidas()
             selectedAddresses.value = emptyList()
         }
     }

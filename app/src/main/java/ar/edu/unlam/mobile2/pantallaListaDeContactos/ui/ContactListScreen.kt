@@ -95,7 +95,7 @@ fun ContactListScreen(navController: NavController, viewModel: HomeViewModel, ta
                     tab,
                     isShowButton ,
                     onClickAgregarSeleccionados={
-                        viewModel.agregarSeleccionados(0)
+                        viewModel.agregarSeleccionados(tab)
                         viewModel.limpiarSeleccionados()
                         navController.navigate(route = AppScreens.HomeScreen.route)
                     },
