@@ -1,4 +1,4 @@
-package ar.edu.unlam.mobile2.data
+package ar.edu.unlam.mobile2.kitties.data
 
 import retrofit2.Response
 import retrofit2.http.GET
