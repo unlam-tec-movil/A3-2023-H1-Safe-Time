@@ -1,4 +1,4 @@
-package ar.edu.unlam.mobile2.pantallaHome.domain.model
+package ar.edu.unlam.mobile2.pantallaHome.data.model
 
 import androidx.annotation.DrawableRes
 import ar.edu.unlam.mobile2.R

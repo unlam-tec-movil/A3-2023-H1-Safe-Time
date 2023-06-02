@@ -1,6 +1,5 @@
 package ar.edu.unlam.mobile2.pantallaMapa.ui
 
-import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -15,7 +14,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
@@ -38,11 +39,10 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -65,8 +65,7 @@ import ar.edu.unlam.mobile2.navigation.AppScreens
 import ar.edu.unlam.mobile2.pantallaHome.ui.viewmodel.HomeViewModel
 import ar.edu.unlam.mobile2.pantallaMapa.data.BottomNavItem
 import ar.edu.unlam.mobile2.pantallaMapa.data.repository.Marcador
-import ar.edu.unlam.mobile2.pantallaMapa.data.repository.MarcadorRepo
-import com.google.android.gms.maps.CameraUpdateFactory
+import ar.edu.unlam.mobile2.pantallaMapa.data.repository.MarcadorRepository
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.CameraPositionState
@@ -76,12 +75,11 @@ import com.google.maps.android.compose.MapType
 import com.google.maps.android.compose.MapUiSettings
 import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.MarkerState
-import com.google.maps.android.compose.rememberCameraPositionState
-import com.google.maps.android.compose.rememberMarkerState
 
 
 @Composable
 fun PantallaMapa(navController: NavController, viewModel: HomeViewModel) {
+
 
     ViewContainer(navController, viewModel)
 }
@@ -101,6 +99,7 @@ fun MapScreen(currentUbication: LatLng) {
                 shape = RoundedCornerShape(20.dp)
             )
             .clip(shape = RoundedCornerShape(percent = 10))
+
     ) {
         GoogleMap(
             modifier = Modifier
@@ -110,7 +109,6 @@ fun MapScreen(currentUbication: LatLng) {
             properties = mapProperties,
             uiSettings = uiSettings
         ) {
-
             Marker(state = MarkerState(currentUbication))
         }
     }
@@ -131,73 +129,79 @@ fun ViewContainer(navController: NavController, viewModel: HomeViewModel) {
 
     LocalContext.current.applicationContext
     var mUbicacionSeleccionada by remember {
-        mutableStateOf(MarcadorRepo.ubicaciones[2])
+        mutableStateOf(MarcadorRepository.ubicaciones[1])
     }
 
-    Scaffold(topBar = { Toolbar(navController) }, bottomBar = { Bottombar(navController, viewModel) }) {
+    Scaffold(
+        topBar = { Toolbar(navController) },
+        bottomBar = { Bottombar(navController, viewModel) }) {
 
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues = it)
-                .padding(top = 15.dp),
-            verticalArrangement = Arrangement.Top,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
 
-            item {
-                mUbicacionSeleccionada = selectorDeUbicacionesRegistradas(MarcadorRepo.ubicaciones)
-            }
 
-            item {
-                MapScreen(mUbicacionSeleccionada.latLng)
-            }
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues = it)
+                    .padding(top = 15.dp),
+                verticalArrangement = Arrangement.Top,
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
 
-            item {
-                Spacer(modifier = Modifier.size(width = 0.dp, height = 5.dp))
-            }
+                item {
+                    mUbicacionSeleccionada =
+                        selectorDeUbicacionesRegistradas(MarcadorRepository.ubicaciones, viewModel)
+                }
 
-            item {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceAround
+                item {
+                    MapScreen(mUbicacionSeleccionada.latLng)
+                }
 
-                ) {
+                item {
+                    Spacer(modifier = Modifier.size(width = 0.dp, height = 5.dp))
+                }
+
+                item {
                     Row(
                         modifier = Modifier
-                            .background(
-                                MaterialTheme.colorScheme.primary,
-                                shape = RoundedCornerShape(20.dp)
-                            )
-                            .size(width = 180.dp, height = 50.dp),
+                            .fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Center
+                        horizontalArrangement = Arrangement.SpaceAround
 
                     ) {
+                        Row(
+                            modifier = Modifier
+                                .background(
+                                    MaterialTheme.colorScheme.primary,
+                                    shape = RoundedCornerShape(20.dp)
+                                )
+                                .size(width = 180.dp, height = 50.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Center
 
-                        CartelDistanciaDelPunto(distancia = 0.0)
+                        ) {
 
-                    }
-                    Row(
-                        modifier = Modifier
-                            .background(
-                                MaterialTheme.colorScheme.primary,
-                                shape = RoundedCornerShape(20.dp)
-                            )
-                            .size(width = 180.dp, 50.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Center
+                            CartelDistanciaDelPunto(distancia = 0.0)
 
-                    ) {
-                        CartelLlegadaEstimada(tiempo = 0)
+                        }
+                        Row(
+                            modifier = Modifier
+                                .background(
+                                    MaterialTheme.colorScheme.primary,
+                                    shape = RoundedCornerShape(20.dp)
+                                )
+                                .size(width = 180.dp, 50.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Center
+
+                        ) {
+                            CartelLlegadaEstimada(tiempo = 0)
+                        }
                     }
                 }
             }
         }
     }
-}
+
 
 
 @Composable
@@ -375,13 +379,13 @@ private fun CartelLlegadaEstimada(tiempo: Int) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun selectorDeUbicacionesRegistradas(listaMarcadores: List<Marcador>): Marcador {
+private fun selectorDeUbicacionesRegistradas(listaMarcadores: List<Marcador>,viewModel: HomeViewModel): Marcador {
 
     var mExpanded by remember { mutableStateOf(false) }
 
     val options: List<Marcador> = listaMarcadores
 
-    var mSelectedUbi by remember { mutableStateOf(listaMarcadores[0]) }
+    val mSelectedUbi by viewModel.ubicacionMapa.observeAsState(initial = MarcadorRepository.ubicaciones[1])
     var mSelectedText by remember { mutableStateOf(listaMarcadores[0].nombre) }
 
     var mTextFieldSize by remember { mutableStateOf(Size.Zero) }
@@ -391,7 +395,7 @@ private fun selectorDeUbicacionesRegistradas(listaMarcadores: List<Marcador>): M
     Column(modifier = Modifier.padding(horizontal = 10.dp, vertical = 2.dp)) {
 
         OutlinedTextField(
-            value = mSelectedText,
+            value = mSelectedUbi.nombre,
             onValueChange = { mSelectedText = it },
             modifier = Modifier
                 .fillMaxWidth()
@@ -427,7 +431,9 @@ private fun selectorDeUbicacionesRegistradas(listaMarcadores: List<Marcador>): M
                     onClick = {
                         mSelectedText = opcion.nombre
                         mExpanded = false
-                        mSelectedUbi = opcion
+                       // mSelectedUbi = opcion
+                        viewModel.nuevaUbicacionSeleccionadaEnMapa(opcion)
+
                     },
                     text = { Text(text = opcion.nombre) })
             }
