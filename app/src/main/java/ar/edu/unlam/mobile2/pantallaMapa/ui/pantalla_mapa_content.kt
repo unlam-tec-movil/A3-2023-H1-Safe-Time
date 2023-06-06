@@ -206,8 +206,6 @@ fun ViewContainer(navController: NavController, viewModel: HomeViewModel) {
 
 @Composable
 fun Bottombar(navController: NavController, viewModel: HomeViewModel) {
-
-    val context = LocalContext.current
     val bottomNavItem = listOf(
 
         BottomNavItem(
@@ -265,7 +263,6 @@ fun Bottombar(navController: NavController, viewModel: HomeViewModel) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun Toolbar(navController: NavController) {
-    val context = LocalContext.current
     TopAppBar(
         title = {
             Row(

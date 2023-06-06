@@ -1,7 +1,7 @@
-package ar.edu.unlam.mobile2.kitties
+package ar.edu.unlam.mobile2.hilt
 
 import android.app.Application
 import dagger.hilt.android.HiltAndroidApp
 
 @HiltAndroidApp
-class HiltApplication : Application()
+class SafeTimeApp:Application()

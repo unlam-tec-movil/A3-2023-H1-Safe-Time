@@ -12,20 +12,13 @@ import androidx.compose.material3.Surface
 import ar.edu.unlam.mobile2.navigation.AppNavigation
 import ar.edu.unlam.mobile2.pantallaHome.ui.viewmodel.HomeViewModel
 import com.example.compose.AppTheme
+import dagger.hilt.android.AndroidEntryPoint
 
-
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     private val viewModel by viewModels<HomeViewModel>()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        //INTEGRACION DE APPCENTER, CORREGIR MAS ADELANTE
-        /*AppCenter.start(
-            application,
-            "0a6e59c922abcfd3bc3ded3870661ccfae411c45",
-            Analytics::class.java,
-            Crashes::class.java
-        )*/
 
         Log.i("MainActivity", "onCreate")
         setContent {
