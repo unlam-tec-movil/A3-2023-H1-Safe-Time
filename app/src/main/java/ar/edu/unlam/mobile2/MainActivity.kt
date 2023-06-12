@@ -2,6 +2,9 @@ package ar.edu.unlam.mobile2
 
 
 
+import android.content.Context
+import android.hardware.Sensor
+import android.hardware.SensorManager
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -9,6 +12,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.core.content.ContextCompat
 import ar.edu.unlam.mobile2.navigation.AppNavigation
 import ar.edu.unlam.mobile2.pantallaHome.ui.viewmodel.HomeViewModel
 import com.example.compose.AppTheme
@@ -16,6 +20,7 @@ import com.example.compose.AppTheme
 
 class MainActivity : ComponentActivity() {
     private val viewModel by viewModels<HomeViewModel>()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -35,7 +40,5 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
-
-
     }
 }
