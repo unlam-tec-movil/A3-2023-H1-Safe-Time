@@ -1,6 +1,7 @@
 package ar.edu.unlam.mobile2
 
 import android.Manifest
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
@@ -67,6 +68,7 @@ import androidx.core.content.ContextCompat
 import androidx.navigation.NavController
 import ar.edu.unlam.mobile2.dialogQR.QRDialog
 import ar.edu.unlam.mobile2.navigation.AppScreens
+import ar.edu.unlam.mobile2.pantallaHome.data.SensorDeMovimiento
 import ar.edu.unlam.mobile2.pantallaHome.data.model.Contact
 import ar.edu.unlam.mobile2.pantallaHome.ui.viewmodel.HomeViewModel
 import ar.edu.unlam.mobile2.pantallaMapa.data.repository.Marcador
@@ -169,9 +171,9 @@ fun ContentHome(navController: NavController, viewModel: HomeViewModel) {
         }
         item {
             BotonEmergencia(
-                onClickEmergencia = {viewModel.onEmergencyClick()},
+                onClickEmergencia = { viewModel.onEmergencyClick() },
                 isDialogShown = isDialogShow,
-                onDismissDialog = { viewModel.onDismissDialog()},
+                onDismissDialog = { viewModel.onDismissDialog() },
                 infoQR = viewModel.infoQr
             )
         }
@@ -182,9 +184,9 @@ fun ContentHome(navController: NavController, viewModel: HomeViewModel) {
 
 @Composable
 fun BotonEmergencia(
-    onClickEmergencia:()->Unit,
-    isDialogShown:Boolean,
-    onDismissDialog:()-> Unit,
+    onClickEmergencia: () -> Unit,
+    isDialogShown: Boolean,
+    onDismissDialog: () -> Unit,
     infoQR: String,
 ) {
 
@@ -206,8 +208,6 @@ fun BotonEmergencia(
         )
     }
 }
-
-
 
 
 @Composable

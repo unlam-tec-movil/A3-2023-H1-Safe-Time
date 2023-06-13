@@ -16,7 +16,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
-class HomeViewModel:ViewModel() {
+class HomeViewModel : ViewModel() {
 
     private val contactRepository = ContactRepository()
     private val ubicacionRepository = MarcadorRepository()
@@ -39,6 +39,7 @@ class HomeViewModel:ViewModel() {
     private val _locationState = MutableStateFlow<LatLng?>(null)
     val locationState: StateFlow<LatLng?> = _locationState
 
+    var sensorState = MutableLiveData(false)
 
     var infoQr by mutableStateOf("DEBE LLENAR EL FORMULARIO")
 
@@ -51,6 +52,7 @@ class HomeViewModel:ViewModel() {
     var textButtomAgregarSeleccionados = MutableLiveData("")
     var isDialogShown = MutableLiveData(false)
         private set
+
     init {
         viewModelScope.launch {
             _contactosEmergencia.value = contactRepository.getContactosEmergenciaList()
@@ -61,7 +63,15 @@ class HomeViewModel:ViewModel() {
 
 
     fun onEmergencyClick() {
-        isDialogShown.value=true
+        isDialogShown.value = true
+    }
+
+    fun onSensorActivation() {
+        sensorState.value = true
+    }
+
+    fun onSensorDesactivation() {
+        sensorState.value = false
     }
 
     fun onDismissDialog() {
@@ -70,33 +80,32 @@ class HomeViewModel:ViewModel() {
 
     fun contactoSeleccionado(contacto: Contact) {
         selectedContacts.value = selectedContacts.value + contacto
-        textButtomAgregarSeleccionados.value="Agregar a contactos de emergencia"
-            isButtomShow.value=true
+        textButtomAgregarSeleccionados.value = "Agregar a contactos de emergencia"
+        isButtomShow.value = true
 
     }
 
     fun contactoDesSeleccionado(contacto: Contact) {
         selectedContacts.value = selectedContacts.value - contacto
-        if (selectedContacts.value.isEmpty()){
-            isButtomShow.value=false
+        if (selectedContacts.value.isEmpty()) {
+            isButtomShow.value = false
         }
 
     }
 
     fun ubicacionSeleccionada(ubicacion: Marcador) {
         selectedAddresses.value = selectedAddresses.value + ubicacion
-        textButtomAgregarSeleccionados.value="Agregar a ubicaciones rapidas"
-        isButtomShow.value=true
+        textButtomAgregarSeleccionados.value = "Agregar a ubicaciones rapidas"
+        isButtomShow.value = true
     }
 
     fun ubicacionDesSeleccionada(ubicacion: Marcador) {
         selectedAddresses.value = selectedAddresses.value - ubicacion
-        if (selectedAddresses.value.isEmpty()){
-            isButtomShow.value=false
+        if (selectedAddresses.value.isEmpty()) {
+            isButtomShow.value = false
         }
 
     }
-
 
     fun eliminarContactoEmergencia(contact: Contact) {
         viewModelScope.launch {
@@ -104,6 +113,7 @@ class HomeViewModel:ViewModel() {
             _contactosEmergencia.value = contactRepository.getContactosEmergenciaList()
         }
     }
+
     fun eliminarUbicacionRapida(ubicacion: Marcador) {
         viewModelScope.launch {
             ubicacionRepository.borrarUbicacion(ubicacion)
@@ -111,17 +121,17 @@ class HomeViewModel:ViewModel() {
         }
     }
 
-   /* fun agregarSeleccionados(valor: Int) {
-        if (valor==0){
-            contactRepository.agregarContactoEmergencia(selectedContacts.value)
-            _contactosEmergencia.value=contactRepository.getContactosEmergenciaList()
-            selectedContacts.value = emptyList()
-        }else{
-            ubicacionRepository.agregarUbicacion(selectedAddresses.value)
-            _ubicacionesRapidas.value= ubicacionRepository.getUbicacionesRapidas()
-            selectedAddresses.value = emptyList()
-        }
-    }*/
+    /* fun agregarSeleccionados(valor: Int) {
+         if (valor==0){
+             contactRepository.agregarContactoEmergencia(selectedContacts.value)
+             _contactosEmergencia.value=contactRepository.getContactosEmergenciaList()
+             selectedContacts.value = emptyList()
+         }else{
+             ubicacionRepository.agregarUbicacion(selectedAddresses.value)
+             _ubicacionesRapidas.value= ubicacionRepository.getUbicacionesRapidas()
+             selectedAddresses.value = emptyList()
+         }
+     }*/
 
     fun agregarSeleccionados(valor: Int) {
         if (valor == 0) {
@@ -138,7 +148,7 @@ class HomeViewModel:ViewModel() {
     fun limpiarSeleccionados() {
         selectedAddresses.value -= selectedAddresses.value
         selectedContacts.value -= selectedContacts.value
-        isButtomShow.value=false
+        isButtomShow.value = false
     }
 
     fun nuevaUbicacionSeleccionadaEnMapa(ubicacion: Marcador) {
@@ -146,7 +156,7 @@ class HomeViewModel:ViewModel() {
     }
 
     fun definirPestaña(tab: Int) {
-        tabPestañas.value=tab
+        tabPestañas.value = tab
     }
 
 }

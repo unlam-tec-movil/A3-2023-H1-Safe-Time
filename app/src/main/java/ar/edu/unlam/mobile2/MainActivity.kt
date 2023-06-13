@@ -1,10 +1,6 @@
 package ar.edu.unlam.mobile2
 
 
-
-import android.content.Context
-import android.hardware.Sensor
-import android.hardware.SensorManager
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -12,25 +8,17 @@ import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.core.content.ContextCompat
 import ar.edu.unlam.mobile2.navigation.AppNavigation
+import ar.edu.unlam.mobile2.pantallaHome.data.SensorDeMovimiento
 import ar.edu.unlam.mobile2.pantallaHome.ui.viewmodel.HomeViewModel
 import com.example.compose.AppTheme
 
 
 class MainActivity : ComponentActivity() {
     private val viewModel by viewModels<HomeViewModel>()
-
+    private val sensor = SensorDeMovimiento(this)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        //INTEGRACION DE APPCENTER, CORREGIR MAS ADELANTE
-        /*AppCenter.start(
-            application,
-            "0a6e59c922abcfd3bc3ded3870661ccfae411c45",
-            Analytics::class.java,
-            Crashes::class.java
-        )*/
 
         Log.i("MainActivity", "onCreate")
         setContent {
@@ -40,5 +28,15 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+    }
+
+    override fun onResume() {
+        sensor.iniciarSensor()
+        super.onResume()
+    }
+
+    override fun onPause() {
+        sensor.detenerSensor()
+        super.onPause()
     }
 }
