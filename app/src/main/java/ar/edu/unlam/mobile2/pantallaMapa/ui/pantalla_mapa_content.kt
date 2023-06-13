@@ -1,11 +1,6 @@
 package ar.edu.unlam.mobile2.pantallaMapa.ui
 
-import android.Manifest
 import android.app.Activity
-import android.content.Context
-import android.content.pm.PackageManager
-import android.location.Location
-import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -19,7 +14,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
@@ -64,8 +58,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.toSize
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
 import androidx.navigation.NavController
 import ar.edu.unlam.mobile2.R
 import ar.edu.unlam.mobile2.navigation.AppScreens
@@ -73,13 +65,8 @@ import ar.edu.unlam.mobile2.pantallaHome.ui.viewmodel.HomeViewModel
 import ar.edu.unlam.mobile2.pantallaMapa.data.BottomNavItem
 import ar.edu.unlam.mobile2.pantallaMapa.data.repository.Marcador
 import ar.edu.unlam.mobile2.pantallaMapa.data.repository.MarcadorRepository
-import ar.edu.unlam.mobile2.ui.MainActivity.Companion.REQUEST_LOCATION_PERMISSION
-import com.google.android.gms.location.LocationServices
-import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.Polyline
-import com.google.android.gms.maps.model.PolylineOptions
 import com.google.maps.android.compose.CameraPositionState
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.MapProperties
@@ -87,72 +74,35 @@ import com.google.maps.android.compose.MapType
 import com.google.maps.android.compose.MapUiSettings
 import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.MarkerState
-import com.google.maps.android.compose.Polyline
 
 
 @Composable
 fun PantallaMapa(navController: NavController, viewModel: HomeViewModel) {
-     val context = LocalContext.current
-    val fusedLocationClient = remember {
-        LocationServices.getFusedLocationProviderClient(context)
-    }
-    var currentLocation by remember { mutableStateOf<Location?>(null) }
+    val context = LocalContext.current as Activity
+    var permissionsGranted by remember { mutableStateOf(false) }
+    val currentLocation by viewModel.currentLocation.observeAsState()
 
-    LaunchedEffect(Unit) {
-        if (hasLocationPermission(context)) {
-            if (ActivityCompat.checkSelfPermission(
-                    context,
-                     Manifest.permission_group.LOCATION
-                ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
-                    context,
-                    Manifest.permission.ACCESS_COARSE_LOCATION
-                ) != PackageManager.PERMISSION_GRANTED
-            ) {
-                // TODO: Consider calling
-                //    ActivityCompat#requestPermissions
-                // here to request the missing permissions, and then overriding
-                //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-                //                                          int[] grantResults)
-                // to handle the case where the user grants the permission. See the documentation
-                // for ActivityCompat#requestPermissions for more details.
-                return@LaunchedEffect
-            }
-            fusedLocationClient.lastLocation
-                .addOnSuccessListener { location: Location? ->
-                    currentLocation = location
-                    Toast.makeText(
-                        context,
-                        "La ubicacion se encontro",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                }
-                .addOnFailureListener { exception: Exception ->
-                    // Error al obtener la ubicación
-                    Toast.makeText(
-                       context,
-                        "Error al obtener la ubicación: ${exception.message}",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                }
-        } else {
-            // Permiso denegado, solicitar permisos
-            ActivityCompat.requestPermissions(
-               context as Activity,
-                arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
-                REQUEST_LOCATION_PERMISSION
-            )
-        }
-    }
+   /* LaunchedEffect(Unit) {
+        viewModel.onRequestLocationPermissions(context)
+        // Esperar a que los permisos se concedan antes de continuar
+        if (viewModel.isLocationPermissionGranted.value == true) {
+            permissionsGranted = true
+        }*/
+
 
     currentLocation?.let { ViewContainer(navController, viewModel, it) }
 }
 
 @Composable
-fun MapScreen(currentUbication: LatLng, currentLocation: Location) {
+fun MapScreen(
+    destino: LatLng,
+    currentLocation: LatLng
+) {
 
-    val initialUbication = LatLng(currentLocation.latitude,currentLocation.longitude)
-    val myLocation = LatLng(-34.684791, -58.557518)
+    val initialUbication = LatLng(currentLocation.latitude, currentLocation.longitude)
+
     val mapProperties by remember { mutableStateOf(MapProperties(mapType = MapType.HYBRID)) }
+
     val uiSettings by remember { mutableStateOf(MapUiSettings(rotationGesturesEnabled = false)) }
 
     Box(
@@ -169,30 +119,33 @@ fun MapScreen(currentUbication: LatLng, currentLocation: Location) {
             modifier = Modifier
                 .size(width = 380.dp, height = 500.dp)
                 .padding(8.dp),
-            cameraPositionState = cameraUpdate(initialUbication, currentUbication),
+            cameraPositionState = cameraUpdate(initialUbication, initialUbication),
             properties = mapProperties,
             uiSettings = uiSettings
         ) {
-
-
             Marker(state = MarkerState(initialUbication))
-           // Marker(state = MarkerState(myLocation))
+
         }
     }
 }
 
-private fun cameraUpdate(current : LatLng, next : LatLng) : CameraPositionState{
+private fun cameraUpdate(current: LatLng, next: LatLng): CameraPositionState {
 
-    if(current != next) {
+    if (current != next) {
 
         return CameraPositionState(position = CameraPosition(next, 16.6f, 0f, 0f))
     }
 
     return CameraPositionState(position = CameraPosition(current, 16.6f, 0f, 0f))
 }
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ViewContainer(navController: NavController, viewModel: HomeViewModel,currentLocation: Location) {
+fun ViewContainer(
+    navController: NavController,
+    viewModel: HomeViewModel,
+    currentLocation: LatLng
+) {
 
     LocalContext.current.applicationContext
     var mUbicacionSeleccionada by remember {
@@ -204,68 +157,65 @@ fun ViewContainer(navController: NavController, viewModel: HomeViewModel,current
         bottomBar = { Bottombar(navController, viewModel) }) {
 
 
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues = it)
+                .padding(top = 15.dp),
+            verticalArrangement = Arrangement.Top,
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
 
-            Column(
+
+            mUbicacionSeleccionada =
+                selectorDeUbicacionesRegistradas(MarcadorRepository.ubicaciones, viewModel)
+
+
+
+            MapScreen(mUbicacionSeleccionada.latLng, currentLocation)
+
+
+            Spacer(modifier = Modifier.size(width = 0.dp, height = 5.dp))
+
+            Row(
                 modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues = it)
-                    .padding(top = 15.dp),
-                verticalArrangement = Arrangement.Top,
-                horizontalAlignment = Alignment.CenterHorizontally,
+                    .fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceAround
+
             ) {
+                Row(
+                    modifier = Modifier
+                        .background(
+                            MaterialTheme.colorScheme.primary,
+                            shape = RoundedCornerShape(20.dp)
+                        )
+                        .size(width = 180.dp, height = 50.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
 
+                ) {
 
-                    mUbicacionSeleccionada =
-                        selectorDeUbicacionesRegistradas(MarcadorRepository.ubicaciones, viewModel)
+                    CartelDistanciaDelPunto(distancia = 0.0)
 
+                }
+                Row(
+                    modifier = Modifier
+                        .background(
+                            MaterialTheme.colorScheme.primary,
+                            shape = RoundedCornerShape(20.dp)
+                        )
+                        .size(width = 180.dp, 50.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
 
-
-                    MapScreen(mUbicacionSeleccionada.latLng,currentLocation)
-
-
-                    Spacer(modifier = Modifier.size(width = 0.dp, height = 5.dp))
-
-          Row(
-                        modifier = Modifier
-                            .fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceAround
-
-                    ) {
-                        Row(
-                            modifier = Modifier
-                                .background(
-                                    MaterialTheme.colorScheme.primary,
-                                    shape = RoundedCornerShape(20.dp)
-                                )
-                                .size(width = 180.dp, height = 50.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.Center
-
-                        ) {
-
-                            CartelDistanciaDelPunto(distancia = 0.0)
-
-                        }
-                        Row(
-                            modifier = Modifier
-                                .background(
-                                    MaterialTheme.colorScheme.primary,
-                                    shape = RoundedCornerShape(20.dp)
-                                )
-                                .size(width = 180.dp, 50.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.Center
-
-                        ) {
-                            CartelLlegadaEstimada(tiempo = 0)
-                        }
-                    }
+                ) {
+                    CartelLlegadaEstimada(tiempo = 0)
                 }
             }
         }
-
-
+    }
+}
 
 
 @Composable
@@ -355,7 +305,7 @@ fun Toolbar(navController: NavController) {
             TopAppBarActionButton(
                 imageVector = Icons.Rounded.Settings,
                 description = "Settings Icon",
-                onClick = {navController.navigate(route = AppScreens.InfoQrScreen.route)}
+                onClick = { navController.navigate(route = AppScreens.InfoQrScreen.route) }
             )
         }
     )
@@ -440,7 +390,10 @@ private fun CartelLlegadaEstimada(tiempo: Int) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun selectorDeUbicacionesRegistradas(listaMarcadores: List<Marcador>,viewModel: HomeViewModel): Marcador {
+private fun selectorDeUbicacionesRegistradas(
+    listaMarcadores: List<Marcador>,
+    viewModel: HomeViewModel
+): Marcador {
 
     var mExpanded by remember { mutableStateOf(false) }
 
@@ -492,7 +445,7 @@ private fun selectorDeUbicacionesRegistradas(listaMarcadores: List<Marcador>,vie
                     onClick = {
                         mSelectedText = opcion.nombre
                         mExpanded = false
-                       // mSelectedUbi = opcion
+                        // mSelectedUbi = opcion
                         viewModel.nuevaUbicacionSeleccionadaEnMapa(opcion)
 
                     },
@@ -501,11 +454,4 @@ private fun selectorDeUbicacionesRegistradas(listaMarcadores: List<Marcador>,vie
         }
     }
     return mSelectedUbi
-}
-
-private fun hasLocationPermission(context: Context): Boolean {
-    return ContextCompat.checkSelfPermission(
-        context,
-        Manifest.permission.ACCESS_FINE_LOCATION
-    ) == PackageManager.PERMISSION_GRANTED
 }
