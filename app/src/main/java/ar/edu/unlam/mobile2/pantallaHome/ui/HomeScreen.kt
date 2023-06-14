@@ -95,8 +95,11 @@ fun HomeScreen(navController: NavController, viewModel: HomeViewModel) {
 
 @Composable
 fun ContentHome(navController: NavController, viewModel: HomeViewModel) {
+
     val contacts by viewModel.contactosEmergencia.observeAsState(initial = emptyList())
+
     val ubicacion by viewModel.ubicacionesRapidas.observeAsState(initial = emptyList())
+
     val isDialogShow by viewModel.isDialogShown.observeAsState(initial = false)
 
     val context = LocalContext.current
@@ -166,6 +169,7 @@ fun ContentHome(navController: NavController, viewModel: HomeViewModel) {
         item {
             Divider(modifier = Modifier.width(360.dp), thickness = 2.dp)
         }
+
         item {
             BotonEmergencia(
                 onClickEmergencia = { viewModel.onEmergencyClick() },

@@ -1,5 +1,6 @@
 package ar.edu.unlam.mobile2.pantallaMapa.ui
 
+import android.app.Activity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -13,10 +14,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
@@ -39,6 +37,7 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
@@ -79,16 +78,31 @@ import com.google.maps.android.compose.MarkerState
 
 @Composable
 fun PantallaMapa(navController: NavController, viewModel: HomeViewModel) {
+    val context = LocalContext.current as Activity
+    var permissionsGranted by remember { mutableStateOf(false) }
+    val currentLocation by viewModel.currentLocation.observeAsState()
+
+   /* LaunchedEffect(Unit) {
+        viewModel.onRequestLocationPermissions(context)
+        // Esperar a que los permisos se concedan antes de continuar
+        if (viewModel.isLocationPermissionGranted.value == true) {
+            permissionsGranted = true
+        }*/
 
 
-    ViewContainer(navController, viewModel)
+    currentLocation?.let { ViewContainer(navController, viewModel, it) }
 }
 
 @Composable
-fun MapScreen(currentUbication: LatLng) {
+fun MapScreen(
+    destino: LatLng,
+    currentLocation: LatLng
+) {
 
-    val initialUbication = LatLng(-34.6690101, -58.5637967)
+    val initialUbication = LatLng(currentLocation.latitude, currentLocation.longitude)
+
     val mapProperties by remember { mutableStateOf(MapProperties(mapType = MapType.HYBRID)) }
+
     val uiSettings by remember { mutableStateOf(MapUiSettings(rotationGesturesEnabled = false)) }
 
     Box(
@@ -105,27 +119,33 @@ fun MapScreen(currentUbication: LatLng) {
             modifier = Modifier
                 .size(width = 380.dp, height = 500.dp)
                 .padding(8.dp),
-            cameraPositionState = cameraUpdate(initialUbication, currentUbication),
+            cameraPositionState = cameraUpdate(initialUbication, initialUbication),
             properties = mapProperties,
             uiSettings = uiSettings
         ) {
-            Marker(state = MarkerState(currentUbication))
+            Marker(state = MarkerState(initialUbication))
+
         }
     }
 }
 
-private fun cameraUpdate(current : LatLng, next : LatLng) : CameraPositionState{
+private fun cameraUpdate(current: LatLng, next: LatLng): CameraPositionState {
 
-    if(current != next) {
+    if (current != next) {
 
         return CameraPositionState(position = CameraPosition(next, 16.6f, 0f, 0f))
     }
 
     return CameraPositionState(position = CameraPosition(current, 16.6f, 0f, 0f))
 }
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ViewContainer(navController: NavController, viewModel: HomeViewModel) {
+fun ViewContainer(
+    navController: NavController,
+    viewModel: HomeViewModel,
+    currentLocation: LatLng
+) {
 
     LocalContext.current.applicationContext
     var mUbicacionSeleccionada by remember {
@@ -137,71 +157,65 @@ fun ViewContainer(navController: NavController, viewModel: HomeViewModel) {
         bottomBar = { Bottombar(navController, viewModel) }) {
 
 
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues = it)
+                .padding(top = 15.dp),
+            verticalArrangement = Arrangement.Top,
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
 
-            LazyColumn(
+
+            mUbicacionSeleccionada =
+                selectorDeUbicacionesRegistradas(MarcadorRepository.ubicaciones, viewModel)
+
+
+
+            MapScreen(mUbicacionSeleccionada.latLng, currentLocation)
+
+
+            Spacer(modifier = Modifier.size(width = 0.dp, height = 5.dp))
+
+            Row(
                 modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues = it)
-                    .padding(top = 15.dp),
-                verticalArrangement = Arrangement.Top,
-                horizontalAlignment = Alignment.CenterHorizontally,
+                    .fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceAround
+
             ) {
+                Row(
+                    modifier = Modifier
+                        .background(
+                            MaterialTheme.colorScheme.primary,
+                            shape = RoundedCornerShape(20.dp)
+                        )
+                        .size(width = 180.dp, height = 50.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
 
-                item {
-                    mUbicacionSeleccionada =
-                        selectorDeUbicacionesRegistradas(MarcadorRepository.ubicaciones, viewModel)
+                ) {
+
+                    CartelDistanciaDelPunto(distancia = 0.0)
+
                 }
+                Row(
+                    modifier = Modifier
+                        .background(
+                            MaterialTheme.colorScheme.primary,
+                            shape = RoundedCornerShape(20.dp)
+                        )
+                        .size(width = 180.dp, 50.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
 
-                item {
-                    MapScreen(mUbicacionSeleccionada.latLng)
-                }
-
-                item {
-                    Spacer(modifier = Modifier.size(width = 0.dp, height = 5.dp))
-                }
-
-                item {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceAround
-
-                    ) {
-                        Row(
-                            modifier = Modifier
-                                .background(
-                                    MaterialTheme.colorScheme.primary,
-                                    shape = RoundedCornerShape(20.dp)
-                                )
-                                .size(width = 180.dp, height = 50.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.Center
-
-                        ) {
-
-                            CartelDistanciaDelPunto(distancia = 0.0)
-
-                        }
-                        Row(
-                            modifier = Modifier
-                                .background(
-                                    MaterialTheme.colorScheme.primary,
-                                    shape = RoundedCornerShape(20.dp)
-                                )
-                                .size(width = 180.dp, 50.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.Center
-
-                        ) {
-                            CartelLlegadaEstimada(tiempo = 0)
-                        }
-                    }
+                ) {
+                    CartelLlegadaEstimada(tiempo = 0)
                 }
             }
         }
     }
-
+}
 
 
 @Composable
@@ -291,7 +305,7 @@ fun Toolbar(navController: NavController) {
             TopAppBarActionButton(
                 imageVector = Icons.Rounded.Settings,
                 description = "Settings Icon",
-                onClick = {navController.navigate(route = AppScreens.InfoQrScreen.route)}
+                onClick = { navController.navigate(route = AppScreens.InfoQrScreen.route) }
             )
         }
     )
@@ -376,7 +390,10 @@ private fun CartelLlegadaEstimada(tiempo: Int) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun selectorDeUbicacionesRegistradas(listaMarcadores: List<Marcador>,viewModel: HomeViewModel): Marcador {
+private fun selectorDeUbicacionesRegistradas(
+    listaMarcadores: List<Marcador>,
+    viewModel: HomeViewModel
+): Marcador {
 
     var mExpanded by remember { mutableStateOf(false) }
 
@@ -428,7 +445,7 @@ private fun selectorDeUbicacionesRegistradas(listaMarcadores: List<Marcador>,vie
                     onClick = {
                         mSelectedText = opcion.nombre
                         mExpanded = false
-                       // mSelectedUbi = opcion
+                        // mSelectedUbi = opcion
                         viewModel.nuevaUbicacionSeleccionadaEnMapa(opcion)
 
                     },
