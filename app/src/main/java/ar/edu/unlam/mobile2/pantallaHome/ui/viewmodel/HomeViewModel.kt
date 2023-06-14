@@ -39,8 +39,6 @@ class HomeViewModel : ViewModel() {
     private val _locationState = MutableStateFlow<LatLng?>(null)
     val locationState: StateFlow<LatLng?> = _locationState
 
-    var sensorState = MutableLiveData(false)
-
     var infoQr by mutableStateOf("DEBE LLENAR EL FORMULARIO")
 
     var screenUbication by mutableStateOf("home_screenn")
@@ -64,14 +62,6 @@ class HomeViewModel : ViewModel() {
 
     fun onEmergencyClick() {
         isDialogShown.value = true
-    }
-
-    fun onSensorActivation() {
-        sensorState.value = true
-    }
-
-    fun onSensorDesactivation() {
-        sensorState.value = false
     }
 
     fun onDismissDialog() {

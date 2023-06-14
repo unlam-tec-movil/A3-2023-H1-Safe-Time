@@ -6,14 +6,13 @@ import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
-import android.util.Log
-import ar.edu.unlam.mobile2.pantallaHome.ui.viewmodel.HomeViewModel
+import androidx.lifecycle.MutableLiveData
 
 
 class SensorDeMovimiento(val context: Context) : SensorEventListener {
 
     private lateinit var sensorManager: SensorManager
-    private val viewModel = HomeViewModel()
+    var sensorState = MutableLiveData(false)
 
     fun iniciarSensor() {
 
@@ -26,22 +25,16 @@ class SensorDeMovimiento(val context: Context) : SensorEventListener {
                 SensorManager.SENSOR_DELAY_FASTEST
             )
         }
-
-
     }
 
 
-    override fun onSensorChanged(event: SensorEvent?) {
-        if (event?.sensor?.type == Sensor.TYPE_ACCELEROMETER) {
+    override fun onSensorChanged(event: SensorEvent) {
+        if (event.sensor.type == Sensor.TYPE_ACCELEROMETER) {
 
             val sides = event.values[0]
-            //val upDown = event.values[1]
 
-            val estaQuieto = sides.toInt() == 0
-
-            if (sides.toInt() >= 20) {
-                Log.d("SENSOR ACTIVATION", "valor:${viewModel.sensorState.value}")
-                viewModel.onSensorActivation()
+            if (sensorState.value == false && sides.toInt() >= 20) {
+                onSensorActivation()
             }
         }
     }
@@ -52,6 +45,15 @@ class SensorDeMovimiento(val context: Context) : SensorEventListener {
 
     fun detenerSensor() {
         sensorManager.unregisterListener(this)
-        viewModel.onSensorDesactivation()
+        onSensorDesactivation()
+    }
+
+    fun onSensorDesactivation() {
+        sensorState.value = false
+    }
+
+    fun onSensorActivation() {
+        sensorState.value = true
     }
 }
+

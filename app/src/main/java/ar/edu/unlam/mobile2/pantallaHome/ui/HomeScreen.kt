@@ -1,7 +1,6 @@
-package ar.edu.unlam.mobile2
+package ar.edu.unlam.mobile2.pantallaHome.ui
 
 import android.Manifest
-import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
@@ -48,7 +47,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -68,7 +66,6 @@ import androidx.core.content.ContextCompat
 import androidx.navigation.NavController
 import ar.edu.unlam.mobile2.dialogQR.QRDialog
 import ar.edu.unlam.mobile2.navigation.AppScreens
-import ar.edu.unlam.mobile2.pantallaHome.data.SensorDeMovimiento
 import ar.edu.unlam.mobile2.pantallaHome.data.model.Contact
 import ar.edu.unlam.mobile2.pantallaHome.ui.viewmodel.HomeViewModel
 import ar.edu.unlam.mobile2.pantallaMapa.data.repository.Marcador
@@ -91,6 +88,7 @@ fun HomeScreen(navController: NavController, viewModel: HomeViewModel) {
             contentAlignment = Alignment.Center
         ) {
             ContentHome(navController, viewModel)
+
         }
     }
 }
@@ -112,7 +110,6 @@ fun ContentHome(navController: NavController, viewModel: HomeViewModel) {
             context.startActivity(intent)
         }
     }
-
 
     LazyColumn(
         verticalArrangement = Arrangement.spacedBy(15.dp),

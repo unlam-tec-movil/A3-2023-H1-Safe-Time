@@ -17,6 +17,7 @@ import com.example.compose.AppTheme
 class MainActivity : ComponentActivity() {
     private val viewModel by viewModels<HomeViewModel>()
     private val sensor = SensorDeMovimiento(this)
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -24,7 +25,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             AppTheme() {
                 Surface(color = MaterialTheme.colorScheme.background) {
-                    AppNavigation(viewModel)
+                    AppNavigation(viewModel, sensor)
                 }
             }
         }
@@ -39,4 +40,5 @@ class MainActivity : ComponentActivity() {
         sensor.detenerSensor()
         super.onPause()
     }
+
 }
