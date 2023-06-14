@@ -1,4 +1,4 @@
-package ar.edu.unlam.mobile2
+package ar.edu.unlam.mobile2.pantallaHome.ui
 
 import android.Manifest
 import android.content.Intent
@@ -47,7 +47,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -89,6 +88,7 @@ fun HomeScreen(navController: NavController, viewModel: HomeViewModel) {
             contentAlignment = Alignment.Center
         ) {
             ContentHome(navController, viewModel)
+
         }
     }
 }
@@ -110,7 +110,6 @@ fun ContentHome(navController: NavController, viewModel: HomeViewModel) {
             context.startActivity(intent)
         }
     }
-
 
     LazyColumn(
         verticalArrangement = Arrangement.spacedBy(15.dp),
@@ -169,9 +168,9 @@ fun ContentHome(navController: NavController, viewModel: HomeViewModel) {
         }
         item {
             BotonEmergencia(
-                onClickEmergencia = {viewModel.onEmergencyClick()},
+                onClickEmergencia = { viewModel.onEmergencyClick() },
                 isDialogShown = isDialogShow,
-                onDismissDialog = { viewModel.onDismissDialog()},
+                onDismissDialog = { viewModel.onDismissDialog() },
                 infoQR = viewModel.infoQr
             )
         }
@@ -182,9 +181,9 @@ fun ContentHome(navController: NavController, viewModel: HomeViewModel) {
 
 @Composable
 fun BotonEmergencia(
-    onClickEmergencia:()->Unit,
-    isDialogShown:Boolean,
-    onDismissDialog:()-> Unit,
+    onClickEmergencia: () -> Unit,
+    isDialogShown: Boolean,
+    onDismissDialog: () -> Unit,
     infoQR: String,
 ) {
 
@@ -206,8 +205,6 @@ fun BotonEmergencia(
         )
     }
 }
-
-
 
 
 @Composable
