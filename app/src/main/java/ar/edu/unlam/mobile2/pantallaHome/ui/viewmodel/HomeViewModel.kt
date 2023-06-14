@@ -12,14 +12,20 @@ import ar.edu.unlam.mobile2.pantallaHome.data.model.Contact
 import ar.edu.unlam.mobile2.pantallaMapa.data.repository.Marcador
 import ar.edu.unlam.mobile2.pantallaMapa.data.repository.MarcadorRepository
 import com.google.android.gms.maps.model.LatLng
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class HomeViewModel:ViewModel() {
+@HiltViewModel
+class HomeViewModel @Inject constructor(
 
-    private val contactRepository = ContactRepository()
-    private val ubicacionRepository = MarcadorRepository()
+    private val contactRepository :ContactRepository,
+    private val ubicacionRepository : MarcadorRepository
+
+):ViewModel() {
+
 
     private val _contactos = MutableLiveData(emptyList<Contact>())
     val contactos: LiveData<List<Contact>> = _contactos
@@ -35,9 +41,6 @@ class HomeViewModel:ViewModel() {
 
     val selectedContacts = MutableStateFlow<List<Contact>>(emptyList())
     val selectedAddresses = MutableStateFlow<List<Marcador>>(emptyList())
-
-    private val _locationState = MutableStateFlow<LatLng?>(null)
-    val locationState: StateFlow<LatLng?> = _locationState
 
 
     var infoQr by mutableStateOf("DEBE LLENAR EL FORMULARIO")
@@ -111,21 +114,9 @@ class HomeViewModel:ViewModel() {
         }
     }
 
-   /* fun agregarSeleccionados(valor: Int) {
-        if (valor==0){
-            contactRepository.agregarContactoEmergencia(selectedContacts.value)
-            _contactosEmergencia.value=contactRepository.getContactosEmergenciaList()
-            selectedContacts.value = emptyList()
-        }else{
-            ubicacionRepository.agregarUbicacion(selectedAddresses.value)
-            _ubicacionesRapidas.value= ubicacionRepository.getUbicacionesRapidas()
-            selectedAddresses.value = emptyList()
-        }
-    }*/
-
     fun agregarSeleccionados(valor: Int) {
         if (valor == 0) {
-            contactRepository.agregarContactoEmergencia(selectedContacts.value)
+            contactRepository.addContactEmergencia(selectedContacts.value)
             _contactosEmergencia.value = contactRepository.getContactosEmergenciaList()
             selectedContacts.value = emptyList()
         } else {

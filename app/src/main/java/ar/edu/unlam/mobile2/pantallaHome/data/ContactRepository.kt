@@ -2,8 +2,9 @@ package ar.edu.unlam.mobile2.pantallaHome.data
 
 import ar.edu.unlam.mobile2.R
 import ar.edu.unlam.mobile2.pantallaHome.data.model.Contact
+import javax.inject.Inject
 
-class ContactRepository {
+class ContactRepository @Inject constructor() {
     companion object ContactDataProvider {
 
         var ubicaciones = listOf(
@@ -83,7 +84,6 @@ class ContactRepository {
         )
     }
 
-    // Elimina un contacto de la lista
     fun deleteContact(contact: Contact) {
         contactosDeEmergencia.remove(contact)
     }
@@ -96,7 +96,7 @@ class ContactRepository {
         return contactosDeEmergencia.toMutableList()
     }
 
-    fun agregarContactoEmergencia(contacts: List<Contact>) {
+    fun addContactEmergencia(contacts: List<Contact>) {
         contactosDeEmergencia.addAll(contacts)
     }
 }
