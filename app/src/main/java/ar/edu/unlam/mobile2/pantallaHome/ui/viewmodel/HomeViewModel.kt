@@ -18,12 +18,14 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import ar.edu.unlam.mobile2.pantallaHome.data.ContactRepository
 import ar.edu.unlam.mobile2.pantallaHome.data.model.Contact
+import ar.edu.unlam.mobile2.pantallaMapa.data.model.RouteModel
 import ar.edu.unlam.mobile2.pantallaMapa.data.repository.Marcador
 import ar.edu.unlam.mobile2.pantallaMapa.data.repository.MarcadorRepository
 import ar.edu.unlam.mobile2.pantallaMapa.domain.RouteServices
 import ar.edu.unlam.mobile2.ui.MainActivity
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.PolylineOptions
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
@@ -67,6 +69,10 @@ class HomeViewModel @Inject constructor(
     var isButtomShow = MutableLiveData(false)
 
     var textButtomAgregarSeleccionados = MutableLiveData("")
+
+    private val _polylineOptions = MutableLiveData<PolylineOptions?>()
+    val polylineOptions : LiveData<PolylineOptions?> = _polylineOptions
+
     var isDialogShown = MutableLiveData(false)
         private set
 
@@ -158,13 +164,31 @@ class HomeViewModel @Inject constructor(
     }
 
 
-    suspend fun createRoute(star: String, end: String) {
-        routeServices.getRoutes(star, end)
+     fun createRoute() {
+
+
+         var stringCurrentLocation = "${_currentLocation.value?.longitude},${currentLocation.value?.latitude}"
+         Log.i("bruno", "${currentLocation.value?.latitude},${_currentLocation.value?.longitude}")
+        // var stringCurrentLocation = "-58.70138301488951,-34.749780019436365 "
+         val stringDestino = "${_ubicacionMapa.value?.latLng?.longitude},${_ubicacionMapa.value?.latLng?.latitude}"
+
+       _polylineOptions.value= null
+         _polylineOptions.value?.points?.clear()
+
+         viewModelScope.launch {
+             val response = routeServices.getRoutes(stringCurrentLocation, stringDestino)
+             _polylineOptions.value=response
+         }
+
     }
 
     fun setCurrentLocation(result: LatLng) {
         _currentLocation.value = result
 
+    }
+
+    fun permissionGranted() {
+        _isLocationPermissionGranted.value=true
     }
 
 

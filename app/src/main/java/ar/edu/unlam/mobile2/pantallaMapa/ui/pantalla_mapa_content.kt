@@ -1,6 +1,7 @@
 package ar.edu.unlam.mobile2.pantallaMapa.ui
 
 import android.app.Activity
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -37,7 +38,6 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
@@ -67,6 +67,7 @@ import ar.edu.unlam.mobile2.pantallaMapa.data.repository.Marcador
 import ar.edu.unlam.mobile2.pantallaMapa.data.repository.MarcadorRepository
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.PolylineOptions
 import com.google.maps.android.compose.CameraPositionState
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.MapProperties
@@ -74,29 +75,25 @@ import com.google.maps.android.compose.MapType
 import com.google.maps.android.compose.MapUiSettings
 import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.MarkerState
+import com.google.maps.android.compose.Polyline
 
 
 @Composable
 fun PantallaMapa(navController: NavController, viewModel: HomeViewModel) {
     val context = LocalContext.current as Activity
     var permissionsGranted by remember { mutableStateOf(false) }
-    val currentLocation by viewModel.currentLocation.observeAsState()
+    val polylineOptions by viewModel.polylineOptions.observeAsState()
+    val currentLocation =LatLng(-34.730798,-58.719489)
+    val destino by viewModel.ubicacionMapa.observeAsState()
 
-   /* LaunchedEffect(Unit) {
-        viewModel.onRequestLocationPermissions(context)
-        // Esperar a que los permisos se concedan antes de continuar
-        if (viewModel.isLocationPermissionGranted.value == true) {
-            permissionsGranted = true
-        }*/
-
-
-    currentLocation?.let { ViewContainer(navController, viewModel, it) }
+ViewContainer(navController, viewModel, currentLocation,polylineOptions)
 }
 
 @Composable
 fun MapScreen(
     destino: LatLng,
-    currentLocation: LatLng
+    currentLocation: LatLng,
+    polylineOptions: PolylineOptions?
 ) {
 
     val initialUbication = LatLng(currentLocation.latitude, currentLocation.longitude)
@@ -125,6 +122,12 @@ fun MapScreen(
         ) {
             Marker(state = MarkerState(initialUbication))
 
+            if (polylineOptions != null) {
+                Polyline(points = polylineOptions.points)
+            }else{
+                Toast.makeText(LocalContext.current,"POLY NULL",Toast.LENGTH_SHORT).show()
+
+            }
         }
     }
 }
@@ -144,8 +147,8 @@ private fun cameraUpdate(current: LatLng, next: LatLng): CameraPositionState {
 fun ViewContainer(
     navController: NavController,
     viewModel: HomeViewModel,
-    currentLocation: LatLng
-) {
+    currentLocation: LatLng,
+    polylineOptions: PolylineOptions?, ) {
 
     LocalContext.current.applicationContext
     var mUbicacionSeleccionada by remember {
@@ -172,7 +175,7 @@ fun ViewContainer(
 
 
 
-            MapScreen(mUbicacionSeleccionada.latLng, currentLocation)
+            MapScreen(mUbicacionSeleccionada.latLng, currentLocation,polylineOptions)
 
 
             Spacer(modifier = Modifier.size(width = 0.dp, height = 5.dp))
@@ -255,7 +258,9 @@ fun Bottombar(navController: NavController, viewModel: HomeViewModel) {
                     if (viewModel.screenUbication != item.route) {
                         when (item.route) {
                             "home_screen" -> navController.navigate(route = AppScreens.HomeScreen.route)
-                            "map_screen" -> navController.navigate(route = AppScreens.MapScreen.route)
+                            "map_screen" ->{
+                                navController.navigate(route = AppScreens.MapScreen.route)
+                            }
                             "list_screen" -> navController.navigate(route = AppScreens.ContactListScreen.route)
                             "infoQr_screen" -> navController.navigate(route = AppScreens.InfoQrScreen.route)
                         }

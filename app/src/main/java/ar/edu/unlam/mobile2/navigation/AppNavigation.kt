@@ -1,6 +1,7 @@
 package ar.edu.unlam.mobile2.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -20,6 +21,7 @@ fun AppNavigation(viewModel: HomeViewModel, navController: NavHostController) {
         }
         composable(route = AppScreens.MapScreen.route){
             viewModel.screenUbication = "map_screen"
+
             PantallaMapa(navController,viewModel)
         }
         composable(route = AppScreens.ContactListScreen.route){

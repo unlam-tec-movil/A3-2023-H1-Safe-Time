@@ -43,7 +43,7 @@ class MainActivity : ComponentActivity() {
                     AppNavigation(viewModel = viewModel,navController)
                 }
             }
-            requestLocationPermissions()
+            getCurrentLocation()
         }
 
 
@@ -61,6 +61,7 @@ class MainActivity : ComponentActivity() {
             if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 // Permisos de ubicación concedidos
                 getCurrentLocation()
+                Toast.makeText(this, "Permiso de ubicación concedido", Toast.LENGTH_SHORT).show()
             } else {
                 // Permiso de ubicación denegado
                 Toast.makeText(this, "Permiso de ubicación denegado", Toast.LENGTH_SHORT).show()
@@ -72,7 +73,6 @@ class MainActivity : ComponentActivity() {
         val locationPermission = Manifest.permission.ACCESS_FINE_LOCATION
         val isLocationPermissionGranted = ContextCompat.checkSelfPermission(this, locationPermission) ==
                 PackageManager.PERMISSION_GRANTED
-
         if (isLocationPermissionGranted) {
             getCurrentLocation()
         } else {
@@ -107,7 +107,9 @@ class MainActivity : ComponentActivity() {
             .addOnSuccessListener { location: Location? ->
                 if (location != null) {
                     val result = LatLng(location.latitude, location.longitude)
+                    viewModel.permissionGranted()
                     viewModel.setCurrentLocation(result)
+                    Toast.makeText(this, "se obtuvo la ubi y esta en el viewmodel", Toast.LENGTH_SHORT).show()
                 } else {
                     // La ubicación es nula
                     Toast.makeText(this, "La ubicación es nula", Toast.LENGTH_SHORT).show()
