@@ -29,6 +29,7 @@ fun AppNavigation(viewModel: HomeViewModel, sensor: SensorDeMovimiento) {
         }
 
     }
+
     NavHost(navController = navController, startDestination = AppScreens.HomeScreen.route) {
 
         composable(route = AppScreens.HomeScreen.route) {

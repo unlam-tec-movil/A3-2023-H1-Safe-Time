@@ -1,5 +1,4 @@
 package ar.edu.unlam.mobile2.hilt
-import ar.edu.unlam.mobile2.pantallaHome.data.ContactRepository
 import ar.edu.unlam.mobile2.pantallaMapa.data.repository.RouteRepository
 import ar.edu.unlam.mobile2.pantallaMapa.data.repository.RoutesRestRepository
 import dagger.Binds
