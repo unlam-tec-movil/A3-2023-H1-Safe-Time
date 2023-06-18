@@ -7,8 +7,6 @@ import javax.inject.Inject
 class MarcadorRepository @Inject constructor(
     private val marcadorDao: MarcadorDAO
 ) {
-
-
     fun getAllMarcador(): List<MarcadorEntity> = marcadorDao.getAll()
 
     fun getAllFavMarcador(): List<MarcadorEntity> = marcadorDao.getAllFav()
@@ -20,6 +18,8 @@ class MarcadorRepository @Inject constructor(
     fun insert(marcadores: MarcadorEntity) = marcadorDao.insert(marcadores)
 
     fun update(marcadorEntity: MarcadorEntity) = marcadorDao.update(marcadorEntity)
+
+    fun updateFavorito(nombre : String) = marcadorDao.updateFavorito(nombre)
 
     fun delete(marcadorEntity: MarcadorEntity) = marcadorDao.delete(marcadorEntity)
 
