@@ -161,12 +161,9 @@ class HomeViewModel @Inject constructor(
 
     }
 
-    fun setContactsFromPhone(name : String, number: String) {
+    fun setContactsFromPhone(name: String, number: String) {
 
-        val contacto = ContactsFromPhone(name, number)
-
-        _contactosFromPhone.value = contactosFromPhone.value?.plus(contacto)
-
+        _contactosFromPhone.value = contactosFromPhone.value?.plus(ContactsFromPhone(name, number))
     }
 
 

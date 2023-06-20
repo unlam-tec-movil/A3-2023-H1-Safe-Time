@@ -5,6 +5,7 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
+import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
@@ -66,6 +67,9 @@ fun ContactListScreen(navController: NavController, viewModel: HomeViewModel, ta
     val isShowButton by viewModel.isButtomShow.observeAsState(initial = false)
     val context = LocalContext.current
     val actionDialIntent = Intent(Intent.ACTION_DIAL)
+    val listaContactosFromPhone by viewModel.contactosFromPhone.observeAsState(initial = emptyList())
+
+    Log.i("CONTACT_PROVIDER_DEMO", "TOTAL DE CONTACTOS: ${listaContactosFromPhone.size}")
 
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
@@ -74,12 +78,11 @@ fun ContactListScreen(navController: NavController, viewModel: HomeViewModel, ta
             context.startActivity(actionDialIntent)
         }
     }
-
-
     Scaffold(
         topBar = { Toolbar(navController) },
         bottomBar = { Bottombar(navController, viewModel) }
     ) {
+
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -93,14 +96,14 @@ fun ContactListScreen(navController: NavController, viewModel: HomeViewModel, ta
                 TabContactosDirecciones(
                     contactList,
                     tab,
-                    isShowButton ,
-                    onClickAgregarSeleccionados={
+                    isShowButton,
+                    onClickAgregarSeleccionados = {
                         viewModel.agregarSeleccionados(tab)
                         viewModel.limpiarSeleccionados()
                         navController.navigate(route = AppScreens.HomeScreen.route)
                     },
 
-                    onClickLlamar= {
+                    onClickLlamar = {
 
                         actionDialIntent.data = Uri.parse("tel:${it.telefono}")
                         if (ContextCompat.checkSelfPermission(
@@ -114,15 +117,15 @@ fun ContactListScreen(navController: NavController, viewModel: HomeViewModel, ta
                         }
 
                     },
-                    textButtonAgregarSeleccionados= it1,
+                    textButtonAgregarSeleccionados = it1,
 
-                    onContactSelected = {viewModel.contactoSeleccionado(it)},
-                    onContactUnSelected = {viewModel.contactoDesSeleccionado(it)},
+                    onContactSelected = { viewModel.contactoSeleccionado(it) },
+                    onContactUnSelected = { viewModel.contactoDesSeleccionado(it) },
 
 
                     ubicacionList,
-                    onUbicacionSelected = {viewModel.ubicacionSeleccionada(it)},
-                    onUbicacionUnSelected = {viewModel.ubicacionDesSeleccionada(it)},
+                    onUbicacionSelected = { viewModel.ubicacionSeleccionada(it) },
+                    onUbicacionUnSelected = { viewModel.ubicacionDesSeleccionada(it) },
                     onClickNavegarA = {
                         viewModel.nuevaUbicacionSeleccionadaEnMapa(it)
                         navController.navigate(route = AppScreens.MapScreen.route)
@@ -146,11 +149,11 @@ fun ContactListView(
     onClickAgregarSeleccionados: () -> Unit,
     onClickLlamar: (contacto: Contact) -> Unit,
     textButtonAgregarSeleccionados: String,
-    onContactSelected: (contact:Contact) -> Unit,
-    onContactUnSelected: (contact:Contact) -> Unit,
+    onContactSelected: (contact: Contact) -> Unit,
+    onContactUnSelected: (contact: Contact) -> Unit,
 
 
-) {
+    ) {
 
     Box(modifier = Modifier.fillMaxSize()) {
         LazyColumn(
@@ -159,20 +162,28 @@ fun ContactListView(
             items(contacts) { contacto ->
                 ItemContacto(
                     contacto,
-                    onClickLlamar={onClickLlamar(contacto)},
+                    onClickLlamar = { onClickLlamar(contacto) },
                     onContactSelected = { onContactSelected(contacto) },
-                    onContactUnSelected= {onContactUnSelected(contacto)}
+                    onContactUnSelected = { onContactUnSelected(contacto) }
                 )
             }
         }
 
-        BotonAgregarSeleccionados(onClickAgregarSeleccionados, isShowButton,textButtonAgregarSeleccionados)
+        BotonAgregarSeleccionados(
+            onClickAgregarSeleccionados,
+            isShowButton,
+            textButtonAgregarSeleccionados
+        )
     }
 }
 
 @SuppressLint("StateFlowValueCalledInComposition")
 @Composable
-fun BotonAgregarSeleccionados(onClickAgregarSeleccionados: ()->Unit,isShowButton: Boolean,textButtonAgregarSeleccionados: String ) {
+fun BotonAgregarSeleccionados(
+    onClickAgregarSeleccionados: () -> Unit,
+    isShowButton: Boolean,
+    textButtonAgregarSeleccionados: String
+) {
 
     Box(modifier = Modifier.fillMaxSize()) {
 
@@ -186,7 +197,7 @@ fun BotonAgregarSeleccionados(onClickAgregarSeleccionados: ()->Unit,isShowButton
                 backgroundColor = MaterialTheme.colorScheme.secondaryContainer,
 
                 onClick = {
-                   onClickAgregarSeleccionados()
+                    onClickAgregarSeleccionados()
                 },
                 modifier = Modifier
                     .align(Alignment.Center)
@@ -203,10 +214,11 @@ fun BotonAgregarSeleccionados(onClickAgregarSeleccionados: ()->Unit,isShowButton
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ItemContacto(contacto: Contact,
-                 onClickLlamar: () -> Unit,
-                 onContactSelected:()-> Unit,
-                 onContactUnSelected: () -> Unit
+fun ItemContacto(
+    contacto: Contact,
+    onClickLlamar: () -> Unit,
+    onContactSelected: () -> Unit,
+    onContactUnSelected: () -> Unit
 ) {
 
     val isSelected = rememberSaveable { mutableStateOf(false) }
@@ -228,7 +240,7 @@ fun ItemContacto(contacto: Contact,
             if (isSelected.value) {
                 onContactSelected()
             } else {
-              onContactUnSelected()
+                onContactUnSelected()
             }
 
         }
@@ -290,8 +302,6 @@ fun AdressListView(
     onUbicacionUnSelected: (ubicacion: Marcador) -> Unit
 
 
-
-
 ) {
 
     Box(modifier = Modifier.fillMaxSize()) {
@@ -299,23 +309,29 @@ fun AdressListView(
             items(ubicaciones) { adress ->
                 ItemDireccion(
                     ubicacion = adress,
-                    onClickNavegarA =  {onClickNavegarA(adress)},
-                    onUbicacionSelected = {onUbicacionSelected(adress)},
-                    onUbicacionUnSelected ={ onUbicacionUnSelected(adress)})
+                    onClickNavegarA = { onClickNavegarA(adress) },
+                    onUbicacionSelected = { onUbicacionSelected(adress) },
+                    onUbicacionUnSelected = { onUbicacionUnSelected(adress) })
             }
 
         }
-        BotonAgregarSeleccionados(onClickAgregarSeleccionados, isShowButton,textButtonAgregarSeleccionados)
+        BotonAgregarSeleccionados(
+            onClickAgregarSeleccionados,
+            isShowButton,
+            textButtonAgregarSeleccionados
+        )
     }
 
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ItemDireccion(ubicacion: Marcador,
-                  onClickNavegarA: () -> Unit,
-                  onUbicacionSelected:()-> Unit,
-                  onUbicacionUnSelected: () -> Unit) {
+fun ItemDireccion(
+    ubicacion: Marcador,
+    onClickNavegarA: () -> Unit,
+    onUbicacionSelected: () -> Unit,
+    onUbicacionUnSelected: () -> Unit
+) {
 
     val isSelected = rememberSaveable { mutableStateOf(false) }
 
@@ -333,7 +349,7 @@ fun ItemDireccion(ubicacion: Marcador,
         onClick = {
             isSelected.value = !isSelected.value
             if (isSelected.value) {
-               onUbicacionSelected()
+                onUbicacionSelected()
             } else {
                 onUbicacionUnSelected()
             }
@@ -364,7 +380,8 @@ fun ItemDireccion(ubicacion: Marcador,
 
             IconButton(
                 onClick = {
-                   onClickNavegarA()},
+                    onClickNavegarA()
+                },
             ) {
                 Icon(
                     Icons.Default.LocationOn,
@@ -386,14 +403,14 @@ fun TabContactosDirecciones(
     onClickAgregarSeleccionados: () -> Unit,
     onClickLlamar: (contacto: Contact) -> Unit,
     textButtonAgregarSeleccionados: String,
-    onContactSelected: (contact:Contact) -> Unit,
-    onContactUnSelected:(contact:Contact)->Unit,
+    onContactSelected: (contact: Contact) -> Unit,
+    onContactUnSelected: (contact: Contact) -> Unit,
 
-    ubicaciones:List<Marcador>,
+    ubicaciones: List<Marcador>,
     onUbicacionSelected: (ubicacion: Marcador) -> Unit,
     onUbicacionUnSelected: (ubicacion: Marcador) -> Unit,
     onClickNavegarA: (ubicacion: Marcador) -> Unit,
-    onClickTab:(tab:Int)->Unit
+    onClickTab: (tab: Int) -> Unit
 ) {
 
     var tabIndex by remember { mutableStateOf(tabParametro) }
@@ -408,9 +425,10 @@ fun TabContactosDirecciones(
             tabs.forEachIndexed { index, title ->
                 Tab(
                     selected = tabIndex == index,
-                    onClick = { tabIndex = index
-                              onClickTab(tabIndex)
-                              },
+                    onClick = {
+                        tabIndex = index
+                        onClickTab(tabIndex)
+                    },
                     text = {
                         Text(
                             text = title,
@@ -447,7 +465,8 @@ fun TabContactosDirecciones(
                     onClickNavegarA,
                     textButtonAgregarSeleccionados,
                     onUbicacionSelected,
-                    onUbicacionUnSelected)
+                    onUbicacionUnSelected
+                )
             }
         }
     }

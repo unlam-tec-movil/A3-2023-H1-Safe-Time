@@ -108,7 +108,7 @@ class MainActivity : ComponentActivity() {
         val cursor: Cursor? = contentResolver.query(uri, null, null, null, null)
 
         if (cursor != null) {
-            Log.i("CONTACT_PROVIDER_DEMO", "TOTAL # of contacts ::: " + cursor.count.toString())
+            Log.i("CONTACT_PROVIDER_DEMO", "TOTAL of contacts " + cursor.count.toString())
             if (cursor.count > 0) {
                 while (cursor.moveToNext()) {
                     val contactName =
