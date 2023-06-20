@@ -1,13 +1,15 @@
 package ar.edu.unlam.mobile2.pantallaHome.data
 
+
 import ar.edu.unlam.mobile2.R
 import ar.edu.unlam.mobile2.pantallaHome.data.model.Contact
 import javax.inject.Inject
 
 class ContactRepository @Inject constructor() {
+
     companion object ContactDataProvider {
 
-        var ubicaciones = listOf(
+        var contacts = listOf(
             Contact(
                 "Bruno Mendez",
                 "+549113017809",
@@ -89,7 +91,7 @@ class ContactRepository @Inject constructor() {
     }
 
     fun getContactos(): List<Contact> {
-        return ubicaciones
+        return contacts
     }
 
     fun getContactosEmergenciaList(): MutableList<Contact> {

@@ -1,27 +1,18 @@
 package ar.edu.unlam.mobile2.pantallaHome.ui.viewmodel
 
-import android.Manifest
-import android.app.Activity
-import android.content.Context
-import android.content.pm.PackageManager
-import android.location.Location
-import android.util.Log
-import android.widget.Toast
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import ar.edu.unlam.mobile2.pantallaHome.data.ContactRepository
 import ar.edu.unlam.mobile2.pantallaHome.data.model.Contact
+import ar.edu.unlam.mobile2.pantallaListaDeContactos.ContactsFromPhone
 import ar.edu.unlam.mobile2.pantallaMapa.data.repository.Marcador
 import ar.edu.unlam.mobile2.pantallaMapa.data.repository.MarcadorRepository
 import ar.edu.unlam.mobile2.pantallaMapa.domain.RouteServices
-import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.maps.model.LatLng
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -31,11 +22,11 @@ import javax.inject.Inject
 @HiltViewModel
 class HomeViewModel @Inject constructor(
 
-    private val contactRepository :ContactRepository,
-    private val ubicacionRepository : MarcadorRepository,
+    private val contactRepository: ContactRepository,
+    private val ubicacionRepository: MarcadorRepository,
     private val routeServices: RouteServices
 
-):ViewModel() {
+) : ViewModel() {
 
 
     private val _contactos = MutableLiveData(emptyList<Contact>())
@@ -55,6 +46,10 @@ class HomeViewModel @Inject constructor(
 
     val selectedContacts = MutableStateFlow<List<Contact>>(emptyList())
     val selectedAddresses = MutableStateFlow<List<Marcador>>(emptyList())
+
+
+    private val _contactosFromPhone = MutableLiveData(emptyList<ContactsFromPhone>())
+    val contactosFromPhone: LiveData<List<ContactsFromPhone>> = _contactosFromPhone
 
 
     var infoQr by mutableStateOf("DEBE LLENAR EL FORMULARIO")
@@ -166,27 +161,35 @@ class HomeViewModel @Inject constructor(
 
     }
 
+    fun setContactsFromPhone(name : String, number: String) {
+
+        val contacto = ContactsFromPhone(name, number)
+
+        _contactosFromPhone.value = contactosFromPhone.value?.plus(contacto)
+
+    }
+
 
     private val _isLocationPermissionGranted = MutableLiveData(false)
     val isLocationPermissionGranted: LiveData<Boolean> = _isLocationPermissionGranted
 
-  /*  fun onRequestLocationPermissions(context: Context) {
-        val activity = MainActivity()
-        val locationPermission = Manifest.permission.ACCESS_FINE_LOCATION
-        val isLocationPermissionGranted = ContextCompat.checkSelfPermission(
-            context,
-            locationPermission
-        ) == PackageManager.PERMISSION_GRANTED
+    /*  fun onRequestLocationPermissions(context: Context) {
+          val activity = MainActivity()
+          val locationPermission = Manifest.permission.ACCESS_FINE_LOCATION
+          val isLocationPermissionGranted = ContextCompat.checkSelfPermission(
+              context,
+              locationPermission
+          ) == PackageManager.PERMISSION_GRANTED
 
-        if (isLocationPermissionGranted) {
-            _isLocationPermissionGranted.value = true
-            activity.getCurrentLocation()
-        } else {
-            // Si los permisos no están concedidos, puedes implementar lógica adicional aquí
-            // como solicitar los permisos al usuario o mostrar un mensaje
-            activity.requestLocationPermissions()
-        }
+          if (isLocationPermissionGranted) {
+              _isLocationPermissionGranted.value = true
+              activity.getCurrentLocation()
+          } else {
+              // Si los permisos no están concedidos, puedes implementar lógica adicional aquí
+              // como solicitar los permisos al usuario o mostrar un mensaje
+              activity.requestLocationPermissions()
+          }
 
 
-    }¨*/
+      }¨*/
 }

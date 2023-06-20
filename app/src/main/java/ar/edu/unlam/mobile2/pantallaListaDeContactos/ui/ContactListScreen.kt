@@ -65,13 +65,13 @@ fun ContactListScreen(navController: NavController, viewModel: HomeViewModel, ta
     val ubicacionList by viewModel.ubicacionesRapidas.observeAsState(initial = emptyList())
     val isShowButton by viewModel.isButtomShow.observeAsState(initial = false)
     val context = LocalContext.current
-    val intent = Intent(Intent.ACTION_DIAL)
+    val actionDialIntent = Intent(Intent.ACTION_DIAL)
 
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
     ) { isGranted ->
         if (isGranted) {
-            context.startActivity(intent)
+            context.startActivity(actionDialIntent)
         }
     }
 
@@ -102,13 +102,13 @@ fun ContactListScreen(navController: NavController, viewModel: HomeViewModel, ta
 
                     onClickLlamar= {
 
-                        intent.data = Uri.parse("tel:${it.telefono}")
+                        actionDialIntent.data = Uri.parse("tel:${it.telefono}")
                         if (ContextCompat.checkSelfPermission(
                                 context,
                                 Manifest.permission.CALL_PHONE
                             ) == PackageManager.PERMISSION_GRANTED
                         ) {
-                            context.startActivity(Intent.createChooser(intent, "Llamar"))
+                            context.startActivity(Intent.createChooser(actionDialIntent, "Llamar"))
                         } else {
                             launcher.launch(Manifest.permission.CALL_PHONE)
                         }

@@ -2,9 +2,14 @@ package ar.edu.unlam.mobile2
 
 
 import android.Manifest
+import android.annotation.SuppressLint
+import android.content.ContentResolver
 import android.content.pm.PackageManager
+import android.database.Cursor
 import android.location.Location
+import android.net.Uri
 import android.os.Bundle
+import android.provider.ContactsContract
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -39,6 +44,7 @@ class MainActivity : ComponentActivity() {
                 }
             }
             requestLocationPermissions()
+            requestContactPermissions()
         }
     }
 
@@ -49,7 +55,7 @@ class MainActivity : ComponentActivity() {
         grantResults: IntArray
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode == MainActivity.REQUEST_LOCATION_PERMISSION) {
+        if (requestCode == REQUEST_LOCATION_PERMISSION) {
             if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 // Permisos de ubicación concedidos
                 getCurrentLocation()
@@ -60,7 +66,7 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    fun requestLocationPermissions() {
+    private fun requestLocationPermissions() {
         val locationPermission = Manifest.permission.ACCESS_FINE_LOCATION
         val isLocationPermissionGranted =
             ContextCompat.checkSelfPermission(this, locationPermission) ==
@@ -72,12 +78,60 @@ class MainActivity : ComponentActivity() {
             ActivityCompat.requestPermissions(
                 this,
                 arrayOf(locationPermission),
-                MainActivity.REQUEST_LOCATION_PERMISSION
+                REQUEST_LOCATION_PERMISSION
             )
         }
     }
 
-    fun getCurrentLocation() {
+    private fun requestContactPermissions() {
+        val contactPermission = Manifest.permission.READ_CONTACTS
+        val isContactPermissionGranted =
+            ContextCompat.checkSelfPermission(this, contactPermission) ==
+                    PackageManager.PERMISSION_GRANTED
+
+        if (isContactPermissionGranted) {
+            getContactsPhone()
+        } else {
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf(contactPermission),
+                REQUEST_CONTACTS_PERMISSION
+            )
+        }
+    }
+
+    @SuppressLint("Range", "Recycle")
+    fun getContactsPhone() {
+
+        val contentResolver: ContentResolver = contentResolver
+        val uri: Uri = ContactsContract.CommonDataKinds.Phone.CONTENT_URI
+        val cursor: Cursor? = contentResolver.query(uri, null, null, null, null)
+
+        if (cursor != null) {
+            Log.i("CONTACT_PROVIDER_DEMO", "TOTAL # of contacts ::: " + cursor.count.toString())
+            if (cursor.count > 0) {
+                while (cursor.moveToNext()) {
+                    val contactName =
+                        cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME))
+                    val contactNumber =
+                        cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER))
+
+                    viewModel.setContactsFromPhone(contactName, contactNumber)
+                    Log.i(
+                        "CONTACT_PROVIDER_DEMO",
+                        "Name:$contactName, Numero: $contactNumber"
+                    )
+                }
+
+            }
+        } else {
+            Toast.makeText(this, "NO SE ENCONTRARON CONTACTOS", Toast.LENGTH_SHORT).show()
+        }
+
+
+    }
+
+    private fun getCurrentLocation() {
         if (ActivityCompat.checkSelfPermission(
                 this,
                 Manifest.permission.ACCESS_FINE_LOCATION
@@ -92,7 +146,7 @@ class MainActivity : ComponentActivity() {
                     Manifest.permission.ACCESS_FINE_LOCATION,
                     Manifest.permission.ACCESS_COARSE_LOCATION
                 ),
-                MainActivity.REQUEST_LOCATION_PERMISSION
+                REQUEST_LOCATION_PERMISSION
             )
             return
         }
@@ -118,6 +172,7 @@ class MainActivity : ComponentActivity() {
 
     companion object {
         private const val REQUEST_LOCATION_PERMISSION = 123
+        private const val REQUEST_CONTACTS_PERMISSION = 0
     }
 
     override fun onResume() {
