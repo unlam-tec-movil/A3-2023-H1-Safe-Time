@@ -7,9 +7,9 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import ar.edu.unlam.mobile2.pantallaHome.data.ContactRepository
-import ar.edu.unlam.mobile2.pantallaHome.data.model.Contact
-import ar.edu.unlam.mobile2.pantallaListaDeContactos.ContactsFromPhone
+import ar.edu.unlam.mobile2.data.room.ContactRepository
+import ar.edu.unlam.mobile2.data.room.model.ContactsFromPhone
+import ar.edu.unlam.mobile2.pantallaListaDeContactos.data.ContactosDeEmergencia
 import ar.edu.unlam.mobile2.pantallaMapa.data.repository.Marcador
 import ar.edu.unlam.mobile2.pantallaMapa.data.repository.MarcadorRepository
 import ar.edu.unlam.mobile2.pantallaMapa.domain.RouteServices
@@ -28,9 +28,6 @@ class HomeViewModel @Inject constructor(
 
 ) : ViewModel() {
 
-
-    private val _contactos = MutableLiveData(emptyList<Contact>())
-    val contactos: LiveData<List<Contact>> = _contactos
 
     private val _contactosEmergencia = MutableLiveData(emptyList<ContactsFromPhone>())
     val contactosEmergencia: LiveData<List<ContactsFromPhone>> = _contactosEmergencia
@@ -66,9 +63,10 @@ class HomeViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            _contactosEmergencia.value = contactRepository.getContactosEmergenciaList()
+
+            _contactosEmergencia.value = contactRepository.getAll()
             _ubicacionesRapidas.value = ubicacionRepository.getUbicacionesRapidas()
-            _contactos.value = contactRepository.getContactos()
+
         }
     }
 
@@ -110,11 +108,10 @@ class HomeViewModel @Inject constructor(
 
     }
 
-
     fun eliminarContactoEmergencia(contact: ContactsFromPhone) {
         viewModelScope.launch {
-            contactRepository.deleteContact(contact)
-            _contactosEmergencia.value = contactRepository.getContactosEmergenciaList()
+            contactRepository.delete(contact)
+            _contactosEmergencia.value = contactRepository.getAll()
         }
     }
 
@@ -127,8 +124,8 @@ class HomeViewModel @Inject constructor(
 
     fun agregarSeleccionados(valor: Int) {
         if (valor == 0) {
-            contactRepository.addContactEmergencia(selectedContacts.value)
-            _contactosEmergencia.value = contactRepository.getContactosEmergenciaList()
+            contactRepository.insertAll(selectedContacts.value)
+            _contactosEmergencia.value = contactRepository.getAll()
             selectedContacts.value = emptyList()
         } else {
             ubicacionRepository.agregarUbicacion(selectedAddresses.value)
@@ -169,23 +166,4 @@ class HomeViewModel @Inject constructor(
     private val _isLocationPermissionGranted = MutableLiveData(false)
     val isLocationPermissionGranted: LiveData<Boolean> = _isLocationPermissionGranted
 
-    /*  fun onRequestLocationPermissions(context: Context) {
-          val activity = MainActivity()
-          val locationPermission = Manifest.permission.ACCESS_FINE_LOCATION
-          val isLocationPermissionGranted = ContextCompat.checkSelfPermission(
-              context,
-              locationPermission
-          ) == PackageManager.PERMISSION_GRANTED
-
-          if (isLocationPermissionGranted) {
-              _isLocationPermissionGranted.value = true
-              activity.getCurrentLocation()
-          } else {
-              // Si los permisos no están concedidos, puedes implementar lógica adicional aquí
-              // como solicitar los permisos al usuario o mostrar un mensaje
-              activity.requestLocationPermissions()
-          }
-
-
-      }¨*/
 }

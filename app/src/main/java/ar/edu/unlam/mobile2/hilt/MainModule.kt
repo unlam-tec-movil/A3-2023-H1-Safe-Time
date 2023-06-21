@@ -1,9 +1,13 @@
 package ar.edu.unlam.mobile2.hilt
 
+import android.annotation.SuppressLint
 import android.content.Context
 import androidx.room.Room
+import ar.edu.unlam.mobile2.data.room.local.ContactDatabase
+import ar.edu.unlam.mobile2.data.room.local.ContactFavDAO
 import ar.edu.unlam.mobile2.data.room.local.MarcadorDAO
 import ar.edu.unlam.mobile2.data.room.local.MarcadorDatabase
+import ar.edu.unlam.mobile2.data.room.model.ContactsFromPhone
 import coil.ImageLoader
 import dagger.Module
 import dagger.Provides
@@ -16,7 +20,6 @@ import retrofit2.converter.gson.GsonConverterFactory
 import java.security.SecureRandom
 import java.security.cert.X509Certificate
 import javax.inject.Singleton
-import javax.net.ssl.HostnameVerifier
 import javax.net.ssl.SSLContext
 import javax.net.ssl.TrustManager
 import javax.net.ssl.X509TrustManager
@@ -29,11 +32,31 @@ object MainModule {
     @Provides
     @Singleton
     fun providesMarcadoresDatabase(@ApplicationContext app: Context) =
-        Room.databaseBuilder(app, MarcadorDatabase::class.java, "marcadores_db").build()
+        Room.databaseBuilder(app, MarcadorDatabase::class.java, "marcadores_db")
+            .allowMainThreadQueries()
+            .fallbackToDestructiveMigration()
+            .build()
 
     @Provides
     @Singleton
-    fun providesMarcadoresDAO(marcadorDatabase: MarcadorDatabase) : MarcadorDAO = marcadorDatabase.marcadorDao()
+    fun providesMarcadoresDAO(marcadorDatabase: MarcadorDatabase): MarcadorDAO =
+        marcadorDatabase.marcadorDao()
+
+    @Provides
+    @Singleton
+    fun providesContactDatabase(@ApplicationContext app: Context) =
+        Room.databaseBuilder(app, ContactDatabase::class.java, "contactos_db")
+            .allowMainThreadQueries()
+            .fallbackToDestructiveMigration()
+            .build()
+
+    @Provides
+    @Singleton
+    fun providesContactosDAO(contactDatabase: ContactDatabase): ContactFavDAO =
+        contactDatabase.contactosDAO()
+
+    @Provides
+    fun providesContactEntity() = ContactsFromPhone()
 
     @Singleton
     @Provides
@@ -54,7 +77,8 @@ object MainModule {
     @Singleton
     @Provides
     fun OkHttpClient.Builder.ignoreAllSSLErrors(): OkHttpClient.Builder {
-        val naiveTrustManager = object : X509TrustManager {
+        val naiveTrustManager = @SuppressLint("CustomX509TrustManager")
+        object : X509TrustManager {
             override fun getAcceptedIssuers(): Array<X509Certificate> = arrayOf()
             override fun checkClientTrusted(certs: Array<X509Certificate>, authType: String) = Unit
             override fun checkServerTrusted(certs: Array<X509Certificate>, authType: String) = Unit
@@ -66,7 +90,7 @@ object MainModule {
         }.socketFactory
 
         sslSocketFactory(insecureSocketFactory, naiveTrustManager)
-        hostnameVerifier(HostnameVerifier { _, _ -> true })
+        hostnameVerifier { _, _ -> true }
         return this
     }
 
