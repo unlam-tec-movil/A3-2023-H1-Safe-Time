@@ -1,31 +1,19 @@
 package ar.edu.unlam.mobile2.pantallaHome.ui.viewmodel
 
-import android.Manifest
-import android.app.Activity
-import android.content.Context
-import android.content.pm.PackageManager
-import android.location.Location
-import android.util.Log
-import android.widget.Toast
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import ar.edu.unlam.mobile2.pantallaHome.data.ContactRepository
-import ar.edu.unlam.mobile2.pantallaHome.data.model.Contact
-import ar.edu.unlam.mobile2.pantallaMapa.data.model.RouteModel
+import ar.edu.unlam.mobile2.data.room.ContactRepository
+import ar.edu.unlam.mobile2.data.room.model.ContactsFromPhone
+import ar.edu.unlam.mobile2.pantallaListaDeContactos.data.ContactosDeEmergencia
 import ar.edu.unlam.mobile2.pantallaMapa.data.repository.Marcador
 import ar.edu.unlam.mobile2.pantallaMapa.data.repository.MarcadorRepository
 import ar.edu.unlam.mobile2.pantallaMapa.domain.RouteServices
-import ar.edu.unlam.mobile2.ui.MainActivity
-import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.PolylineOptions
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
@@ -34,18 +22,15 @@ import javax.inject.Inject
 @HiltViewModel
 class HomeViewModel @Inject constructor(
 
-    private val contactRepository :ContactRepository,
-    private val ubicacionRepository : MarcadorRepository,
+    private val contactRepository: ContactRepository,
+    private val ubicacionRepository: MarcadorRepository,
     private val routeServices: RouteServices
 
-):ViewModel() {
+) : ViewModel() {
 
 
-    private val _contactos = MutableLiveData(emptyList<Contact>())
-    val contactos: LiveData<List<Contact>> = _contactos
-
-    private val _contactosEmergencia = MutableLiveData(emptyList<Contact>())
-    val contactosEmergencia: LiveData<List<Contact>> = _contactosEmergencia
+    private val _contactosEmergencia = MutableLiveData(emptyList<ContactsFromPhone>())
+    val contactosEmergencia: LiveData<List<ContactsFromPhone>> = _contactosEmergencia
 
     private val _ubicacionesRapidas = MutableLiveData(emptyList<Marcador>())
     val ubicacionesRapidas: LiveData<List<Marcador>> = _ubicacionesRapidas
@@ -56,8 +41,12 @@ class HomeViewModel @Inject constructor(
     private var _currentLocation = MutableLiveData<LatLng?>()
     val currentLocation: LiveData<LatLng?> = _currentLocation
 
-    val selectedContacts = MutableStateFlow<List<Contact>>(emptyList())
+    val selectedContacts = MutableStateFlow<List<ContactsFromPhone>>(emptyList())
     val selectedAddresses = MutableStateFlow<List<Marcador>>(emptyList())
+
+
+    private val _contactosFromPhone = MutableLiveData(emptyList<ContactsFromPhone>())
+    val contactosFromPhone: LiveData<List<ContactsFromPhone>> = _contactosFromPhone
 
 
     var infoQr by mutableStateOf("DEBE LLENAR EL FORMULARIO")
@@ -69,18 +58,15 @@ class HomeViewModel @Inject constructor(
     var isButtomShow = MutableLiveData(false)
 
     var textButtomAgregarSeleccionados = MutableLiveData("")
-
-    private val _polylineOptions = MutableLiveData<PolylineOptions?>()
-    val polylineOptions : LiveData<PolylineOptions?> = _polylineOptions
-
     var isDialogShown = MutableLiveData(false)
         private set
 
     init {
         viewModelScope.launch {
-            _contactosEmergencia.value = contactRepository.getContactosEmergenciaList()
+
+            _contactosEmergencia.value = contactRepository.getAll()
             _ubicacionesRapidas.value = ubicacionRepository.getUbicacionesRapidas()
-            _contactos.value = contactRepository.getContactos()
+
         }
     }
 
@@ -93,14 +79,14 @@ class HomeViewModel @Inject constructor(
         isDialogShown.value = false
     }
 
-    fun contactoSeleccionado(contacto: Contact) {
+    fun contactoSeleccionado(contacto: ContactsFromPhone) {
         selectedContacts.value = selectedContacts.value + contacto
         textButtomAgregarSeleccionados.value = "Agregar a contactos de emergencia"
         isButtomShow.value = true
 
     }
 
-    fun contactoDesSeleccionado(contacto: Contact) {
+    fun contactoDesSeleccionado(contacto: ContactsFromPhone) {
         selectedContacts.value = selectedContacts.value - contacto
         if (selectedContacts.value.isEmpty()) {
             isButtomShow.value = false
@@ -122,11 +108,10 @@ class HomeViewModel @Inject constructor(
 
     }
 
-
-    fun eliminarContactoEmergencia(contact: Contact) {
+    fun eliminarContactoEmergencia(contact: ContactsFromPhone) {
         viewModelScope.launch {
-            contactRepository.deleteContact(contact)
-            _contactosEmergencia.value = contactRepository.getContactosEmergenciaList()
+            contactRepository.delete(contact)
+            _contactosEmergencia.value = contactRepository.getAll()
         }
     }
 
@@ -139,8 +124,8 @@ class HomeViewModel @Inject constructor(
 
     fun agregarSeleccionados(valor: Int) {
         if (valor == 0) {
-            contactRepository.addContactEmergencia(selectedContacts.value)
-            _contactosEmergencia.value = contactRepository.getContactosEmergenciaList()
+            contactRepository.insertAll(selectedContacts.value)
+            _contactosEmergencia.value = contactRepository.getAll()
             selectedContacts.value = emptyList()
         } else {
             ubicacionRepository.agregarUbicacion(selectedAddresses.value)
@@ -184,34 +169,15 @@ class HomeViewModel @Inject constructor(
 
     fun setCurrentLocation(result: LatLng) {
         _currentLocation.value = result
-
     }
 
-    fun permissionGranted() {
-        _isLocationPermissionGranted.value=true
+    fun setContactsFromPhone(name: String, number: String) {
+
+        _contactosFromPhone.value = contactosFromPhone.value?.plus(ContactsFromPhone(name, number))
     }
 
 
     private val _isLocationPermissionGranted = MutableLiveData(false)
     val isLocationPermissionGranted: LiveData<Boolean> = _isLocationPermissionGranted
 
-  /*  fun onRequestLocationPermissions(context: Context) {
-        val activity = MainActivity()
-        val locationPermission = Manifest.permission.ACCESS_FINE_LOCATION
-        val isLocationPermissionGranted = ContextCompat.checkSelfPermission(
-            context,
-            locationPermission
-        ) == PackageManager.PERMISSION_GRANTED
-
-        if (isLocationPermissionGranted) {
-            _isLocationPermissionGranted.value = true
-            activity.getCurrentLocation()
-        } else {
-            // Si los permisos no están concedidos, puedes implementar lógica adicional aquí
-            // como solicitar los permisos al usuario o mostrar un mensaje
-            activity.requestLocationPermissions()
-        }
-
-
-    }¨*/
 }

@@ -1,4 +1,4 @@
-package ar.edu.unlam.mobile2
+package ar.edu.unlam.mobile2.pantallaHome.ui
 
 import android.Manifest
 import android.content.Intent
@@ -47,7 +47,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -67,8 +66,8 @@ import androidx.core.content.ContextCompat
 import androidx.navigation.NavController
 import ar.edu.unlam.mobile2.dialogQR.QRDialog
 import ar.edu.unlam.mobile2.navigation.AppScreens
-import ar.edu.unlam.mobile2.pantallaHome.data.model.Contact
 import ar.edu.unlam.mobile2.pantallaHome.ui.viewmodel.HomeViewModel
+import ar.edu.unlam.mobile2.data.room.model.ContactsFromPhone
 import ar.edu.unlam.mobile2.pantallaMapa.data.repository.Marcador
 import ar.edu.unlam.mobile2.pantallaMapa.ui.Bottombar
 import ar.edu.unlam.mobile2.pantallaMapa.ui.Toolbar
@@ -89,6 +88,7 @@ fun HomeScreen(navController: NavController, viewModel: HomeViewModel) {
             contentAlignment = Alignment.Center
         ) {
             ContentHome(navController, viewModel)
+
         }
     }
 }
@@ -113,7 +113,6 @@ fun ContentHome(navController: NavController, viewModel: HomeViewModel) {
             context.startActivity(intent)
         }
     }
-
 
     LazyColumn(
         verticalArrangement = Arrangement.spacedBy(15.dp),
@@ -143,8 +142,8 @@ fun ContentHome(navController: NavController, viewModel: HomeViewModel) {
                     } else {
                         launcher.launch(Manifest.permission.CALL_PHONE)
                     }
-                },
-                onClickEliminarContacto = { viewModel.eliminarContactoEmergencia(it) })
+                }
+            ) { viewModel.eliminarContactoEmergencia(it) }
         }
 
         item {
@@ -173,9 +172,9 @@ fun ContentHome(navController: NavController, viewModel: HomeViewModel) {
 
         item {
             BotonEmergencia(
-                onClickEmergencia = {viewModel.onEmergencyClick()},
+                onClickEmergencia = { viewModel.onEmergencyClick() },
                 isDialogShown = isDialogShow,
-                onDismissDialog = { viewModel.onDismissDialog()},
+                onDismissDialog = { viewModel.onDismissDialog() },
                 infoQR = viewModel.infoQr
             )
         }
@@ -186,9 +185,9 @@ fun ContentHome(navController: NavController, viewModel: HomeViewModel) {
 
 @Composable
 fun BotonEmergencia(
-    onClickEmergencia:()->Unit,
-    isDialogShown:Boolean,
-    onDismissDialog:()-> Unit,
+    onClickEmergencia: () -> Unit,
+    isDialogShown: Boolean,
+    onDismissDialog: () -> Unit,
     infoQR: String,
 ) {
 
@@ -212,8 +211,6 @@ fun BotonEmergencia(
 }
 
 
-
-
 @Composable
 fun TextoContactos() {
     Text(
@@ -233,10 +230,10 @@ fun TextoContactos() {
 
 @Composable
 fun FilaContactos(
-    contacts: List<Contact>,
+    contacts: List<ContactsFromPhone>,
     onClickAgregar: () -> Unit,
     onClickLlamar: (numero: String) -> Unit,
-    onClickEliminarContacto: (contacto: Contact) -> Unit
+    onClickEliminarContacto: (contacto: ContactsFromPhone) -> Unit
 ) {
     LazyRow(
         modifier = Modifier
@@ -249,9 +246,8 @@ fun FilaContactos(
         items(contacts) {
             ContactItem(
                 contact = it,
-                onClickLlamar = { onClickLlamar(it.telefono) },
-                onClickEliminarContacto = { onClickEliminarContacto(it) }
-            )
+                onClickLlamar = { onClickLlamar(it.number) }
+            ) { onClickEliminarContacto(it) }
         }
 
         item {
@@ -276,7 +272,7 @@ fun FilaContactos(
 
 @Composable
 fun ContactItem(
-    contact: Contact,
+    contact: ContactsFromPhone,
     onClickLlamar: () -> Unit,
     onClickEliminarContacto: () -> Unit
 ) {
@@ -298,7 +294,7 @@ fun ContactItem(
 
                     Image(
                         painter = painterResource(contact.imagen),
-                        contentDescription = contact.nombre,
+                        contentDescription = contact.name,
                         contentScale = ContentScale.Crop,
                         modifier = Modifier
                             .size(64.dp)
@@ -310,14 +306,14 @@ fun ContactItem(
                     )
 
                     Text(
-                        text = contact.nombre,
+                        text = contact.name,
                         fontWeight = FontWeight.Bold,
                         color = Color.White,
                         modifier = Modifier.align(Alignment.CenterHorizontally)
                     )
 
                     Text(
-                        text = contact.telefono,
+                        text = contact.number,
                         color = Color.White,
                         modifier = Modifier
                             .padding(4.dp)

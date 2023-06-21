@@ -1,87 +1,53 @@
 package ar.edu.unlam.mobile2.dialogQR
 
-import androidx.compose.foundation.Canvas
+import android.graphics.Bitmap
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
-import androidx.compose.ui.graphics.nativeCanvas
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.google.zxing.BarcodeFormat
+import com.google.zxing.EncodeHintType
+import com.google.zxing.WriterException
 import com.google.zxing.qrcode.QRCodeWriter
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
-
+@Preview
 @Composable
-fun QRDialog(info: String, onDismiss: () -> Unit) {
-    val qrCode = QRCodeWriter().encode(info, BarcodeFormat.QR_CODE, 512, 512)
+fun QRDialog(info: String = "yama", onDismiss: () -> Unit = {}) {
     AlertDialog(
         onDismissRequest = onDismiss,
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(IntrinsicSize.Max),
         title = { Text(text = "Código QR") },
         text = {
-            Column(
-                modifier = Modifier
-                    .padding(16.dp)
-                    .fillMaxWidth()
-                    .heightIn(max = 512.dp)
-                    .wrapContentHeight(Alignment.CenterVertically),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
+            Column() {
                 Text(text = "Escanea el siguiente código QR para ver la información:")
-                Canvas(
+                Image(
+                    painter = rememberQrBitmapPainter(info),
+                    contentDescription = "Info QR",
+                    contentScale = ContentScale.FillBounds,
                     modifier = Modifier
-                        .padding(16.dp)
-                        .fillMaxWidth()
-                        .aspectRatio(1f)
-                        .padding(bottom = 30.dp)
-                ) {
-                    drawIntoCanvas { canvas ->
-                        val paint = android.graphics.Paint().apply {
-                            color = Color.Black.toArgb()
-                        }
-                        qrCode.run {
-                            val width = width
-                            val height = height
-                            val pixels = IntArray(width * height)
-                            for (y in 0 until height) {
-                                val offset = y * width
-                                for (x in 0 until width) {
-                                    pixels[offset + x] = if (get(x, y)) {
-                                        Color.Black.toArgb()
-                                    } else {
-                                        Color.White.toArgb()
-                                    }
-                                }
-                            }
-                            canvas.nativeCanvas.drawBitmap(
-                                pixels,
-                                0,
-                                width,
-                                0f,
-                                0f,
-                                width,
-                                height,
-                                false,
-                                paint
-                            )
-                        }
-                    }
-                }
+                        .size(400.dp)
+                        .aspectRatio(1f),
+                )
             }
         },
         confirmButton = {
@@ -90,4 +56,73 @@ fun QRDialog(info: String, onDismiss: () -> Unit) {
             }
         }
     )
+}
+
+@Preview
+@Composable
+fun rememberQrBitmapPainter(
+    content: String = "yama",
+    size: Dp = 150.dp,
+    padding: Dp = 0.dp
+): BitmapPainter {
+
+    val density = LocalDensity.current
+    val sizePx = with(density) { size.roundToPx() }
+    val paddingPx = with(density) { padding.roundToPx() }
+
+
+    var bitmap by remember(content) {
+        mutableStateOf<Bitmap?>(null)
+    }
+
+    LaunchedEffect(bitmap) {
+        if (bitmap != null) return@LaunchedEffect
+
+        launch(Dispatchers.IO) {
+            val qrCodeWriter = QRCodeWriter()
+
+            val encodeHints = mutableMapOf<EncodeHintType, Any?>()
+                .apply {
+                    this[EncodeHintType.MARGIN] = paddingPx
+                }
+
+            val bitmapMatrix = try {
+                qrCodeWriter.encode(
+                    content, BarcodeFormat.QR_CODE,
+                    sizePx, sizePx, encodeHints
+                )
+            } catch (ex: WriterException) {
+                null
+            }
+
+            val matrixWidth = bitmapMatrix?.width ?: sizePx
+            val matrixHeight = bitmapMatrix?.height ?: sizePx
+
+            val newBitmap = Bitmap.createBitmap(
+                bitmapMatrix?.width ?: sizePx,
+                bitmapMatrix?.height ?: sizePx,
+                Bitmap.Config.ARGB_8888,
+            )
+
+            for (x in 0 until matrixWidth) {
+                for (y in 0 until matrixHeight) {
+                    val shouldColorPixel = bitmapMatrix?.get(x, y) ?: false
+                    val pixelColor = if (shouldColorPixel) Color.Black else Color.White
+
+                    newBitmap.setPixel(x, y, pixelColor.toArgb())
+                }
+            }
+
+            bitmap = newBitmap
+        }
+    }
+
+    return remember(bitmap) {
+        val currentBitmap = bitmap ?: Bitmap.createBitmap(
+            sizePx, sizePx,
+            Bitmap.Config.ARGB_8888,
+        ).apply { eraseColor(Color.Transparent.toArgb()) }
+
+        BitmapPainter(currentBitmap.asImageBitmap())
+    }
 }

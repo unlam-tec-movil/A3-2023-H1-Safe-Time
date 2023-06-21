@@ -3,8 +3,7 @@ package ar.edu.unlam.mobile2.pantallaMapa.data.repository
 import com.google.android.gms.maps.model.LatLng
 import javax.inject.Inject
 
-data class Marcador(val nombre: String, val latLng: LatLng) {
-}
+data class Marcador(val nombre: String, val latLng: LatLng)
 
 class MarcadorRepository @Inject constructor() {
 

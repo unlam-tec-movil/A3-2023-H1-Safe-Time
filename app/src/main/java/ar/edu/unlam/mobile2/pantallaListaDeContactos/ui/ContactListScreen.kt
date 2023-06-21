@@ -51,8 +51,8 @@ import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import androidx.navigation.NavController
 import ar.edu.unlam.mobile2.navigation.AppScreens
-import ar.edu.unlam.mobile2.pantallaHome.data.model.Contact
 import ar.edu.unlam.mobile2.pantallaHome.ui.viewmodel.HomeViewModel
+import ar.edu.unlam.mobile2.data.room.model.ContactsFromPhone
 import ar.edu.unlam.mobile2.pantallaMapa.data.repository.Marcador
 import ar.edu.unlam.mobile2.pantallaMapa.ui.Bottombar
 import ar.edu.unlam.mobile2.pantallaMapa.ui.Toolbar
@@ -61,25 +61,26 @@ import ar.edu.unlam.mobile2.pantallaMapa.ui.Toolbar
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ContactListScreen(navController: NavController, viewModel: HomeViewModel, tab: Int) {
-    val contactList by viewModel.contactos.observeAsState(initial = emptyList())
+    //val contactList by viewModel.contactos.observeAsState(initial = emptyList())
     val ubicacionList by viewModel.ubicacionesRapidas.observeAsState(initial = emptyList())
     val isShowButton by viewModel.isButtomShow.observeAsState(initial = false)
     val context = LocalContext.current
-    val intent = Intent(Intent.ACTION_DIAL)
+    val actionDialIntent = Intent(Intent.ACTION_DIAL)
+    val contactList by viewModel.contactosFromPhone.observeAsState(initial = emptyList())
+
 
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
     ) { isGranted ->
         if (isGranted) {
-            context.startActivity(intent)
+            context.startActivity(actionDialIntent)
         }
     }
-
-
     Scaffold(
         topBar = { Toolbar(navController) },
         bottomBar = { Bottombar(navController, viewModel) }
     ) {
+
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -93,46 +94,45 @@ fun ContactListScreen(navController: NavController, viewModel: HomeViewModel, ta
                 TabContactosDirecciones(
                     contactList,
                     tab,
-                    isShowButton ,
-                    onClickAgregarSeleccionados={
+                    isShowButton,
+                    onClickAgregarSeleccionados = {
                         viewModel.agregarSeleccionados(tab)
                         viewModel.limpiarSeleccionados()
                         navController.navigate(route = AppScreens.HomeScreen.route)
                     },
 
-                    onClickLlamar= {
+                    onClickLlamar = {
 
-                        intent.data = Uri.parse("tel:${it.telefono}")
+                        actionDialIntent.data = Uri.parse("tel:${it.number}")
                         if (ContextCompat.checkSelfPermission(
                                 context,
                                 Manifest.permission.CALL_PHONE
                             ) == PackageManager.PERMISSION_GRANTED
                         ) {
-                            context.startActivity(Intent.createChooser(intent, "Llamar"))
+                            context.startActivity(Intent.createChooser(actionDialIntent, "Llamar"))
                         } else {
                             launcher.launch(Manifest.permission.CALL_PHONE)
                         }
 
                     },
-                    textButtonAgregarSeleccionados= it1,
+                    textButtonAgregarSeleccionados = it1,
 
-                    onContactSelected = {viewModel.contactoSeleccionado(it)},
-                    onContactUnSelected = {viewModel.contactoDesSeleccionado(it)},
+                    onContactSelected = { viewModel.contactoSeleccionado(it) },
+                    onContactUnSelected = { viewModel.contactoDesSeleccionado(it) },
 
 
                     ubicacionList,
-                    onUbicacionSelected = {viewModel.ubicacionSeleccionada(it)},
-                    onUbicacionUnSelected = {viewModel.ubicacionDesSeleccionada(it)},
+                    onUbicacionSelected = { viewModel.ubicacionSeleccionada(it) },
+                    onUbicacionUnSelected = { viewModel.ubicacionDesSeleccionada(it) },
                     onClickNavegarA = {
                         viewModel.nuevaUbicacionSeleccionadaEnMapa(it)
                         navController.navigate(route = AppScreens.MapScreen.route)
-                    },
-                    onClickTab = {
-                        viewModel.limpiarSeleccionados()
                     }
 
 
-                )
+                ) {
+                    viewModel.limpiarSeleccionados()
+                }
             }
 
         }
@@ -141,16 +141,16 @@ fun ContactListScreen(navController: NavController, viewModel: HomeViewModel, ta
 
 @Composable
 fun ContactListView(
-    contacts: List<Contact>,
+    contacts: List<ContactsFromPhone>,
     isShowButton: Boolean,
     onClickAgregarSeleccionados: () -> Unit,
-    onClickLlamar: (contacto: Contact) -> Unit,
+    onClickLlamar: (contacto: ContactsFromPhone) -> Unit,
     textButtonAgregarSeleccionados: String,
-    onContactSelected: (contact:Contact) -> Unit,
-    onContactUnSelected: (contact:Contact) -> Unit,
+    onContactSelected: (contact: ContactsFromPhone) -> Unit,
+    onContactUnSelected: (contact: ContactsFromPhone) -> Unit,
 
 
-) {
+    ) {
 
     Box(modifier = Modifier.fillMaxSize()) {
         LazyColumn(
@@ -159,20 +159,27 @@ fun ContactListView(
             items(contacts) { contacto ->
                 ItemContacto(
                     contacto,
-                    onClickLlamar={onClickLlamar(contacto)},
-                    onContactSelected = { onContactSelected(contacto) },
-                    onContactUnSelected= {onContactUnSelected(contacto)}
-                )
+                    onClickLlamar = { onClickLlamar(contacto) },
+                    onContactSelected = { onContactSelected(contacto) }
+                ) { onContactUnSelected(contacto) }
             }
         }
 
-        BotonAgregarSeleccionados(onClickAgregarSeleccionados, isShowButton,textButtonAgregarSeleccionados)
+        BotonAgregarSeleccionados(
+            onClickAgregarSeleccionados,
+            isShowButton,
+            textButtonAgregarSeleccionados
+        )
     }
 }
 
 @SuppressLint("StateFlowValueCalledInComposition")
 @Composable
-fun BotonAgregarSeleccionados(onClickAgregarSeleccionados: ()->Unit,isShowButton: Boolean,textButtonAgregarSeleccionados: String ) {
+fun BotonAgregarSeleccionados(
+    onClickAgregarSeleccionados: () -> Unit,
+    isShowButton: Boolean,
+    textButtonAgregarSeleccionados: String
+) {
 
     Box(modifier = Modifier.fillMaxSize()) {
 
@@ -186,7 +193,7 @@ fun BotonAgregarSeleccionados(onClickAgregarSeleccionados: ()->Unit,isShowButton
                 backgroundColor = MaterialTheme.colorScheme.secondaryContainer,
 
                 onClick = {
-                   onClickAgregarSeleccionados()
+                    onClickAgregarSeleccionados()
                 },
                 modifier = Modifier
                     .align(Alignment.Center)
@@ -203,10 +210,11 @@ fun BotonAgregarSeleccionados(onClickAgregarSeleccionados: ()->Unit,isShowButton
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ItemContacto(contacto: Contact,
-                 onClickLlamar: () -> Unit,
-                 onContactSelected:()-> Unit,
-                 onContactUnSelected: () -> Unit
+fun ItemContacto(
+    contacto: ContactsFromPhone,
+    onClickLlamar: () -> Unit,
+    onContactSelected: () -> Unit,
+    onContactUnSelected: () -> Unit
 ) {
 
     val isSelected = rememberSaveable { mutableStateOf(false) }
@@ -228,7 +236,7 @@ fun ItemContacto(contacto: Contact,
             if (isSelected.value) {
                 onContactSelected()
             } else {
-              onContactUnSelected()
+                onContactUnSelected()
             }
 
         }
@@ -249,14 +257,14 @@ fun ItemContacto(contacto: Contact,
                     .weight(3f)
             ) {
                 Text(
-                    text = contacto.nombre,
+                    text = contacto.name,
                     fontSize = 22.sp,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onPrimaryContainer
 
                 )
                 Text(
-                    text = contacto.telefono,
+                    text = contacto.number,
                     fontSize = 18.sp,
                     fontWeight = FontWeight.SemiBold,
                     color = MaterialTheme.colorScheme.onPrimaryContainer
@@ -290,8 +298,6 @@ fun AdressListView(
     onUbicacionUnSelected: (ubicacion: Marcador) -> Unit
 
 
-
-
 ) {
 
     Box(modifier = Modifier.fillMaxSize()) {
@@ -299,23 +305,29 @@ fun AdressListView(
             items(ubicaciones) { adress ->
                 ItemDireccion(
                     ubicacion = adress,
-                    onClickNavegarA =  {onClickNavegarA(adress)},
-                    onUbicacionSelected = {onUbicacionSelected(adress)},
-                    onUbicacionUnSelected ={ onUbicacionUnSelected(adress)})
+                    onClickNavegarA = { onClickNavegarA(adress) },
+                    onUbicacionSelected = { onUbicacionSelected(adress) },
+                    onUbicacionUnSelected = { onUbicacionUnSelected(adress) })
             }
 
         }
-        BotonAgregarSeleccionados(onClickAgregarSeleccionados, isShowButton,textButtonAgregarSeleccionados)
+        BotonAgregarSeleccionados(
+            onClickAgregarSeleccionados,
+            isShowButton,
+            textButtonAgregarSeleccionados
+        )
     }
 
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ItemDireccion(ubicacion: Marcador,
-                  onClickNavegarA: () -> Unit,
-                  onUbicacionSelected:()-> Unit,
-                  onUbicacionUnSelected: () -> Unit) {
+fun ItemDireccion(
+    ubicacion: Marcador,
+    onClickNavegarA: () -> Unit,
+    onUbicacionSelected: () -> Unit,
+    onUbicacionUnSelected: () -> Unit
+) {
 
     val isSelected = rememberSaveable { mutableStateOf(false) }
 
@@ -333,7 +345,7 @@ fun ItemDireccion(ubicacion: Marcador,
         onClick = {
             isSelected.value = !isSelected.value
             if (isSelected.value) {
-               onUbicacionSelected()
+                onUbicacionSelected()
             } else {
                 onUbicacionUnSelected()
             }
@@ -364,7 +376,8 @@ fun ItemDireccion(ubicacion: Marcador,
 
             IconButton(
                 onClick = {
-                   onClickNavegarA()},
+                    onClickNavegarA()
+                },
             ) {
                 Icon(
                     Icons.Default.LocationOn,
@@ -380,20 +393,20 @@ fun ItemDireccion(ubicacion: Marcador,
 
 @Composable
 fun TabContactosDirecciones(
-    conctactList: List<Contact>,
+    conctactList: List<ContactsFromPhone>,
     tabParametro: Int = 0,
     isShowButton: Boolean,
     onClickAgregarSeleccionados: () -> Unit,
-    onClickLlamar: (contacto: Contact) -> Unit,
+    onClickLlamar: (contacto: ContactsFromPhone) -> Unit,
     textButtonAgregarSeleccionados: String,
-    onContactSelected: (contact:Contact) -> Unit,
-    onContactUnSelected:(contact:Contact)->Unit,
+    onContactSelected: (contact: ContactsFromPhone) -> Unit,
+    onContactUnSelected: (contact: ContactsFromPhone) -> Unit,
 
-    ubicaciones:List<Marcador>,
+    ubicaciones: List<Marcador>,
     onUbicacionSelected: (ubicacion: Marcador) -> Unit,
     onUbicacionUnSelected: (ubicacion: Marcador) -> Unit,
     onClickNavegarA: (ubicacion: Marcador) -> Unit,
-    onClickTab:(tab:Int)->Unit
+    onClickTab: (tab: Int) -> Unit
 ) {
 
     var tabIndex by remember { mutableStateOf(tabParametro) }
@@ -408,9 +421,10 @@ fun TabContactosDirecciones(
             tabs.forEachIndexed { index, title ->
                 Tab(
                     selected = tabIndex == index,
-                    onClick = { tabIndex = index
-                              onClickTab(tabIndex)
-                              },
+                    onClick = {
+                        tabIndex = index
+                        onClickTab(tabIndex)
+                    },
                     text = {
                         Text(
                             text = title,
@@ -447,7 +461,8 @@ fun TabContactosDirecciones(
                     onClickNavegarA,
                     textButtonAgregarSeleccionados,
                     onUbicacionSelected,
-                    onUbicacionUnSelected)
+                    onUbicacionUnSelected
+                )
             }
         }
     }
