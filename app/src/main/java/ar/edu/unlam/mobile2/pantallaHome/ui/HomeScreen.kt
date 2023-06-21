@@ -160,7 +160,6 @@ fun ContentHome(navController: NavController, viewModel: HomeViewModel) {
                 },
                 onClickIrMapa = {
                     viewModel.nuevaUbicacionSeleccionadaEnMapa(it)
-                    viewModel.createRoute()
                     navController.navigate(route = AppScreens.MapScreen.route)
                 },
                 onClickEliminarUbicacion = { viewModel.eliminarUbicacionRapida(it) }

@@ -1,6 +1,5 @@
 package ar.edu.unlam.mobile2.pantallaMapa.ui
 
-import android.app.Activity
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -65,10 +64,12 @@ import ar.edu.unlam.mobile2.pantallaHome.ui.viewmodel.HomeViewModel
 import ar.edu.unlam.mobile2.pantallaMapa.data.BottomNavItem
 import ar.edu.unlam.mobile2.pantallaMapa.data.repository.Marcador
 import ar.edu.unlam.mobile2.pantallaMapa.data.repository.MarcadorRepository
+import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.PolylineOptions
 import com.google.maps.android.compose.CameraPositionState
+import com.google.maps.android.compose.Circle
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.MapProperties
 import com.google.maps.android.compose.MapType
@@ -80,14 +81,13 @@ import com.google.maps.android.compose.Polyline
 
 @Composable
 fun PantallaMapa(navController: NavController, viewModel: HomeViewModel) {
-    val context = LocalContext.current as Activity
-    var permissionsGranted by remember { mutableStateOf(false) }
     val polylineOptions by viewModel.polylineOptions.observeAsState()
-    val currentLocation =LatLng(-34.730798,-58.719489)
+    val currentLocation by viewModel.currentLocation.observeAsState()
     val destino by viewModel.ubicacionMapa.observeAsState()
 
-ViewContainer(navController, viewModel, currentLocation,polylineOptions)
+    currentLocation?.let { ViewContainer(navController, viewModel, it,polylineOptions) }
 }
+
 
 @Composable
 fun MapScreen(
@@ -95,12 +95,14 @@ fun MapScreen(
     currentLocation: LatLng,
     polylineOptions: PolylineOptions?
 ) {
-
     val initialUbication = LatLng(currentLocation.latitude, currentLocation.longitude)
 
-    val mapProperties by remember { mutableStateOf(MapProperties(mapType = MapType.HYBRID)) }
+    val mapProperties by remember { mutableStateOf(MapProperties(mapType = MapType.HYBRID, isMyLocationEnabled = true)) }
 
-    val uiSettings by remember { mutableStateOf(MapUiSettings(rotationGesturesEnabled = false)) }
+    val uiSettings by remember { mutableStateOf(MapUiSettings(
+        rotationGesturesEnabled = false ,
+        myLocationButtonEnabled = true
+    )) }
 
     Box(
         Modifier
@@ -110,7 +112,6 @@ fun MapScreen(
                 shape = RoundedCornerShape(20.dp)
             )
             .clip(shape = RoundedCornerShape(percent = 10))
-
     ) {
         GoogleMap(
             modifier = Modifier
@@ -120,26 +121,42 @@ fun MapScreen(
             properties = mapProperties,
             uiSettings = uiSettings
         ) {
-            Marker(state = MarkerState(initialUbication))
-
             if (polylineOptions != null) {
-                Polyline(points = polylineOptions.points)
-            }else{
-                Toast.makeText(LocalContext.current,"POLY NULL",Toast.LENGTH_SHORT).show()
+                val polylinePoints = polylineOptions.points.map { LatLng(it.latitude, it.longitude) }
+                val currentPolylinePoints = polylinePoints.filter { it != initialUbication }
+                Polyline(
+                    points = currentPolylinePoints,
+                    color = Color(0xFF4285F4), // Color azul de Google Maps
+                    width = 5.dp.value
+                )
 
+                Marker(state = MarkerState(destino), icon = BitmapDescriptorFactory.defaultMarker())
+            } else {
+                Toast.makeText(LocalContext.current, "POLY NULL", Toast.LENGTH_SHORT).show()
             }
+
+
+            Circle(
+                center = initialUbication,
+                radius = 10.0,
+                fillColor = Color(0x664285F4), // Color azul con transparencia de Google Maps
+                strokeWidth = 2.dp.value,
+                strokeColor = Color(0xFF4285F4) // Color del borde del círculo
+            )
         }
     }
 }
+
+
 
 private fun cameraUpdate(current: LatLng, next: LatLng): CameraPositionState {
 
     if (current != next) {
 
-        return CameraPositionState(position = CameraPosition(next, 16.6f, 0f, 0f))
+        return CameraPositionState(position = CameraPosition(next, 18.6f, 0f, 0f))
     }
 
-    return CameraPositionState(position = CameraPosition(current, 16.6f, 0f, 0f))
+    return CameraPositionState(position = CameraPosition(current, 18.6f, 0f, 0f))
 }
 
 @OptIn(ExperimentalMaterial3Api::class)

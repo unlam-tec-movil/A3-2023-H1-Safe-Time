@@ -43,7 +43,7 @@ class MainActivity : ComponentActivity() {
                     AppNavigation(viewModel = viewModel,navController)
                 }
             }
-            getCurrentLocation()
+           getCurrentLocation()
         }
 
 

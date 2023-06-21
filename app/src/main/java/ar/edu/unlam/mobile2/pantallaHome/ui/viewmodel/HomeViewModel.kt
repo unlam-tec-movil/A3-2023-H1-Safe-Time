@@ -157,6 +157,7 @@ class HomeViewModel @Inject constructor(
 
     fun nuevaUbicacionSeleccionadaEnMapa(ubicacion: Marcador) {
         _ubicacionMapa.value = ubicacion
+        createRoute()
     }
 
     fun definirPestaña(tab: Int) {
@@ -167,12 +168,11 @@ class HomeViewModel @Inject constructor(
      fun createRoute() {
 
 
-         var stringCurrentLocation = "${_currentLocation.value?.longitude},${currentLocation.value?.latitude}"
+       val stringCurrentLocation = "${_currentLocation.value?.longitude},${currentLocation.value?.latitude}"
          Log.i("bruno", "${currentLocation.value?.latitude},${_currentLocation.value?.longitude}")
-        // var stringCurrentLocation = "-58.70138301488951,-34.749780019436365 "
+         //val stringCurrentLocation = "-58.719489,-34.730798"
          val stringDestino = "${_ubicacionMapa.value?.latLng?.longitude},${_ubicacionMapa.value?.latLng?.latitude}"
 
-       _polylineOptions.value= null
          _polylineOptions.value?.points?.clear()
 
          viewModelScope.launch {
