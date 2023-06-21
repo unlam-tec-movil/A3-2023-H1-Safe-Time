@@ -5,7 +5,6 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
-import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
@@ -52,8 +51,8 @@ import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import androidx.navigation.NavController
 import ar.edu.unlam.mobile2.navigation.AppScreens
-import ar.edu.unlam.mobile2.pantallaHome.data.model.Contact
 import ar.edu.unlam.mobile2.pantallaHome.ui.viewmodel.HomeViewModel
+import ar.edu.unlam.mobile2.pantallaListaDeContactos.ContactsFromPhone
 import ar.edu.unlam.mobile2.pantallaMapa.data.repository.Marcador
 import ar.edu.unlam.mobile2.pantallaMapa.ui.Bottombar
 import ar.edu.unlam.mobile2.pantallaMapa.ui.Toolbar
@@ -62,14 +61,13 @@ import ar.edu.unlam.mobile2.pantallaMapa.ui.Toolbar
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ContactListScreen(navController: NavController, viewModel: HomeViewModel, tab: Int) {
-    val contactList by viewModel.contactos.observeAsState(initial = emptyList())
+    //val contactList by viewModel.contactos.observeAsState(initial = emptyList())
     val ubicacionList by viewModel.ubicacionesRapidas.observeAsState(initial = emptyList())
     val isShowButton by viewModel.isButtomShow.observeAsState(initial = false)
     val context = LocalContext.current
     val actionDialIntent = Intent(Intent.ACTION_DIAL)
-    val listaContactosFromPhone by viewModel.contactosFromPhone.observeAsState(initial = emptyList())
+    val contactList by viewModel.contactosFromPhone.observeAsState(initial = emptyList())
 
-    Log.i("CONTACT_PROVIDER_DEMO", "TOTAL DE CONTACTOS: ${listaContactosFromPhone.size}")
 
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
@@ -105,7 +103,7 @@ fun ContactListScreen(navController: NavController, viewModel: HomeViewModel, ta
 
                     onClickLlamar = {
 
-                        actionDialIntent.data = Uri.parse("tel:${it.telefono}")
+                        actionDialIntent.data = Uri.parse("tel:${it.number}")
                         if (ContextCompat.checkSelfPermission(
                                 context,
                                 Manifest.permission.CALL_PHONE
@@ -129,13 +127,12 @@ fun ContactListScreen(navController: NavController, viewModel: HomeViewModel, ta
                     onClickNavegarA = {
                         viewModel.nuevaUbicacionSeleccionadaEnMapa(it)
                         navController.navigate(route = AppScreens.MapScreen.route)
-                    },
-                    onClickTab = {
-                        viewModel.limpiarSeleccionados()
                     }
 
 
-                )
+                ) {
+                    viewModel.limpiarSeleccionados()
+                }
             }
 
         }
@@ -144,13 +141,13 @@ fun ContactListScreen(navController: NavController, viewModel: HomeViewModel, ta
 
 @Composable
 fun ContactListView(
-    contacts: List<Contact>,
+    contacts: List<ContactsFromPhone>,
     isShowButton: Boolean,
     onClickAgregarSeleccionados: () -> Unit,
-    onClickLlamar: (contacto: Contact) -> Unit,
+    onClickLlamar: (contacto: ContactsFromPhone) -> Unit,
     textButtonAgregarSeleccionados: String,
-    onContactSelected: (contact: Contact) -> Unit,
-    onContactUnSelected: (contact: Contact) -> Unit,
+    onContactSelected: (contact: ContactsFromPhone) -> Unit,
+    onContactUnSelected: (contact: ContactsFromPhone) -> Unit,
 
 
     ) {
@@ -163,9 +160,8 @@ fun ContactListView(
                 ItemContacto(
                     contacto,
                     onClickLlamar = { onClickLlamar(contacto) },
-                    onContactSelected = { onContactSelected(contacto) },
-                    onContactUnSelected = { onContactUnSelected(contacto) }
-                )
+                    onContactSelected = { onContactSelected(contacto) }
+                ) { onContactUnSelected(contacto) }
             }
         }
 
@@ -215,7 +211,7 @@ fun BotonAgregarSeleccionados(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ItemContacto(
-    contacto: Contact,
+    contacto: ContactsFromPhone,
     onClickLlamar: () -> Unit,
     onContactSelected: () -> Unit,
     onContactUnSelected: () -> Unit
@@ -261,14 +257,14 @@ fun ItemContacto(
                     .weight(3f)
             ) {
                 Text(
-                    text = contacto.nombre,
+                    text = contacto.name,
                     fontSize = 22.sp,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onPrimaryContainer
 
                 )
                 Text(
-                    text = contacto.telefono,
+                    text = contacto.number,
                     fontSize = 18.sp,
                     fontWeight = FontWeight.SemiBold,
                     color = MaterialTheme.colorScheme.onPrimaryContainer
@@ -397,14 +393,14 @@ fun ItemDireccion(
 
 @Composable
 fun TabContactosDirecciones(
-    conctactList: List<Contact>,
+    conctactList: List<ContactsFromPhone>,
     tabParametro: Int = 0,
     isShowButton: Boolean,
     onClickAgregarSeleccionados: () -> Unit,
-    onClickLlamar: (contacto: Contact) -> Unit,
+    onClickLlamar: (contacto: ContactsFromPhone) -> Unit,
     textButtonAgregarSeleccionados: String,
-    onContactSelected: (contact: Contact) -> Unit,
-    onContactUnSelected: (contact: Contact) -> Unit,
+    onContactSelected: (contact: ContactsFromPhone) -> Unit,
+    onContactUnSelected: (contact: ContactsFromPhone) -> Unit,
 
     ubicaciones: List<Marcador>,
     onUbicacionSelected: (ubicacion: Marcador) -> Unit,

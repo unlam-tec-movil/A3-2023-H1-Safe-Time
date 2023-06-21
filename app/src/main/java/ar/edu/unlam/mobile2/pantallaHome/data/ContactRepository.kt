@@ -3,6 +3,7 @@ package ar.edu.unlam.mobile2.pantallaHome.data
 
 import ar.edu.unlam.mobile2.R
 import ar.edu.unlam.mobile2.pantallaHome.data.model.Contact
+import ar.edu.unlam.mobile2.pantallaListaDeContactos.ContactsFromPhone
 import javax.inject.Inject
 
 class ContactRepository @Inject constructor() {
@@ -62,31 +63,11 @@ class ContactRepository @Inject constructor() {
             )
         )
 
-        var contactosDeEmergencia = mutableListOf(
-            Contact(
-                "PEPO Mendez",
-                "+549113017809",
-                R.drawable.safetimelogo
-            ),
-            Contact(
-                "Maria Garcia",
-                "555-555-2222",
-                R.drawable.ic_launcher_foreground
-            ),
-            Contact(
-                "Pedro Rodriguez",
-                "555-555-3333",
-                R.drawable.ic_launcher_foreground
-            ),
-            Contact(
-                "Lucia Hernandez",
-                "555-555-4444",
-                R.drawable.ic_launcher_foreground
-            )
+        var contactosDeEmergencia = mutableListOf<ContactsFromPhone>(
         )
     }
 
-    fun deleteContact(contact: Contact) {
+    fun deleteContact(contact: ContactsFromPhone) {
         contactosDeEmergencia.remove(contact)
     }
 
@@ -94,11 +75,11 @@ class ContactRepository @Inject constructor() {
         return contacts
     }
 
-    fun getContactosEmergenciaList(): MutableList<Contact> {
+    fun getContactosEmergenciaList(): MutableList<ContactsFromPhone> {
         return contactosDeEmergencia.toMutableList()
     }
 
-    fun addContactEmergencia(contacts: List<Contact>) {
+    fun addContactEmergencia(contacts: List<ContactsFromPhone>) {
         contactosDeEmergencia.addAll(contacts)
     }
 }

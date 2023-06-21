@@ -32,8 +32,8 @@ class HomeViewModel @Inject constructor(
     private val _contactos = MutableLiveData(emptyList<Contact>())
     val contactos: LiveData<List<Contact>> = _contactos
 
-    private val _contactosEmergencia = MutableLiveData(emptyList<Contact>())
-    val contactosEmergencia: LiveData<List<Contact>> = _contactosEmergencia
+    private val _contactosEmergencia = MutableLiveData(emptyList<ContactsFromPhone>())
+    val contactosEmergencia: LiveData<List<ContactsFromPhone>> = _contactosEmergencia
 
     private val _ubicacionesRapidas = MutableLiveData(emptyList<Marcador>())
     val ubicacionesRapidas: LiveData<List<Marcador>> = _ubicacionesRapidas
@@ -44,7 +44,7 @@ class HomeViewModel @Inject constructor(
     private var _currentLocation = MutableLiveData<LatLng?>()
     val currentLocation: LiveData<LatLng?> = _currentLocation
 
-    val selectedContacts = MutableStateFlow<List<Contact>>(emptyList())
+    val selectedContacts = MutableStateFlow<List<ContactsFromPhone>>(emptyList())
     val selectedAddresses = MutableStateFlow<List<Marcador>>(emptyList())
 
 
@@ -81,14 +81,14 @@ class HomeViewModel @Inject constructor(
         isDialogShown.value = false
     }
 
-    fun contactoSeleccionado(contacto: Contact) {
+    fun contactoSeleccionado(contacto: ContactsFromPhone) {
         selectedContacts.value = selectedContacts.value + contacto
         textButtomAgregarSeleccionados.value = "Agregar a contactos de emergencia"
         isButtomShow.value = true
 
     }
 
-    fun contactoDesSeleccionado(contacto: Contact) {
+    fun contactoDesSeleccionado(contacto: ContactsFromPhone) {
         selectedContacts.value = selectedContacts.value - contacto
         if (selectedContacts.value.isEmpty()) {
             isButtomShow.value = false
@@ -111,7 +111,7 @@ class HomeViewModel @Inject constructor(
     }
 
 
-    fun eliminarContactoEmergencia(contact: Contact) {
+    fun eliminarContactoEmergencia(contact: ContactsFromPhone) {
         viewModelScope.launch {
             contactRepository.deleteContact(contact)
             _contactosEmergencia.value = contactRepository.getContactosEmergenciaList()
@@ -158,7 +158,6 @@ class HomeViewModel @Inject constructor(
 
     fun setCurrentLocation(result: LatLng) {
         _currentLocation.value = result
-
     }
 
     fun setContactsFromPhone(name: String, number: String) {

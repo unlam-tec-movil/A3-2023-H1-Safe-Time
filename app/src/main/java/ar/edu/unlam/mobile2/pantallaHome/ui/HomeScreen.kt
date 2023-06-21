@@ -68,6 +68,7 @@ import ar.edu.unlam.mobile2.dialogQR.QRDialog
 import ar.edu.unlam.mobile2.navigation.AppScreens
 import ar.edu.unlam.mobile2.pantallaHome.data.model.Contact
 import ar.edu.unlam.mobile2.pantallaHome.ui.viewmodel.HomeViewModel
+import ar.edu.unlam.mobile2.pantallaListaDeContactos.ContactsFromPhone
 import ar.edu.unlam.mobile2.pantallaMapa.data.repository.Marcador
 import ar.edu.unlam.mobile2.pantallaMapa.ui.Bottombar
 import ar.edu.unlam.mobile2.pantallaMapa.ui.Toolbar
@@ -142,8 +143,8 @@ fun ContentHome(navController: NavController, viewModel: HomeViewModel) {
                     } else {
                         launcher.launch(Manifest.permission.CALL_PHONE)
                     }
-                },
-                onClickEliminarContacto = { viewModel.eliminarContactoEmergencia(it) })
+                }
+            ) { viewModel.eliminarContactoEmergencia(it) }
         }
 
         item {
@@ -230,10 +231,10 @@ fun TextoContactos() {
 
 @Composable
 fun FilaContactos(
-    contacts: List<Contact>,
+    contacts: List<ContactsFromPhone>,
     onClickAgregar: () -> Unit,
     onClickLlamar: (numero: String) -> Unit,
-    onClickEliminarContacto: (contacto: Contact) -> Unit
+    onClickEliminarContacto: (contacto: ContactsFromPhone) -> Unit
 ) {
     LazyRow(
         modifier = Modifier
@@ -246,9 +247,8 @@ fun FilaContactos(
         items(contacts) {
             ContactItem(
                 contact = it,
-                onClickLlamar = { onClickLlamar(it.telefono) },
-                onClickEliminarContacto = { onClickEliminarContacto(it) }
-            )
+                onClickLlamar = { onClickLlamar(it.number) }
+            ) { onClickEliminarContacto(it) }
         }
 
         item {
@@ -273,7 +273,7 @@ fun FilaContactos(
 
 @Composable
 fun ContactItem(
-    contact: Contact,
+    contact: ContactsFromPhone,
     onClickLlamar: () -> Unit,
     onClickEliminarContacto: () -> Unit
 ) {
@@ -295,7 +295,7 @@ fun ContactItem(
 
                     Image(
                         painter = painterResource(contact.imagen),
-                        contentDescription = contact.nombre,
+                        contentDescription = contact.name,
                         contentScale = ContentScale.Crop,
                         modifier = Modifier
                             .size(64.dp)
@@ -307,14 +307,14 @@ fun ContactItem(
                     )
 
                     Text(
-                        text = contact.nombre,
+                        text = contact.name,
                         fontWeight = FontWeight.Bold,
                         color = Color.White,
                         modifier = Modifier.align(Alignment.CenterHorizontally)
                     )
 
                     Text(
-                        text = contact.telefono,
+                        text = contact.number,
                         color = Color.White,
                         modifier = Modifier
                             .padding(4.dp)
