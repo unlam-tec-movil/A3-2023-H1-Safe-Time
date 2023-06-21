@@ -9,11 +9,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import ar.edu.unlam.mobile2.data.room.ContactRepository
 import ar.edu.unlam.mobile2.data.room.model.ContactsFromPhone
-import ar.edu.unlam.mobile2.pantallaListaDeContactos.data.ContactosDeEmergencia
 import ar.edu.unlam.mobile2.pantallaMapa.data.repository.Marcador
 import ar.edu.unlam.mobile2.pantallaMapa.data.repository.MarcadorRepository
 import ar.edu.unlam.mobile2.pantallaMapa.domain.RouteServices
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.PolylineOptions
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
@@ -28,6 +28,8 @@ class HomeViewModel @Inject constructor(
 
 ) : ViewModel() {
 
+    private val _polylineOptions = MutableLiveData<PolylineOptions?>()
+    val polylineOptions : LiveData<PolylineOptions?> = _polylineOptions
 
     private val _contactosEmergencia = MutableLiveData(emptyList<ContactsFromPhone>())
     val contactosEmergencia: LiveData<List<ContactsFromPhone>> = _contactosEmergencia
@@ -154,7 +156,7 @@ class HomeViewModel @Inject constructor(
 
 
        val stringCurrentLocation = "${_currentLocation.value?.longitude},${currentLocation.value?.latitude}"
-         Log.i("bruno", "${currentLocation.value?.latitude},${_currentLocation.value?.longitude}")
+
          //val stringCurrentLocation = "-58.719489,-34.730798"
          val stringDestino = "${_ubicacionMapa.value?.latLng?.longitude},${_ubicacionMapa.value?.latLng?.latitude}"
 

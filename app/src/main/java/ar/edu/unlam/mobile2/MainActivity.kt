@@ -44,7 +44,7 @@ class MainActivity : ComponentActivity() {
                     AppNavigation(viewModel, sensor)
                 }
             }
-            requestLocationPermissions()
+            getCurrentLocation()
             requestContactPermissions()
         }
     }
@@ -73,9 +73,6 @@ class MainActivity : ComponentActivity() {
         val isLocationPermissionGranted =
             ContextCompat.checkSelfPermission(this, locationPermission) ==
                     PackageManager.PERMISSION_GRANTED
-
-        val isLocationPermissionGranted = ContextCompat.checkSelfPermission(this, locationPermission) ==
-                PackageManager.PERMISSION_GRANTED
         if (isLocationPermissionGranted) {
             getCurrentLocation()
         } else {
@@ -158,7 +155,6 @@ class MainActivity : ComponentActivity() {
             .addOnSuccessListener { location: Location? ->
                 if (location != null) {
                     val result = LatLng(location.latitude, location.longitude)
-                    viewModel.permissionGranted()
                     viewModel.setCurrentLocation(result)
                     Toast.makeText(this, "se obtuvo la ubi y esta en el viewmodel", Toast.LENGTH_SHORT).show()
                 } else {

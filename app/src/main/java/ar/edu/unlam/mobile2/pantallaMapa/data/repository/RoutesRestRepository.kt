@@ -13,7 +13,7 @@ class RoutesRestRepository @Inject constructor(builder: Builder) :RouteRepositor
 
     val apiKey = "5b3ce3597851110001cf6248573e19e0c2ce4c8aa3277a353b2f8f92"
 
-    var retrofit: Retrofit = builder
+    private var retrofit: Retrofit = builder
         .baseUrl("https://api.openrouteservice.org/")
         .build()
 

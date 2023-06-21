@@ -85,7 +85,10 @@ fun PantallaMapa(navController: NavController, viewModel: HomeViewModel) {
     val currentLocation by viewModel.currentLocation.observeAsState()
     val destino by viewModel.ubicacionMapa.observeAsState()
 
-    currentLocation?.let { ViewContainer(navController, viewModel, it,polylineOptions) }
+    currentLocation?.let { destino?.let { it1 ->
+        ViewContainer(navController, viewModel, it,polylineOptions,
+            it1.latLng)
+    } }
 }
 
 
@@ -165,7 +168,10 @@ fun ViewContainer(
     navController: NavController,
     viewModel: HomeViewModel,
     currentLocation: LatLng,
-    polylineOptions: PolylineOptions?, ) {
+    polylineOptions: PolylineOptions?,
+    destino : LatLng
+
+    ) {
 
     LocalContext.current.applicationContext
     var mUbicacionSeleccionada by remember {
@@ -192,7 +198,7 @@ fun ViewContainer(
 
 
 
-            MapScreen(mUbicacionSeleccionada.latLng, currentLocation,polylineOptions)
+            MapScreen(destino , currentLocation,polylineOptions)
 
 
             Spacer(modifier = Modifier.size(width = 0.dp, height = 5.dp))
