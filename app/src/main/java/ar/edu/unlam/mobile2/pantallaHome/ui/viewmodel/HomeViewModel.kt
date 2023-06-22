@@ -47,8 +47,8 @@ class HomeViewModel @Inject constructor(
     private val _marcadoresFav = MutableLiveData(emptyList<MarcadorEntity>())
     val marcadoresFav: LiveData<List<MarcadorEntity>> = _marcadoresFav
 
-    private val _ubicacionMapa = MutableLiveData<Marcador>()
-    val ubicacionMapa: LiveData<Marcador> = _ubicacionMapa
+    private val _ubicacionMapa = MutableLiveData<MarcadorEntity>()
+    val ubicacionMapa: LiveData<MarcadorEntity> = _ubicacionMapa
 
     private var _currentLocation = MutableLiveData<LatLng?>()
     val currentLocation: LiveData<LatLng?> = _currentLocation
@@ -167,10 +167,10 @@ class HomeViewModel @Inject constructor(
             _contactosEmergencia.value = contactRepository.getAll()
             selectedContacts.value = emptyList()
         } else {
-            //version vieja
+            /*version vieja
             ubicacionRepository.agregarUbicacion(selectedAddresses.value)
             _ubicacionesRapidas.value = ubicacionRepository.getUbicacionesRapidas()
-            selectedAddresses.value = emptyList()
+            selectedAddresses.value = emptyList()*/
 
             //version nueva
             marcadorSeleccionado.value.forEach {
@@ -182,13 +182,13 @@ class HomeViewModel @Inject constructor(
     }
 
     fun limpiarSeleccionados() {
-        selectedAddresses.value -= selectedAddresses.value
+        //selectedAddresses.value -= selectedAddresses.value
         selectedContacts.value -= selectedContacts.value
         marcadorSeleccionado.value -= marcadorSeleccionado.value
         isButtomShow.value = false
     }
 
-    fun nuevaUbicacionSeleccionadaEnMapa(ubicacion: Marcador) {
+    fun nuevaUbicacionSeleccionadaEnMapa(ubicacion: MarcadorEntity) {
         _ubicacionMapa.value = ubicacion
         createRoute()
     }
@@ -206,7 +206,7 @@ class HomeViewModel @Inject constructor(
 
         //val stringCurrentLocation = "-58.719489,-34.730798"
         val stringDestino =
-            "${_ubicacionMapa.value?.latLng?.longitude},${_ubicacionMapa.value?.latLng?.latitude}"
+            "${_ubicacionMapa.value?.longitud},${_ubicacionMapa.value?.latitud}"
 
         _polylineOptions.value?.points?.clear()
 

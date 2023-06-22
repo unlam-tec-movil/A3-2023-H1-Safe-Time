@@ -53,6 +53,7 @@ import androidx.navigation.NavController
 import ar.edu.unlam.mobile2.navigation.AppScreens
 import ar.edu.unlam.mobile2.pantallaHome.ui.viewmodel.HomeViewModel
 import ar.edu.unlam.mobile2.data.room.model.ContactsFromPhone
+import ar.edu.unlam.mobile2.data.room.model.MarcadorEntity
 import ar.edu.unlam.mobile2.pantallaMapa.data.repository.Marcador
 import ar.edu.unlam.mobile2.pantallaMapa.ui.Bottombar
 import ar.edu.unlam.mobile2.pantallaMapa.ui.Toolbar
@@ -61,12 +62,12 @@ import ar.edu.unlam.mobile2.pantallaMapa.ui.Toolbar
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ContactListScreen(navController: NavController, viewModel: HomeViewModel, tab: Int) {
-    //val contactList by viewModel.contactos.observeAsState(initial = emptyList())
-    val ubicacionList by viewModel.ubicacionesRapidas.observeAsState(initial = emptyList())
+    //val ubicacionList by viewModel.ubicacionesRapidas.observeAsState(initial = emptyList())
     val isShowButton by viewModel.isButtomShow.observeAsState(initial = false)
     val context = LocalContext.current
     val actionDialIntent = Intent(Intent.ACTION_DIAL)
     val contactList by viewModel.contactosFromPhone.observeAsState(initial = emptyList())
+    val ubicacionList by viewModel.marcadoresFav.observeAsState(initial = emptyList())
 
 
     val launcher = rememberLauncherForActivityResult(
@@ -122,8 +123,8 @@ fun ContactListScreen(navController: NavController, viewModel: HomeViewModel, ta
 
 
                     ubicacionList,
-                    onUbicacionSelected = { viewModel.ubicacionSeleccionada(it) },
-                    onUbicacionUnSelected = { viewModel.ubicacionDesSeleccionada(it) },
+                    onUbicacionSelected = { viewModel.marcadorSeleccionado(it) },
+                    onUbicacionUnSelected = { viewModel.marcadorDeseleccionado(it) },
                     onClickNavegarA = {
                         viewModel.nuevaUbicacionSeleccionadaEnMapa(it)
                         navController.navigate(route = AppScreens.MapScreen.route)
@@ -289,13 +290,13 @@ fun ItemContacto(
 
 @Composable
 fun AdressListView(
-    ubicaciones: List<Marcador>,
+    ubicaciones: List<MarcadorEntity>,
     isShowButton: Boolean,
     onClickAgregarSeleccionados: () -> Unit,
-    onClickNavegarA: (ubicacion: Marcador) -> Unit,
+    onClickNavegarA: (ubicacion: MarcadorEntity) -> Unit,
     textButtonAgregarSeleccionados: String,
-    onUbicacionSelected: (ubicacion: Marcador) -> Unit,
-    onUbicacionUnSelected: (ubicacion: Marcador) -> Unit
+    onUbicacionSelected: (ubicacion: MarcadorEntity) -> Unit,
+    onUbicacionUnSelected: (ubicacion: MarcadorEntity) -> Unit
 
 
 ) {
@@ -323,7 +324,7 @@ fun AdressListView(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ItemDireccion(
-    ubicacion: Marcador,
+    ubicacion: MarcadorEntity,
     onClickNavegarA: () -> Unit,
     onUbicacionSelected: () -> Unit,
     onUbicacionUnSelected: () -> Unit
@@ -367,7 +368,7 @@ fun ItemDireccion(
                     color = MaterialTheme.colorScheme.onPrimaryContainer
                 )
                 Text(
-                    text = ubicacion.latLng.toString(),
+                    text = ubicacion.direccion,
                     fontSize = 18.sp,
                     fontWeight = FontWeight.SemiBold,
                     color = MaterialTheme.colorScheme.onPrimaryContainer
@@ -402,10 +403,10 @@ fun TabContactosDirecciones(
     onContactSelected: (contact: ContactsFromPhone) -> Unit,
     onContactUnSelected: (contact: ContactsFromPhone) -> Unit,
 
-    ubicaciones: List<Marcador>,
-    onUbicacionSelected: (ubicacion: Marcador) -> Unit,
-    onUbicacionUnSelected: (ubicacion: Marcador) -> Unit,
-    onClickNavegarA: (ubicacion: Marcador) -> Unit,
+    ubicaciones: List<MarcadorEntity>,
+    onUbicacionSelected: (ubicacion: MarcadorEntity) -> Unit,
+    onUbicacionUnSelected: (ubicacion: MarcadorEntity) -> Unit,
+    onClickNavegarA: (ubicacion: MarcadorEntity) -> Unit,
     onClickTab: (tab: Int) -> Unit
 ) {
 

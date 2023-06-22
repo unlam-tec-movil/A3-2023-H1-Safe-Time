@@ -59,6 +59,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.toSize
 import androidx.navigation.NavController
 import ar.edu.unlam.mobile2.R
+import ar.edu.unlam.mobile2.data.room.model.MarcadorEntity
 import ar.edu.unlam.mobile2.navigation.AppScreens
 import ar.edu.unlam.mobile2.pantallaHome.ui.viewmodel.HomeViewModel
 import ar.edu.unlam.mobile2.pantallaMapa.data.BottomNavItem
@@ -85,10 +86,14 @@ fun PantallaMapa(navController: NavController, viewModel: HomeViewModel) {
     val currentLocation by viewModel.currentLocation.observeAsState()
     val destino by viewModel.ubicacionMapa.observeAsState()
 
-    currentLocation?.let { destino?.let { it1 ->
-        ViewContainer(navController, viewModel, it,polylineOptions,
-            it1.latLng)
-    } }
+    currentLocation?.let {
+        destino?.let { it1 ->
+            ViewContainer(
+                navController, viewModel, it, polylineOptions,
+                LatLng(it1.latitud, it1.longitud)
+            )
+        }
+    }
 }
 
 
@@ -100,12 +105,23 @@ fun MapScreen(
 ) {
     val initialUbication = LatLng(currentLocation.latitude, currentLocation.longitude)
 
-    val mapProperties by remember { mutableStateOf(MapProperties(mapType = MapType.NORMAL, isMyLocationEnabled = true)) }
+    val mapProperties by remember {
+        mutableStateOf(
+            MapProperties(
+                mapType = MapType.NORMAL,
+                isMyLocationEnabled = true
+            )
+        )
+    }
 
-    val uiSettings by remember { mutableStateOf(MapUiSettings(
-        rotationGesturesEnabled = false ,
-        myLocationButtonEnabled = true
-    )) }
+    val uiSettings by remember {
+        mutableStateOf(
+            MapUiSettings(
+                rotationGesturesEnabled = false,
+                myLocationButtonEnabled = true
+            )
+        )
+    }
 
     Box(
         Modifier
@@ -125,7 +141,8 @@ fun MapScreen(
             uiSettings = uiSettings
         ) {
             if (polylineOptions != null) {
-                val polylinePoints = polylineOptions.points.map { LatLng(it.latitude, it.longitude) }
+                val polylinePoints =
+                    polylineOptions.points.map { LatLng(it.latitude, it.longitude) }
                 val currentPolylinePoints = polylinePoints.filter { it != initialUbication }
                 Polyline(
                     points = currentPolylinePoints,
@@ -151,7 +168,6 @@ fun MapScreen(
 }
 
 
-
 private fun cameraUpdate(current: LatLng, next: LatLng): CameraPositionState {
 
     if (current != next) {
@@ -169,13 +185,13 @@ fun ViewContainer(
     viewModel: HomeViewModel,
     currentLocation: LatLng,
     polylineOptions: PolylineOptions?,
-    destino : LatLng
+    destino: LatLng
 
-    ) {
+) {
 
     LocalContext.current.applicationContext
     var mUbicacionSeleccionada by remember {
-        mutableStateOf(MarcadorRepository.ubicaciones[1])
+        mutableStateOf(viewModel.marcadores.value?.get(1))
     }
 
     Scaffold(
@@ -194,11 +210,16 @@ fun ViewContainer(
 
 
             mUbicacionSeleccionada =
-                selectorDeUbicacionesRegistradas(MarcadorRepository.ubicaciones, viewModel)
+                viewModel.marcadores.value?.let { it1 ->
+                    selectorDeUbicacionesRegistradas(
+                        it1,
+                        viewModel
+                    )
+                }
 
 
 
-            MapScreen(destino , currentLocation,polylineOptions)
+            MapScreen(destino, currentLocation, polylineOptions)
 
 
             Spacer(modifier = Modifier.size(width = 0.dp, height = 5.dp))
@@ -281,9 +302,10 @@ fun Bottombar(navController: NavController, viewModel: HomeViewModel) {
                     if (viewModel.screenUbication != item.route) {
                         when (item.route) {
                             "home_screen" -> navController.navigate(route = AppScreens.HomeScreen.route)
-                            "map_screen" ->{
+                            "map_screen" -> {
                                 navController.navigate(route = AppScreens.MapScreen.route)
                             }
+
                             "list_screen" -> navController.navigate(route = AppScreens.ContactListScreen.route)
                             "infoQr_screen" -> navController.navigate(route = AppScreens.InfoQrScreen.route)
                         }
@@ -419,15 +441,19 @@ private fun CartelLlegadaEstimada(tiempo: Int) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun selectorDeUbicacionesRegistradas(
-    listaMarcadores: List<Marcador>,
+    listaMarcadores: List<MarcadorEntity>,
     viewModel: HomeViewModel
-): Marcador {
+): MarcadorEntity? {
 
     var mExpanded by remember { mutableStateOf(false) }
 
-    val options: List<Marcador> = listaMarcadores
+    val options: List<MarcadorEntity> = listaMarcadores
 
-    val mSelectedUbi by viewModel.ubicacionMapa.observeAsState(initial = MarcadorRepository.ubicaciones[1])
+    val mSelectedUbi by viewModel.ubicacionMapa.observeAsState(
+        initial = viewModel.marcadores.value?.get(
+            1
+        )
+    )
     var mSelectedText by remember { mutableStateOf(listaMarcadores[0].nombre) }
 
     var mTextFieldSize by remember { mutableStateOf(Size.Zero) }
@@ -436,31 +462,33 @@ private fun selectorDeUbicacionesRegistradas(
 
     Column(modifier = Modifier.padding(horizontal = 10.dp, vertical = 2.dp)) {
 
-        OutlinedTextField(
-            value = mSelectedUbi.nombre,
-            onValueChange = { mSelectedText = it },
-            modifier = Modifier
-                .fillMaxWidth()
-                .onGloballyPositioned { coordinates ->
-                    mTextFieldSize = coordinates.size.toSize()
+        mSelectedUbi?.let {
+            OutlinedTextField(
+                value = it.nombre,
+                onValueChange = { mSelectedText = it },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .onGloballyPositioned { coordinates ->
+                        mTextFieldSize = coordinates.size.toSize()
+                    },
+                readOnly = true,
+                colors = TextFieldDefaults.outlinedTextFieldColors(
+                    textColor = MaterialTheme.colorScheme.primary,
+                    unfocusedBorderColor = MaterialTheme.colorScheme.primary,
+                    placeholderColor = MaterialTheme.colorScheme.primary,
+                ),
+                label = {
+                    Text(
+                        "Viajar a",
+                        color = MaterialTheme.colorScheme.primary
+                    )
                 },
-            readOnly = true,
-            colors = TextFieldDefaults.outlinedTextFieldColors(
-                textColor = MaterialTheme.colorScheme.primary,
-                unfocusedBorderColor = MaterialTheme.colorScheme.primary,
-                placeholderColor = MaterialTheme.colorScheme.primary,
-            ),
-            label = {
-                Text(
-                    "Viajar a",
-                    color = MaterialTheme.colorScheme.primary
-                )
-            },
-            trailingIcon = {
-                Icon(icon, "expanded icon",
-                    Modifier.clickable { mExpanded = !mExpanded })
-            }
-        )
+                trailingIcon = {
+                    Icon(icon, "expanded icon",
+                        Modifier.clickable { mExpanded = !mExpanded })
+                }
+            )
+        }
 
         DropdownMenu(
             expanded = mExpanded,

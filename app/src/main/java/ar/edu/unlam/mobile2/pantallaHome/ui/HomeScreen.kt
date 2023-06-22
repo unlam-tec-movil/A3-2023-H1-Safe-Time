@@ -68,6 +68,7 @@ import ar.edu.unlam.mobile2.dialogQR.QRDialog
 import ar.edu.unlam.mobile2.navigation.AppScreens
 import ar.edu.unlam.mobile2.pantallaHome.ui.viewmodel.HomeViewModel
 import ar.edu.unlam.mobile2.data.room.model.ContactsFromPhone
+import ar.edu.unlam.mobile2.data.room.model.MarcadorEntity
 import ar.edu.unlam.mobile2.pantallaMapa.data.repository.Marcador
 import ar.edu.unlam.mobile2.pantallaMapa.ui.Bottombar
 import ar.edu.unlam.mobile2.pantallaMapa.ui.Toolbar
@@ -98,7 +99,9 @@ fun ContentHome(navController: NavController, viewModel: HomeViewModel) {
 
     val contacts by viewModel.contactosEmergencia.observeAsState(initial = emptyList())
 
-    val ubicacion by viewModel.ubicacionesRapidas.observeAsState(initial = emptyList())
+    //val ubicacion by viewModel.ubicacionesRapidas.observeAsState(initial = emptyList())
+
+    val ubicacion by viewModel.marcadoresFav.observeAsState(initial = emptyList())
 
     val isDialogShow by viewModel.isDialogShown.observeAsState(initial = false)
 
@@ -161,7 +164,7 @@ fun ContentHome(navController: NavController, viewModel: HomeViewModel) {
                     viewModel.nuevaUbicacionSeleccionadaEnMapa(it)
                     navController.navigate(route = AppScreens.MapScreen.route)
                 },
-                onClickEliminarUbicacion = { viewModel.eliminarUbicacionRapida(it) }
+                onClickEliminarUbicacion = { viewModel.cambiarEstadoFav(it) }
             )
 
         }
@@ -392,10 +395,10 @@ fun TextoUbicaciones() {
 
 @Composable
 fun FilaUbicaciones(
-    ubicacion: List<Marcador>,
+    ubicacion: List<MarcadorEntity>,
     onClickAgregarUbi: () -> Unit,
-    onClickEliminarUbicacion: (ubicacion: Marcador) -> Unit,
-    onClickIrMapa: (ubicacion: Marcador) -> Unit
+    onClickEliminarUbicacion: (ubicacion: MarcadorEntity) -> Unit,
+    onClickIrMapa: (ubicacion: MarcadorEntity) -> Unit
 ) {
 
     LazyRow(
@@ -437,7 +440,7 @@ fun FilaUbicaciones(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun UbicationItem(
-    ubicacion: Marcador,
+    ubicacion: MarcadorEntity,
     onClickIrMapa: () -> Unit,
     onClickEliminarUbicacion: () -> Unit
 ) {
@@ -463,7 +466,7 @@ fun UbicationItem(
                 modifier = Modifier.align(Alignment.CenterHorizontally)
             )
             Text(
-                text = ubicacion.latLng.toString(),
+                text = ubicacion.direccion,
                 color = Color.White,
                 modifier = Modifier
                     .padding(4.dp)
