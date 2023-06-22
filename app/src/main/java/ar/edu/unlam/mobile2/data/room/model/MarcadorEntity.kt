@@ -7,8 +7,9 @@ import androidx.room.PrimaryKey
 @Entity(tableName = "marcadorentity")
 data class MarcadorEntity(
     @PrimaryKey
-    @ColumnInfo(name = "nombre") val nombre: String,
-    @ColumnInfo(name = "latitud") val latitud: Double,
-    @ColumnInfo(name = "longitud") val longitud: Double,
-    @ColumnInfo(name = "favorito", defaultValue = "0") val fav: Boolean
+    @ColumnInfo(name = "nombre") val nombre: String = "",
+    @ColumnInfo(name = "latitud") val latitud: Double = 0.0,
+    @ColumnInfo(name = "longitud") val longitud: Double = 0.0,
+    @ColumnInfo(name = "dirección") val direccion: String = "",
+    @ColumnInfo(name = "favorito") val fav: Boolean = false
 )

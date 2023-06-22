@@ -7,6 +7,7 @@ import ar.edu.unlam.mobile2.data.room.local.ContactFavDAO
 import ar.edu.unlam.mobile2.data.room.local.MarcadorDAO
 import ar.edu.unlam.mobile2.data.room.local.MarcadorDatabase
 import ar.edu.unlam.mobile2.data.room.model.ContactsFromPhone
+import ar.edu.unlam.mobile2.data.room.model.MarcadorEntity
 import coil.ImageLoader
 import dagger.Module
 import dagger.Provides
@@ -41,6 +42,10 @@ object MainModule {
     @Singleton
     fun providesMarcadoresDAO(marcadorDatabase: MarcadorDatabase): MarcadorDAO =
         marcadorDatabase.marcadorDao()
+
+
+    @Provides
+    fun providesMarcadorEntity() = MarcadorEntity()
 
     @Provides
     @Singleton

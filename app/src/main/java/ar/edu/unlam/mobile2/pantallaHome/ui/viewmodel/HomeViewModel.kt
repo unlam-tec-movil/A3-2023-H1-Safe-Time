@@ -1,5 +1,6 @@
 package ar.edu.unlam.mobile2.pantallaHome.ui.viewmodel
 
+import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -9,6 +10,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import ar.edu.unlam.mobile2.data.room.ContactRepository
 import ar.edu.unlam.mobile2.data.room.model.ContactsFromPhone
+import ar.edu.unlam.mobile2.data.room.model.MarcadorEntity
 import ar.edu.unlam.mobile2.pantallaMapa.data.repository.Marcador
 import ar.edu.unlam.mobile2.pantallaMapa.data.repository.MarcadorRepository
 import ar.edu.unlam.mobile2.pantallaMapa.domain.RouteServices
@@ -16,6 +18,7 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.PolylineOptions
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.count
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -24,18 +27,25 @@ class HomeViewModel @Inject constructor(
 
     private val contactRepository: ContactRepository,
     private val ubicacionRepository: MarcadorRepository,
-    private val routeServices: RouteServices
+    private val routeServices: RouteServices,
+    private val marcadorRepository: ar.edu.unlam.mobile2.data.room.MarcadorRepository
 
 ) : ViewModel() {
 
     private val _polylineOptions = MutableLiveData<PolylineOptions?>()
-    val polylineOptions : LiveData<PolylineOptions?> = _polylineOptions
+    val polylineOptions: LiveData<PolylineOptions?> = _polylineOptions
 
     private val _contactosEmergencia = MutableLiveData(emptyList<ContactsFromPhone>())
     val contactosEmergencia: LiveData<List<ContactsFromPhone>> = _contactosEmergencia
 
     private val _ubicacionesRapidas = MutableLiveData(emptyList<Marcador>())
     val ubicacionesRapidas: LiveData<List<Marcador>> = _ubicacionesRapidas
+
+    private val _marcadores = MutableLiveData(emptyList<MarcadorEntity>())
+    val marcadores: LiveData<List<MarcadorEntity>> = _marcadores
+
+    private val _marcadoresFav = MutableLiveData(emptyList<MarcadorEntity>())
+    val marcadoresFav: LiveData<List<MarcadorEntity>> = _marcadoresFav
 
     private val _ubicacionMapa = MutableLiveData<Marcador>()
     val ubicacionMapa: LiveData<Marcador> = _ubicacionMapa
@@ -45,6 +55,7 @@ class HomeViewModel @Inject constructor(
 
     val selectedContacts = MutableStateFlow<List<ContactsFromPhone>>(emptyList())
     val selectedAddresses = MutableStateFlow<List<Marcador>>(emptyList())
+    val marcadorSeleccionado = MutableStateFlow<List<MarcadorEntity>>(emptyList())
 
 
     private val _contactosFromPhone = MutableLiveData(emptyList<ContactsFromPhone>())
@@ -68,6 +79,10 @@ class HomeViewModel @Inject constructor(
 
             _contactosEmergencia.value = contactRepository.getAll()
             _ubicacionesRapidas.value = ubicacionRepository.getUbicacionesRapidas()
+            _marcadores.value = marcadorRepository.getAllMarcador()
+            _marcadoresFav.value = marcadorRepository.getAllFavMarcador()
+
+            Log.i("MARCADOR_DB", "Marcadores en BD: ${marcadorRepository.getAllMarcador()}}")
 
         }
     }
@@ -101,9 +116,25 @@ class HomeViewModel @Inject constructor(
         isButtomShow.value = true
     }
 
+    fun marcadorSeleccionado(marcador: MarcadorEntity) {
+        marcadorSeleccionado.value = marcadorSeleccionado.value + marcador
+        textButtomAgregarSeleccionados.value = "Agregar a ubicaciones rapidas"
+        isButtomShow.value = true
+
+        Log.i("MARCADOR_DB", "Seleccionados: ${marcadorSeleccionado.value}")
+    }
+
     fun ubicacionDesSeleccionada(ubicacion: Marcador) {
         selectedAddresses.value = selectedAddresses.value - ubicacion
         if (selectedAddresses.value.isEmpty()) {
+            isButtomShow.value = false
+        }
+
+    }
+
+    fun marcadorDeseleccionado(marcador: MarcadorEntity) {
+        marcadorSeleccionado.value = marcadorSeleccionado.value - marcador
+        if (marcadorSeleccionado.value.isEmpty()) {
             isButtomShow.value = false
         }
 
@@ -123,21 +154,37 @@ class HomeViewModel @Inject constructor(
         }
     }
 
+    fun cambiarEstadoFav(nuevo: MarcadorEntity) {
+        viewModelScope.launch {
+            marcadorRepository.updateFavorito(nuevo.nombre)
+            _marcadoresFav.value = marcadorRepository.getAllFavMarcador()
+        }
+    }
+
     fun agregarSeleccionados(valor: Int) {
         if (valor == 0) {
             contactRepository.insertAll(selectedContacts.value)
             _contactosEmergencia.value = contactRepository.getAll()
             selectedContacts.value = emptyList()
         } else {
+            //version vieja
             ubicacionRepository.agregarUbicacion(selectedAddresses.value)
             _ubicacionesRapidas.value = ubicacionRepository.getUbicacionesRapidas()
             selectedAddresses.value = emptyList()
+
+            //version nueva
+            marcadorSeleccionado.value.forEach {
+                marcadorRepository.updateFavorito(it.nombre)
+            }
+            _marcadoresFav.value = marcadorRepository.getAllFavMarcador()
+            marcadorSeleccionado.value = emptyList()
         }
     }
 
     fun limpiarSeleccionados() {
         selectedAddresses.value -= selectedAddresses.value
         selectedContacts.value -= selectedContacts.value
+        marcadorSeleccionado.value -= marcadorSeleccionado.value
         isButtomShow.value = false
     }
 
@@ -151,20 +198,22 @@ class HomeViewModel @Inject constructor(
     }
 
 
-     fun createRoute() {
+    fun createRoute() {
 
 
-       val stringCurrentLocation = "${_currentLocation.value?.longitude},${currentLocation.value?.latitude}"
+        val stringCurrentLocation =
+            "${_currentLocation.value?.longitude},${currentLocation.value?.latitude}"
 
-         //val stringCurrentLocation = "-58.719489,-34.730798"
-         val stringDestino = "${_ubicacionMapa.value?.latLng?.longitude},${_ubicacionMapa.value?.latLng?.latitude}"
+        //val stringCurrentLocation = "-58.719489,-34.730798"
+        val stringDestino =
+            "${_ubicacionMapa.value?.latLng?.longitude},${_ubicacionMapa.value?.latLng?.latitude}"
 
-         _polylineOptions.value?.points?.clear()
+        _polylineOptions.value?.points?.clear()
 
-         viewModelScope.launch {
-             val response = routeServices.getRoutes(stringCurrentLocation, stringDestino)
-             _polylineOptions.value=response
-         }
+        viewModelScope.launch {
+            val response = routeServices.getRoutes(stringCurrentLocation, stringDestino)
+            _polylineOptions.value = response
+        }
 
     }
 

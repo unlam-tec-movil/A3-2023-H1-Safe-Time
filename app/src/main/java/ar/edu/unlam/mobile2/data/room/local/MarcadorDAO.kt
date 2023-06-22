@@ -19,11 +19,11 @@ interface MarcadorDAO {
     @Query("SELECT * FROM marcadorentity WHERE nombre LIKE :buscado")
     fun getByName(buscado: String): MarcadorEntity
 
-    @Query("UPDATE marcadorentity SET favorito = NOT favorito WHERE nombre = :nombre")
-    fun updateFavorito(nombre: String)
+    @Query("UPDATE marcadorentity SET favorito = NOT favorito WHERE nombre LIKE :name")
+    fun updateFavorito(name: String)
 
     @Insert
-    fun insertAll(vararg marcadores: MarcadorEntity)
+    fun insertAll(marcadores: List<MarcadorEntity>)
 
     @Insert
     fun insert(marcadores: MarcadorEntity)
