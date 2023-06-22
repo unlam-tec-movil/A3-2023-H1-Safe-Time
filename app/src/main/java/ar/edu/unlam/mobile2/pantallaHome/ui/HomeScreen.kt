@@ -64,12 +64,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import androidx.navigation.NavController
+import ar.edu.unlam.mobile2.data.room.model.ContactsFromPhone
+import ar.edu.unlam.mobile2.data.room.model.MarcadorEntity
 import ar.edu.unlam.mobile2.dialogQR.QRDialog
 import ar.edu.unlam.mobile2.navigation.AppScreens
 import ar.edu.unlam.mobile2.pantallaHome.ui.viewmodel.HomeViewModel
-import ar.edu.unlam.mobile2.data.room.model.ContactsFromPhone
-import ar.edu.unlam.mobile2.data.room.model.MarcadorEntity
-import ar.edu.unlam.mobile2.pantallaMapa.data.repository.Marcador
 import ar.edu.unlam.mobile2.pantallaMapa.ui.Bottombar
 import ar.edu.unlam.mobile2.pantallaMapa.ui.Toolbar
 
@@ -98,8 +97,6 @@ fun HomeScreen(navController: NavController, viewModel: HomeViewModel) {
 fun ContentHome(navController: NavController, viewModel: HomeViewModel) {
 
     val contacts by viewModel.contactosEmergencia.observeAsState(initial = emptyList())
-
-    //val ubicacion by viewModel.ubicacionesRapidas.observeAsState(initial = emptyList())
 
     val ubicacion by viewModel.marcadoresFav.observeAsState(initial = emptyList())
 

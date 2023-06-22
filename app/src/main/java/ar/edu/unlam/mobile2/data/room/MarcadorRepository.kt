@@ -9,7 +9,10 @@ class MarcadorRepository @Inject constructor(
     private val marcadorDao: MarcadorDAO
 ) {
     init {
-        insertAll(MarcadoresFijos.marcadoresFijos)
+
+        if(getAllMarcador().isEmpty()) {
+            insertAll(MarcadoresFijos.marcadoresFijos)
+        }
     }
 
     fun getAllMarcador(): List<MarcadorEntity> = marcadorDao.getAll()

@@ -50,11 +50,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import androidx.navigation.NavController
-import ar.edu.unlam.mobile2.navigation.AppScreens
-import ar.edu.unlam.mobile2.pantallaHome.ui.viewmodel.HomeViewModel
 import ar.edu.unlam.mobile2.data.room.model.ContactsFromPhone
 import ar.edu.unlam.mobile2.data.room.model.MarcadorEntity
-import ar.edu.unlam.mobile2.pantallaMapa.data.repository.Marcador
+import ar.edu.unlam.mobile2.navigation.AppScreens
+import ar.edu.unlam.mobile2.pantallaHome.ui.viewmodel.HomeViewModel
 import ar.edu.unlam.mobile2.pantallaMapa.ui.Bottombar
 import ar.edu.unlam.mobile2.pantallaMapa.ui.Toolbar
 
@@ -62,12 +61,12 @@ import ar.edu.unlam.mobile2.pantallaMapa.ui.Toolbar
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ContactListScreen(navController: NavController, viewModel: HomeViewModel, tab: Int) {
-    //val ubicacionList by viewModel.ubicacionesRapidas.observeAsState(initial = emptyList())
+
     val isShowButton by viewModel.isButtomShow.observeAsState(initial = false)
     val context = LocalContext.current
     val actionDialIntent = Intent(Intent.ACTION_DIAL)
     val contactList by viewModel.contactosFromPhone.observeAsState(initial = emptyList())
-    val ubicacionList by viewModel.marcadoresFav.observeAsState(initial = emptyList())
+    val ubicacionList by viewModel.marcadores.observeAsState(initial = emptyList())
 
 
     val launcher = rememberLauncherForActivityResult(

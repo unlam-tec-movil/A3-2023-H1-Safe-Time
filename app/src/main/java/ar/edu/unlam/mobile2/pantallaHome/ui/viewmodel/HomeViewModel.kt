@@ -11,14 +11,11 @@ import androidx.lifecycle.viewModelScope
 import ar.edu.unlam.mobile2.data.room.ContactRepository
 import ar.edu.unlam.mobile2.data.room.model.ContactsFromPhone
 import ar.edu.unlam.mobile2.data.room.model.MarcadorEntity
-import ar.edu.unlam.mobile2.pantallaMapa.data.repository.Marcador
-import ar.edu.unlam.mobile2.pantallaMapa.data.repository.MarcadorRepository
 import ar.edu.unlam.mobile2.pantallaMapa.domain.RouteServices
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.PolylineOptions
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.count
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -26,7 +23,6 @@ import javax.inject.Inject
 class HomeViewModel @Inject constructor(
 
     private val contactRepository: ContactRepository,
-    private val ubicacionRepository: MarcadorRepository,
     private val routeServices: RouteServices,
     private val marcadorRepository: ar.edu.unlam.mobile2.data.room.MarcadorRepository
 
@@ -38,8 +34,6 @@ class HomeViewModel @Inject constructor(
     private val _contactosEmergencia = MutableLiveData(emptyList<ContactsFromPhone>())
     val contactosEmergencia: LiveData<List<ContactsFromPhone>> = _contactosEmergencia
 
-    private val _ubicacionesRapidas = MutableLiveData(emptyList<Marcador>())
-    val ubicacionesRapidas: LiveData<List<Marcador>> = _ubicacionesRapidas
 
     private val _marcadores = MutableLiveData(emptyList<MarcadorEntity>())
     val marcadores: LiveData<List<MarcadorEntity>> = _marcadores
@@ -54,7 +48,6 @@ class HomeViewModel @Inject constructor(
     val currentLocation: LiveData<LatLng?> = _currentLocation
 
     val selectedContacts = MutableStateFlow<List<ContactsFromPhone>>(emptyList())
-    val selectedAddresses = MutableStateFlow<List<Marcador>>(emptyList())
     val marcadorSeleccionado = MutableStateFlow<List<MarcadorEntity>>(emptyList())
 
 
@@ -78,7 +71,6 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch {
 
             _contactosEmergencia.value = contactRepository.getAll()
-            _ubicacionesRapidas.value = ubicacionRepository.getUbicacionesRapidas()
             _marcadores.value = marcadorRepository.getAllMarcador()
             _marcadoresFav.value = marcadorRepository.getAllFavMarcador()
 
@@ -110,11 +102,6 @@ class HomeViewModel @Inject constructor(
 
     }
 
-    fun ubicacionSeleccionada(ubicacion: Marcador) {
-        selectedAddresses.value = selectedAddresses.value + ubicacion
-        textButtomAgregarSeleccionados.value = "Agregar a ubicaciones rapidas"
-        isButtomShow.value = true
-    }
 
     fun marcadorSeleccionado(marcador: MarcadorEntity) {
         marcadorSeleccionado.value = marcadorSeleccionado.value + marcador
@@ -124,13 +111,6 @@ class HomeViewModel @Inject constructor(
         Log.i("MARCADOR_DB", "Seleccionados: ${marcadorSeleccionado.value}")
     }
 
-    fun ubicacionDesSeleccionada(ubicacion: Marcador) {
-        selectedAddresses.value = selectedAddresses.value - ubicacion
-        if (selectedAddresses.value.isEmpty()) {
-            isButtomShow.value = false
-        }
-
-    }
 
     fun marcadorDeseleccionado(marcador: MarcadorEntity) {
         marcadorSeleccionado.value = marcadorSeleccionado.value - marcador
@@ -147,12 +127,6 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    fun eliminarUbicacionRapida(ubicacion: Marcador) {
-        viewModelScope.launch {
-            ubicacionRepository.borrarUbicacion(ubicacion)
-            _ubicacionesRapidas.value = ubicacionRepository.getUbicacionesRapidas()
-        }
-    }
 
     fun cambiarEstadoFav(nuevo: MarcadorEntity) {
         viewModelScope.launch {
