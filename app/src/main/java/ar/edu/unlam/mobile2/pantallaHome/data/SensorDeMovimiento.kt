@@ -7,9 +7,10 @@ import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import androidx.lifecycle.MutableLiveData
+import javax.inject.Inject
 
 
-class SensorDeMovimiento(val context: Context) : SensorEventListener {
+class SensorDeMovimiento @Inject constructor(val context: Context) : SensorEventListener {
 
     private lateinit var sensorManager: SensorManager
     var sensorState = MutableLiveData(false)

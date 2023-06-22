@@ -85,7 +85,6 @@ class HomeViewModel @Inject constructor(
         selectedContacts.value = selectedContacts.value + contacto
         textButtomAgregarSeleccionados.value = "Agregar a contactos de emergencia"
         isButtomShow.value = true
-
     }
 
     fun contactoDesSeleccionado(contacto: ContactsFromPhone) {

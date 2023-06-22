@@ -100,7 +100,7 @@ fun MapScreen(
 ) {
     val initialUbication = LatLng(currentLocation.latitude, currentLocation.longitude)
 
-    val mapProperties by remember { mutableStateOf(MapProperties(mapType = MapType.HYBRID, isMyLocationEnabled = true)) }
+    val mapProperties by remember { mutableStateOf(MapProperties(mapType = MapType.NORMAL, isMyLocationEnabled = true)) }
 
     val uiSettings by remember { mutableStateOf(MapUiSettings(
         rotationGesturesEnabled = false ,

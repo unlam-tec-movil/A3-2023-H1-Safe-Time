@@ -89,7 +89,5 @@ object MainModule {
         hostnameVerifier(HostnameVerifier { _, _ -> true })
         return this
 
-        //@Binds
-        //abstract fun bindRoutesRepository(routeResRepository: RoutesRestRepository): RouteRepository
     }
 }
