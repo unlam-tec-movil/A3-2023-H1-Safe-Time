@@ -26,6 +26,10 @@ object MarcadoresFijos {
             -58.557518,
             "Av. Brig. Gral. Juan Manuel de Rosas 3910"
         )
-
     )
+
+
+    fun cambiarEstado(marcadorEntity: MarcadorEntity) {
+        marcadorEntity.fav = !marcadorEntity.fav
+    }
 }

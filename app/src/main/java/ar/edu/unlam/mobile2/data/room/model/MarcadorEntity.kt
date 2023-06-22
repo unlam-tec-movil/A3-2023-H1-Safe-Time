@@ -11,5 +11,5 @@ data class MarcadorEntity(
     @ColumnInfo(name = "latitud") val latitud: Double = 0.0,
     @ColumnInfo(name = "longitud") val longitud: Double = 0.0,
     @ColumnInfo(name = "dirección") val direccion: String = "",
-    @ColumnInfo(name = "favorito") val fav: Boolean = false
+    @ColumnInfo(name = "favorito") var fav: Boolean = false
 )

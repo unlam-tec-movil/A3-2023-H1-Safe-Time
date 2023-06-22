@@ -161,7 +161,11 @@ fun ContentHome(navController: NavController, viewModel: HomeViewModel) {
                     viewModel.nuevaUbicacionSeleccionadaEnMapa(it)
                     navController.navigate(route = AppScreens.MapScreen.route)
                 },
-                onClickEliminarUbicacion = { viewModel.cambiarEstadoFav(it) }
+                onClickEliminarUbicacion = {
+                    if(it.fav){
+                    viewModel.cambiarEstadoFav(it)
+                    }
+                }
             )
 
         }
