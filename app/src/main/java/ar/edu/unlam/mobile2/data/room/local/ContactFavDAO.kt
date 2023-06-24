@@ -21,6 +21,9 @@ interface ContactFavDAO {
     @Query("SELECT * FROM contactosfav")
     fun getAll(): List<ContactsFromPhone>
 
+    @Query("DELETE FROM contactosfav WHERE number LIKE :number AND `default` = 0")
+    fun trueDelete(number: String)
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insert(new: ContactsFromPhone)
 

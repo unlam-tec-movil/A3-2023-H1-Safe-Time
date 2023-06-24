@@ -29,7 +29,11 @@ object MarcadoresFijos {
     )
 
 
-    fun cambiarEstado(marcadorEntity: MarcadorEntity) {
-        marcadorEntity.fav = !marcadorEntity.fav
+    fun marcarFavorito(marcadorEntity: MarcadorEntity) {
+        marcadorEntity.fav = true
+    }
+
+    fun desmarcarFavorito(marcadorEntity: MarcadorEntity) {
+        marcadorEntity.fav = false
     }
 }

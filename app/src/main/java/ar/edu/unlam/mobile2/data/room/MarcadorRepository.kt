@@ -1,5 +1,6 @@
 package ar.edu.unlam.mobile2.data.room
 
+import androidx.room.Query
 import ar.edu.unlam.mobile2.data.room.local.MarcadorDAO
 import ar.edu.unlam.mobile2.data.room.model.MarcadorEntity
 import ar.edu.unlam.mobile2.pantallaMapa.data.repository.MarcadoresFijos
@@ -10,7 +11,7 @@ class MarcadorRepository @Inject constructor(
 ) {
     init {
 
-        if(getAllMarcador().isEmpty()) {
+        if (getAllMarcador().isEmpty()) {
             insertAll(MarcadoresFijos.marcadoresFijos)
         }
     }
@@ -27,7 +28,9 @@ class MarcadorRepository @Inject constructor(
 
     fun update(marcadorEntity: MarcadorEntity) = marcadorDao.update(marcadorEntity)
 
-    fun updateFavorito(nombre: String) = marcadorDao.updateFavorito(nombre)
+    fun noEsFavorito(nombre: String) = marcadorDao.noEsFavorito(nombre)
+
+    fun esFavorito(name: String) = marcadorDao.esFavorito(name)
 
     fun delete(marcadorEntity: MarcadorEntity) = marcadorDao.delete(marcadorEntity)
 

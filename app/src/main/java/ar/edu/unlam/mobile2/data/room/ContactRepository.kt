@@ -12,6 +12,7 @@ class ContactRepository @Inject constructor(
     init {
         insertAll(ContactosDeEmergencia.contactosDeEmergencia)
     }
+
     fun getByName(name: String): ContactsFromPhone = contactFavDAO.getByName(name)
 
     fun getByNumber(number: String): ContactsFromPhone = contactFavDAO.getByNumber(number)
@@ -27,6 +28,8 @@ class ContactRepository @Inject constructor(
     fun updateAll(updates: List<ContactsFromPhone>) = contactFavDAO.updateAll(updates)
 
     fun delete(remove: ContactsFromPhone) = contactFavDAO.delete(remove)
+
+    fun trueDelete(name: String) = contactFavDAO.trueDelete(name)
 
     fun deleteAll(removes: List<ContactsFromPhone>) = contactFavDAO.deleteAll(removes)
 

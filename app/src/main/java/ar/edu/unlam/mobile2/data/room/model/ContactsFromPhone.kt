@@ -14,5 +14,6 @@ data class ContactsFromPhone(
     @ColumnInfo("number")
     val number: String = "",
     @ColumnInfo("imagen")
-    @DrawableRes val imagen: Int = R.drawable.ic_launcher_foreground
+    @DrawableRes val imagen: Int = R.drawable.ic_launcher_foreground,
+    @ColumnInfo(name = "default") val esDefault : Boolean = false
 )

@@ -4,8 +4,13 @@ import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandHorizontally
+import androidx.compose.animation.shrinkHorizontally
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -54,6 +59,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
@@ -143,7 +149,17 @@ fun ContentHome(navController: NavController, viewModel: HomeViewModel) {
                         launcher.launch(Manifest.permission.CALL_PHONE)
                     }
                 }
-            ) { viewModel.eliminarContactoEmergencia(it) }
+            ) {
+                if (!it.esDefault) {
+                    viewModel.eliminarContactoEmergencia(it)
+                } else {
+                    Toast.makeText(
+                        context.applicationContext,
+                        "IMPOSIBLE ELIMINAR",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            }
         }
 
         item {
@@ -162,9 +178,7 @@ fun ContentHome(navController: NavController, viewModel: HomeViewModel) {
                     navController.navigate(route = AppScreens.MapScreen.route)
                 },
                 onClickEliminarUbicacion = {
-                    if(it.fav){
-                    viewModel.cambiarEstadoFav(it)
-                    }
+                    viewModel.desmarcarFavorito(it)
                 }
             )
 
@@ -251,7 +265,9 @@ fun FilaContactos(
             ContactItem(
                 contact = it,
                 onClickLlamar = { onClickLlamar(it.number) }
-            ) { onClickEliminarContacto(it) }
+            ) {
+                onClickEliminarContacto(it)
+            }
         }
 
         item {
@@ -521,10 +537,3 @@ fun UbicationItem(
         }
     }
 }
-
-
-
-
-
-
-

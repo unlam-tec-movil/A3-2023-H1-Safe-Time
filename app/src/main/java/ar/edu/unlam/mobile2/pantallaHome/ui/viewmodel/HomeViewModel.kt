@@ -1,9 +1,11 @@
 package ar.edu.unlam.mobile2.pantallaHome.ui.viewmodel
 
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -15,6 +17,7 @@ import ar.edu.unlam.mobile2.pantallaMapa.data.repository.MarcadoresFijos
 import ar.edu.unlam.mobile2.pantallaMapa.domain.RouteServices
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.PolylineOptions
+import dagger.hilt.android.internal.Contexts
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
@@ -99,7 +102,6 @@ class HomeViewModel @Inject constructor(
 
     }
 
-
     fun marcadorSeleccionado(marcador: MarcadorEntity) {
         marcadorSeleccionado.value = marcadorSeleccionado.value + marcador
         textButtomAgregarSeleccionados.value = "Agregar a ubicaciones rapidas"
@@ -119,18 +121,33 @@ class HomeViewModel @Inject constructor(
 
     fun eliminarContactoEmergencia(contact: ContactsFromPhone) {
         viewModelScope.launch {
-            contactRepository.delete(contact)
+            contactRepository.trueDelete(contact.number)
+            _contactosEmergencia.value = contactRepository.getAll()
+
+        }
+    }
+
+    fun agregarContactoEmergencia(contact: ContactsFromPhone) {
+        viewModelScope.launch {
+            contactRepository.insert(contact)
             _contactosEmergencia.value = contactRepository.getAll()
         }
     }
 
-
-    fun cambiarEstadoFav(nuevo: MarcadorEntity) {
+    fun marcarFavorito(nuevo: MarcadorEntity) {
         viewModelScope.launch {
-            marcadorRepository.updateFavorito(nuevo.nombre)
+            marcadorRepository.esFavorito(nuevo.nombre)
             _marcadoresFav.value = marcadorRepository.getAllFavMarcador()
         }
     }
+
+    fun desmarcarFavorito(nuevo: MarcadorEntity) {
+        viewModelScope.launch {
+            marcadorRepository.noEsFavorito(nuevo.nombre)
+            _marcadoresFav.value = marcadorRepository.getAllFavMarcador()
+        }
+    }
+
 
     fun agregarSeleccionados(valor: Int) {
         if (valor == 0) {
@@ -140,9 +157,8 @@ class HomeViewModel @Inject constructor(
         } else {
             marcadorSeleccionado.value.forEach {
 
-                marcadorRepository.updateFavorito(it.nombre)
-                MarcadoresFijos.cambiarEstado(it)
-                _marcadoresFav.value = marcadorRepository.getAllFavMarcador()
+                marcarFavorito(it)
+                MarcadoresFijos.marcarFavorito(it)
             }
             marcadorSeleccionado.value = emptyList()
         }
