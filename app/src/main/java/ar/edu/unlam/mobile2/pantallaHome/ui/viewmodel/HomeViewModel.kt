@@ -79,7 +79,7 @@ class HomeViewModel @Inject constructor(
             _contactosEmergencia.value = contactRepository.getAll()
             _marcadores.value = marcadorRepository.getAllMarcador()
             _marcadoresFav.value = marcadorRepository.getAllFavMarcador()
-            _ubicacionMapa.value = MarcadorEntity("Default",0.0,0.0,"",false)
+            _ubicacionMapa.value = MarcadorEntity("Marque su destino.",0.0,0.0,"",false)
 
         }
     }
