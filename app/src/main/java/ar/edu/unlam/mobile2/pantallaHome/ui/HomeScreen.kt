@@ -3,14 +3,11 @@ package ar.edu.unlam.mobile2.pantallaHome.ui
 import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Camera
 import android.net.Uri
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.expandHorizontally
-import androidx.compose.animation.shrinkHorizontally
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -20,7 +17,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -37,7 +33,6 @@ import androidx.compose.material.icons.filled.Call
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Divider
@@ -48,6 +43,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
@@ -59,15 +55,17 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.navigation.NavController
 import ar.edu.unlam.mobile2.data.room.model.ContactsFromPhone
@@ -77,6 +75,9 @@ import ar.edu.unlam.mobile2.navigation.AppScreens
 import ar.edu.unlam.mobile2.pantallaHome.ui.viewmodel.HomeViewModel
 import ar.edu.unlam.mobile2.pantallaMapa.ui.Bottombar
 import ar.edu.unlam.mobile2.pantallaMapa.ui.Toolbar
+import com.google.android.gms.vision.barcode.BarcodeDetector
+import com.google.mlkit.vision.barcode.common.Barcode
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -148,18 +149,23 @@ fun ContentHome(navController: NavController, viewModel: HomeViewModel) {
                     } else {
                         launcher.launch(Manifest.permission.CALL_PHONE)
                     }
+                },
+                onClickEliminarContacto = {
+                    if (!it.esDefault) {
+                        viewModel.eliminarContactoEmergencia(it)
+                    } else {
+                        Toast.makeText(
+                            context.applicationContext,
+                            "IMPOSIBLE ELIMINAR",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                },
+                onClickCompartirContacto = {
+                    viewModel.informacionACompartir(it)
+                    viewModel.onCompartirClick()
                 }
-            ) {
-                if (!it.esDefault) {
-                    viewModel.eliminarContactoEmergencia(it)
-                } else {
-                    Toast.makeText(
-                        context.applicationContext,
-                        "IMPOSIBLE ELIMINAR",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                }
-            }
+            )
         }
 
         item {
@@ -179,7 +185,12 @@ fun ContentHome(navController: NavController, viewModel: HomeViewModel) {
                 },
                 onClickEliminarUbicacion = {
                     viewModel.desmarcarFavorito(it)
+                },
+                onClickCompartirUbicacion = {
+                    viewModel.informacionACompartir(it)
+                    viewModel.onCompartirClick()
                 }
+
             )
 
         }
@@ -189,43 +200,24 @@ fun ContentHome(navController: NavController, viewModel: HomeViewModel) {
         }
 
         item {
-            BotonEmergencia(
-                onClickEmergencia = { viewModel.onEmergencyClick() },
-                isDialogShown = isDialogShow,
-                onDismissDialog = { viewModel.onDismissDialog() },
-                infoQR = viewModel.infoQr
-            )
+            if (isDialogShow){
+                QRDialog(
+                    onDismiss = { viewModel.onDismissDialog() },
+                    info = viewModel.infoQr
+                )
+            }
+
         }
+        
+        item { 
+            Button(onClick = { viewModel.openScanClick()}) {
+                Text(text = "SCANEAR QR")
+                
+            }
+        }
+
     }
 
-}
-
-
-@Composable
-fun BotonEmergencia(
-    onClickEmergencia: () -> Unit,
-    isDialogShown: Boolean,
-    onDismissDialog: () -> Unit,
-    infoQR: String,
-) {
-
-    Button(
-        onClick = { onClickEmergencia() }, modifier = Modifier
-            .height(height = 75.dp)
-            .padding(2.dp),
-        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error),
-        shape = RoundedCornerShape(8.dp)
-    )
-    {
-        Text(text = "EMERGENCIA", style = TextStyle(fontSize = 25.sp))
-    }
-
-    if (isDialogShown) {
-        QRDialog(
-            onDismiss = { onDismissDialog() },
-            info = infoQR
-        )
-    }
 }
 
 
@@ -251,7 +243,8 @@ fun FilaContactos(
     contacts: List<ContactsFromPhone>,
     onClickAgregar: () -> Unit,
     onClickLlamar: (numero: String) -> Unit,
-    onClickEliminarContacto: (contacto: ContactsFromPhone) -> Unit
+    onClickEliminarContacto: (contacto: ContactsFromPhone) -> Unit,
+    onClickCompartirContacto: (contacto: ContactsFromPhone) -> Unit
 ) {
     LazyRow(
         modifier = Modifier
@@ -264,10 +257,9 @@ fun FilaContactos(
         items(contacts) {
             ContactItem(
                 contact = it,
-                onClickLlamar = { onClickLlamar(it.number) }
-            ) {
-                onClickEliminarContacto(it)
-            }
+                onClickLlamar = { onClickLlamar(it.number) },
+                onClickEliminarContacto = { onClickEliminarContacto(it) },
+                onClickCompartirContacto = { onClickCompartirContacto(it)})
         }
 
         item {
@@ -294,9 +286,9 @@ fun FilaContactos(
 fun ContactItem(
     contact: ContactsFromPhone,
     onClickLlamar: () -> Unit,
-    onClickEliminarContacto: () -> Unit
+    onClickEliminarContacto: () -> Unit,
+    onClickCompartirContacto: () -> Unit
 ) {
-    var isMenuExpanded by remember { mutableStateOf(false) }
 
     Box(Modifier.fillMaxSize()) {
         Card(
@@ -353,43 +345,55 @@ fun ContactItem(
                         )
                     }
                 }
-
-
             }
         }
-        if (isMenuExpanded) {
-            Box(
-                modifier = Modifier
-                    .align(Alignment.TopStart)
-                    .padding(end = 8.dp)
+        MenuOpciones(
+            modifier = Modifier
+                .align(Alignment.TopStart)
+                .padding(end = 8.dp),
+            modifierIcon = Modifier.align(Alignment.TopEnd),
+            onClickEliminar= { onClickEliminarContacto()},
+            onClickCompartir = {onClickCompartirContacto()}
+        )
+    }
+}
+
+
+@Composable
+fun MenuOpciones(modifier: Modifier,
+                 modifierIcon: Modifier,
+                 onClickEliminar: () -> Unit,
+                 onClickCompartir: () -> Unit) {
+    var isMenuExpanded by remember { mutableStateOf(false) }
+
+    if (isMenuExpanded) {
+        Box(
+            modifier = modifier
+        ) {
+            DropdownMenu(
+                expanded = true,
+                onDismissRequest = { isMenuExpanded = false }
             ) {
-                DropdownMenu(
-                    expanded = true,
-                    onDismissRequest = { isMenuExpanded = false }
-                ) {
-                    DropdownMenuItem(onClick = {
-                        // Realizar acción de editar
-                        isMenuExpanded = false
-                    }) {
-                        Text("Editar")
-                    }
-                    DropdownMenuItem(onClick = {
-                        onClickEliminarContacto()
-                        isMenuExpanded = false
-                    }) {
-                        Text("Eliminar")
-                    }
+                DropdownMenuItem(onClick = {
+                    onClickCompartir()
+                    isMenuExpanded = false
+                }) {
+                    Text("Compartir QR")
+                }
+                DropdownMenuItem(onClick = {
+                    onClickEliminar()
+                    isMenuExpanded = false
+                }) {
+                    Text("Eliminar")
                 }
             }
         }
-        IconButton(
-            onClick = { isMenuExpanded = !isMenuExpanded },
-            modifier = Modifier
-                .align(Alignment.TopEnd)
-                .padding()
-        ) {
-            Icon(Icons.Default.MoreVert, contentDescription = "Más opciones")
-        }
+    }
+    IconButton(
+        onClick = { isMenuExpanded = !isMenuExpanded },
+        modifier = modifierIcon
+    ) {
+        Icon(Icons.Default.MoreVert, contentDescription = "Más opciones")
     }
 }
 
@@ -415,7 +419,8 @@ fun FilaUbicaciones(
     ubicacion: List<MarcadorEntity>,
     onClickAgregarUbi: () -> Unit,
     onClickEliminarUbicacion: (ubicacion: MarcadorEntity) -> Unit,
-    onClickIrMapa: (ubicacion: MarcadorEntity) -> Unit
+    onClickIrMapa: (ubicacion: MarcadorEntity) -> Unit,
+    onClickCompartirUbicacion:(ubicacion:MarcadorEntity)-> Unit
 ) {
 
     LazyRow(
@@ -429,7 +434,8 @@ fun FilaUbicaciones(
             UbicationItem(
                 ubicacion = it,
                 onClickIrMapa = { onClickIrMapa(it) },
-                onClickEliminarUbicacion = { onClickEliminarUbicacion(it) }
+                onClickEliminarUbicacion = { onClickEliminarUbicacion(it) },
+                onClickCompartirUbicacion = {onClickCompartirUbicacion(it)}
             )
         }
 
@@ -459,12 +465,11 @@ fun FilaUbicaciones(
 fun UbicationItem(
     ubicacion: MarcadorEntity,
     onClickIrMapa: () -> Unit,
-    onClickEliminarUbicacion: () -> Unit
+    onClickEliminarUbicacion: () -> Unit,
+    onClickCompartirUbicacion: () -> Unit
 ) {
 
     Box(modifier = Modifier.fillMaxSize()) {
-
-        var isMenuExpanded by remember { mutableStateOf(false) }
 
         Card(
             modifier = Modifier
@@ -502,38 +507,13 @@ fun UbicationItem(
                 )
             }
         }
-        if (isMenuExpanded) {
-            Box(
-                modifier = Modifier
-                    .align(Alignment.TopStart)
-                    .padding(end = 8.dp)
-            ) {
-                DropdownMenu(
-                    expanded = true,
-                    onDismissRequest = { isMenuExpanded = false }
-                ) {
-                    DropdownMenuItem(onClick = {
-                        // Realizar acción de editar
-                        isMenuExpanded = false
-                    }) {
-                        Text("Editar")
-                    }
-                    DropdownMenuItem(onClick = {
-                        onClickEliminarUbicacion()
-                        isMenuExpanded = false
-                    }) {
-                        Text("Eliminar")
-                    }
-                }
-            }
-        }
-        IconButton(
-            onClick = { isMenuExpanded = !isMenuExpanded },
+        MenuOpciones(
             modifier = Modifier
-                .align(Alignment.TopEnd)
-                .padding()
-        ) {
-            Icon(Icons.Default.MoreVert, contentDescription = "Más opciones")
-        }
+                .align(Alignment.TopStart)
+                .padding(end = 8.dp),
+            modifierIcon = Modifier.align(Alignment.TopEnd),
+            onClickEliminar ={ onClickEliminarUbicacion() },
+        onClickCompartir = {onClickCompartirUbicacion()})
     }
 }
+

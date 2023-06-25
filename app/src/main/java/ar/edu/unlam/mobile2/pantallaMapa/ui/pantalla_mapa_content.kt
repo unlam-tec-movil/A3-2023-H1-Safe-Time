@@ -144,7 +144,7 @@ fun MapScreen(
                 val currentPolylinePoints = polylinePoints.filter { it != initialUbication }
                 Polyline(
                     points = currentPolylinePoints,
-                    color = Color(0xFF4285F4), // Color azul de Google Maps
+                    color = Color(0xFF4285F4),
                     width = 5.dp.value
                 )
 
@@ -157,9 +157,9 @@ fun MapScreen(
             Circle(
                 center = initialUbication,
                 radius = 10.0,
-                fillColor = Color(0x664285F4), // Color azul con transparencia de Google Maps
+                fillColor = Color(0x664285F4),
                 strokeWidth = 2.dp.value,
-                strokeColor = Color(0xFF4285F4) // Color del borde del círculo
+                strokeColor = Color(0xFF4285F4)
             )
         }
     }
@@ -217,7 +217,7 @@ fun ViewContainer(
 
 
 
-            MapScreen(destino, currentLocation, polylineOptions)
+            MapScreen(destino?:LatLng(0.0,0.0), currentLocation, polylineOptions)
 
 
             Spacer(modifier = Modifier.size(width = 0.dp, height = 5.dp))

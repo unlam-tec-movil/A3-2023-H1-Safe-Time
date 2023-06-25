@@ -17,6 +17,7 @@ import ar.edu.unlam.mobile2.pantallaMapa.data.repository.MarcadoresFijos
 import ar.edu.unlam.mobile2.pantallaMapa.domain.RouteServices
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.PolylineOptions
+import com.google.gson.Gson
 import dagger.hilt.android.internal.Contexts
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -31,6 +32,9 @@ class HomeViewModel @Inject constructor(
     private val marcadorRepository: ar.edu.unlam.mobile2.data.room.MarcadorRepository
 
 ) : ViewModel() {
+
+    private val _openScan = MutableLiveData<Boolean>()
+    val openScan: LiveData<Boolean> =_openScan
 
     private val _polylineOptions = MutableLiveData<PolylineOptions?>()
     val polylineOptions: LiveData<PolylineOptions?> = _polylineOptions
@@ -75,12 +79,13 @@ class HomeViewModel @Inject constructor(
             _contactosEmergencia.value = contactRepository.getAll()
             _marcadores.value = marcadorRepository.getAllMarcador()
             _marcadoresFav.value = marcadorRepository.getAllFavMarcador()
+            _ubicacionMapa.value = MarcadorEntity("Default",0.0,0.0,"",false)
 
         }
     }
 
 
-    fun onEmergencyClick() {
+    fun onCompartirClick() {
         isDialogShown.value = true
     }
 
@@ -173,6 +178,7 @@ class HomeViewModel @Inject constructor(
     fun nuevaUbicacionSeleccionadaEnMapa(ubicacion: MarcadorEntity) {
         _ubicacionMapa.value = ubicacion
         createRoute()
+
     }
 
     fun definirPestaña(tab: Int) {
@@ -208,8 +214,14 @@ class HomeViewModel @Inject constructor(
             contactosFromPhone.value?.plus(ContactsFromPhone(name, number))
     }
 
+    fun informacionACompartir(info: Any) {
+        val gson = Gson()
+        infoQr = gson.toJson(info)
+    }
 
-    private val _isLocationPermissionGranted = MutableLiveData(false)
-    val isLocationPermissionGranted: LiveData<Boolean> = _isLocationPermissionGranted
+    fun openScanClick() {
+        _openScan.value=true
+    }
+
 
 }

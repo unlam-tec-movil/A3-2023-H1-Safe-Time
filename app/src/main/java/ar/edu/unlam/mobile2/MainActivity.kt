@@ -5,6 +5,7 @@ package ar.edu.unlam.mobile2
 import android.Manifest
 import android.annotation.SuppressLint
 import android.content.ContentResolver
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.database.Cursor
 import android.location.Location
@@ -18,8 +19,16 @@ import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.res.integerArrayResource
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.lifecycleScope
+import ar.edu.unlam.mobile2.data.room.model.ContactsFromPhone
+import ar.edu.unlam.mobile2.data.room.model.MarcadorEntity
 import ar.edu.unlam.mobile2.navigation.AppNavigation
 import ar.edu.unlam.mobile2.pantallaHome.data.SensorDeMovimiento
 import ar.edu.unlam.mobile2.pantallaHome.ui.viewmodel.HomeViewModel
@@ -27,6 +36,12 @@ import com.example.compose.AppTheme
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.model.LatLng
+import com.google.gson.Gson
+import com.google.gson.JsonObject
+import com.google.gson.JsonSyntaxException
+import com.google.i18n.phonenumbers.NumberParseException
+import com.google.i18n.phonenumbers.PhoneNumberUtil
+import com.google.zxing.integration.android.IntentIntegrator
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -34,6 +49,7 @@ class MainActivity : ComponentActivity() {
     private val viewModel by viewModels<HomeViewModel>()
     private val sensor = SensorDeMovimiento(this)
     private lateinit var fusedLocationClient: FusedLocationProviderClient
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
@@ -46,8 +62,66 @@ class MainActivity : ComponentActivity() {
             }
             getCurrentLocation()
             requestContactPermissions()
+            viewModel.openScan.observe(LocalLifecycleOwner.current){
+                if (it){
+                    initScanner()
+                }
+            }
         }
     }
+
+    private fun initScanner(){
+       val integrator = IntentIntegrator(this)
+        integrator.setDesiredBarcodeFormats(IntentIntegrator.QR_CODE)
+        integrator.setPrompt("Coloque el codigo QR en el interior del rectangulo del visor para scanear")
+        integrator.initiateScan()
+    }
+
+    @Deprecated("Deprecated in Java")
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        val result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data)
+        if (result != null) {
+            if (result.contents == null) {
+                Toast.makeText(this, "CANCELADO", Toast.LENGTH_SHORT).show()
+            } else {
+                val gson = Gson()
+                val scannedValue = result.contents
+
+                // Verifica si es una ubicacion o un contacto
+                if (isContactJson(scannedValue)) {
+                    try {
+                        val contacto: ContactsFromPhone = gson.fromJson(scannedValue, ContactsFromPhone::class.java)
+                            viewModel.agregarContactoEmergencia(contacto)
+                            Toast.makeText(this, "Contacto guardado", Toast.LENGTH_SHORT).show()
+                    } catch (ex: JsonSyntaxException) {
+                        Toast.makeText(this, "Error al deserializar el contacto", Toast.LENGTH_SHORT).show()
+                    }
+                } else {
+                    try {
+                        val ubicacion: MarcadorEntity = gson.fromJson(scannedValue, MarcadorEntity::class.java)
+                        viewModel.marcarFavorito(ubicacion)
+                        Toast.makeText(this, "Ubicación guardada", Toast.LENGTH_SHORT).show()
+                    } catch (ex: JsonSyntaxException) {
+                        Toast.makeText(this, "Error al deserializar la ubicación", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+        } else {
+            super.onActivityResult(requestCode, resultCode, data)
+        }
+    }
+
+    private fun isContactJson(scannedValue: String): Boolean {
+        val gson = Gson()
+        try {
+            val jsonObject = gson.fromJson(scannedValue, JsonObject::class.java)
+            return jsonObject.has("number")
+        } catch (ex: JsonSyntaxException) {
+            return false
+        }
+    }
+
+
 
     @Deprecated("Deprecated in Java")
     override fun onRequestPermissionsResult(
