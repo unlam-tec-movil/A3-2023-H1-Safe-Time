@@ -94,7 +94,7 @@ class MainActivity : ComponentActivity() {
                             viewModel.agregarContactoEmergencia(contacto)
                             Toast.makeText(this, "Contacto guardado", Toast.LENGTH_SHORT).show()
                     } catch (ex: JsonSyntaxException) {
-                        Toast.makeText(this, "Error al deserializar el contacto", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this, "No corresponde a un contacto o ubicación", Toast.LENGTH_SHORT).show()
                     }
                 } else {
                     try {
@@ -102,7 +102,7 @@ class MainActivity : ComponentActivity() {
                         viewModel.marcarFavorito(ubicacion)
                         Toast.makeText(this, "Ubicación guardada", Toast.LENGTH_SHORT).show()
                     } catch (ex: JsonSyntaxException) {
-                        Toast.makeText(this, "Error al deserializar la ubicación", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this, "No corresponde a un contacto o ubicación", Toast.LENGTH_SHORT).show()
                     }
                 }
             }
