@@ -3,7 +3,6 @@ package ar.edu.unlam.mobile2.pantallaHome.ui
 import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.graphics.Camera
 import android.net.Uri
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -43,7 +42,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
@@ -55,17 +53,14 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.navigation.NavController
 import ar.edu.unlam.mobile2.data.room.model.ContactsFromPhone
@@ -75,8 +70,6 @@ import ar.edu.unlam.mobile2.navigation.AppScreens
 import ar.edu.unlam.mobile2.pantallaHome.ui.viewmodel.HomeViewModel
 import ar.edu.unlam.mobile2.pantallaMapa.ui.Bottombar
 import ar.edu.unlam.mobile2.pantallaMapa.ui.Toolbar
-import com.google.android.gms.vision.barcode.BarcodeDetector
-import com.google.mlkit.vision.barcode.common.Barcode
 
 
 @OptIn(ExperimentalMaterial3Api::class)

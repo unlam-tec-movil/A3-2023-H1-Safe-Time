@@ -14,9 +14,10 @@ import ar.edu.unlam.mobile2.pantallaHome.ui.HomeScreen
 import ar.edu.unlam.mobile2.pantallaHome.ui.viewmodel.HomeViewModel
 import ar.edu.unlam.mobile2.pantallaListaDeContactos.ui.ContactListScreen
 import ar.edu.unlam.mobile2.pantallaMapa.ui.PantallaMapa
+import ar.edu.unlam.mobile2.pantallaMapa.ui.viewmodel.MapViewModel
 
 @Composable
-fun AppNavigation(viewModel: HomeViewModel, sensor: SensorDeMovimiento) {
+fun AppNavigation(viewModel: HomeViewModel, mapViewModel: MapViewModel, sensor: SensorDeMovimiento) {
 
     val navController = rememberNavController()
 
@@ -38,7 +39,7 @@ fun AppNavigation(viewModel: HomeViewModel, sensor: SensorDeMovimiento) {
         }
         composable(route = AppScreens.MapScreen.route){
             viewModel.screenUbication = "map_screen"
-            PantallaMapa(navController,viewModel)
+            PantallaMapa(navController,viewModel, mapViewModel)
         }
         composable(route = AppScreens.ContactListScreen.route){
             viewModel.screenUbication = "list_screen"

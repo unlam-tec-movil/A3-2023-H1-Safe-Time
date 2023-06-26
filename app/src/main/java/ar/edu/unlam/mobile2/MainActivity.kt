@@ -1,7 +1,6 @@
 package ar.edu.unlam.mobile2
 
 
-
 import android.Manifest
 import android.annotation.SuppressLint
 import android.content.ContentResolver
@@ -32,6 +31,7 @@ import ar.edu.unlam.mobile2.data.room.model.MarcadorEntity
 import ar.edu.unlam.mobile2.navigation.AppNavigation
 import ar.edu.unlam.mobile2.pantallaHome.data.SensorDeMovimiento
 import ar.edu.unlam.mobile2.pantallaHome.ui.viewmodel.HomeViewModel
+import ar.edu.unlam.mobile2.pantallaMapa.ui.viewmodel.MapViewModel
 import com.example.compose.AppTheme
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
@@ -47,6 +47,7 @@ import dagger.hilt.android.AndroidEntryPoint
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     private val viewModel by viewModels<HomeViewModel>()
+    private val mapViewModel by viewModels<MapViewModel>()
     private val sensor = SensorDeMovimiento(this)
     private lateinit var fusedLocationClient: FusedLocationProviderClient
 
@@ -57,21 +58,21 @@ class MainActivity : ComponentActivity() {
         setContent {
             AppTheme() {
                 Surface(color = MaterialTheme.colorScheme.background) {
-                    AppNavigation(viewModel, sensor)
+                    AppNavigation(viewModel, mapViewModel, sensor)
                 }
             }
             getCurrentLocation()
             requestContactPermissions()
-            viewModel.openScan.observe(LocalLifecycleOwner.current){
-                if (it){
+            viewModel.openScan.observe(LocalLifecycleOwner.current) {
+                if (it) {
                     initScanner()
                 }
             }
         }
     }
 
-    private fun initScanner(){
-       val integrator = IntentIntegrator(this)
+    private fun initScanner() {
+        val integrator = IntentIntegrator(this)
         integrator.setDesiredBarcodeFormats(IntentIntegrator.QR_CODE)
         integrator.setPrompt("Coloque el codigo QR en el interior del rectangulo del visor para scanear")
         integrator.initiateScan()
@@ -90,19 +91,29 @@ class MainActivity : ComponentActivity() {
                 // Verifica si es una ubicacion o un contacto
                 if (isContactJson(scannedValue)) {
                     try {
-                        val contacto: ContactsFromPhone = gson.fromJson(scannedValue, ContactsFromPhone::class.java)
-                            viewModel.agregarContactoEmergencia(contacto)
-                            Toast.makeText(this, "Contacto guardado", Toast.LENGTH_SHORT).show()
+                        val contacto: ContactsFromPhone =
+                            gson.fromJson(scannedValue, ContactsFromPhone::class.java)
+                        viewModel.agregarContactoEmergencia(contacto)
+                        Toast.makeText(this, "Contacto guardado", Toast.LENGTH_SHORT).show()
                     } catch (ex: JsonSyntaxException) {
-                        Toast.makeText(this, "No corresponde a un contacto o ubicación", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(
+                            this,
+                            "No corresponde a un contacto o ubicación",
+                            Toast.LENGTH_SHORT
+                        ).show()
                     }
                 } else {
                     try {
-                        val ubicacion: MarcadorEntity = gson.fromJson(scannedValue, MarcadorEntity::class.java)
+                        val ubicacion: MarcadorEntity =
+                            gson.fromJson(scannedValue, MarcadorEntity::class.java)
                         viewModel.marcarFavorito(ubicacion)
                         Toast.makeText(this, "Ubicación guardada", Toast.LENGTH_SHORT).show()
                     } catch (ex: JsonSyntaxException) {
-                        Toast.makeText(this, "No corresponde a un contacto o ubicación", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(
+                            this,
+                            "No corresponde a un contacto o ubicación",
+                            Toast.LENGTH_SHORT
+                        ).show()
                     }
                 }
             }
@@ -120,7 +131,6 @@ class MainActivity : ComponentActivity() {
             return false
         }
     }
-
 
 
     @Deprecated("Deprecated in Java")
@@ -230,7 +240,11 @@ class MainActivity : ComponentActivity() {
                 if (location != null) {
                     val result = LatLng(location.latitude, location.longitude)
                     viewModel.setCurrentLocation(result)
-                    Toast.makeText(this, "se obtuvo la ubi y esta en el viewmodel", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        this,
+                        "se obtuvo la ubi y esta en el viewmodel",
+                        Toast.LENGTH_SHORT
+                    ).show()
                 } else {
                     // La ubicación es nula
                     Toast.makeText(this, "La ubicación es nula", Toast.LENGTH_SHORT).show()

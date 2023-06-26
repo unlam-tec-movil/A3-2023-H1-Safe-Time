@@ -1,5 +1,7 @@
 package ar.edu.unlam.mobile2.pantallaMapa.ui
 
+import android.location.Geocoder
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -37,10 +39,12 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -63,9 +67,13 @@ import ar.edu.unlam.mobile2.data.room.model.MarcadorEntity
 import ar.edu.unlam.mobile2.navigation.AppScreens
 import ar.edu.unlam.mobile2.pantallaHome.ui.viewmodel.HomeViewModel
 import ar.edu.unlam.mobile2.pantallaMapa.data.BottomNavItem
+import ar.edu.unlam.mobile2.pantallaMapa.ui.viewmodel.MapViewModel
+import com.google.android.gms.maps.CameraUpdateFactory
+import com.google.android.gms.maps.model.BitmapDescriptor
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.PolylineOptions
 import com.google.maps.android.compose.CameraPositionState
 import com.google.maps.android.compose.Circle
@@ -76,18 +84,25 @@ import com.google.maps.android.compose.MapUiSettings
 import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.Polyline
+import com.google.maps.android.compose.currentCameraPositionState
+import com.google.maps.android.compose.rememberCameraPositionState
+import kotlinx.coroutines.launch
 
 
 @Composable
-fun PantallaMapa(navController: NavController, viewModel: HomeViewModel) {
-    val polylineOptions by viewModel.polylineOptions.observeAsState()
-    val currentLocation by viewModel.currentLocation.observeAsState()
-    val destino by viewModel.ubicacionMapa.observeAsState()
+fun PantallaMapa(
+    navController: NavController,
+    homeViewModel: HomeViewModel,
+    mapViewModel: MapViewModel
+) {
+    val polylineOptions by homeViewModel.polylineOptions.observeAsState()
+    val currentLocation by homeViewModel.currentLocation.observeAsState()
+    val destino by homeViewModel.ubicacionMapa.observeAsState()
 
     currentLocation?.let {
         destino?.let { it1 ->
             ViewContainer(
-                navController, viewModel, it, polylineOptions,
+                navController, homeViewModel, mapViewModel, it, polylineOptions,
                 LatLng(it1.latitud, it1.longitud)
             )
         }
@@ -97,11 +112,14 @@ fun PantallaMapa(navController: NavController, viewModel: HomeViewModel) {
 
 @Composable
 fun MapScreen(
+    mapViewModel: MapViewModel,
     destino: LatLng,
     currentLocation: LatLng,
     polylineOptions: PolylineOptions?
 ) {
     val initialUbication = LatLng(currentLocation.latitude, currentLocation.longitude)
+
+    mapViewModel.geocoder = Geocoder(LocalContext.current)
 
     val mapProperties by remember {
         mutableStateOf(
@@ -121,6 +139,11 @@ fun MapScreen(
         )
     }
 
+    val scope = rememberCoroutineScope()
+    val posicionCamara = rememberCameraPositionState {
+        position = CameraPosition.fromLatLngZoom(initialUbication, 15f)
+    }
+
     Box(
         Modifier
             .padding(top = 5.dp)
@@ -134,10 +157,26 @@ fun MapScreen(
             modifier = Modifier
                 .size(width = 380.dp, height = 500.dp)
                 .padding(8.dp),
-            cameraPositionState = cameraUpdate(initialUbication, initialUbication),
+            cameraPositionState = posicionCamara,
             properties = mapProperties,
-            uiSettings = uiSettings
+            uiSettings = uiSettings, onMapLongClick = {
+                mapViewModel.getDireccion(it)
+                Log.i("MAP_LOG", "Te encontras en: ${mapViewModel.text}")
+                scope.launch {
+                    posicionCamara.animate(CameraUpdateFactory.newLatLng(it))
+                }
+            }
         ) {
+
+            LaunchedEffect(currentLocation) {
+                posicionCamara.animate(CameraUpdateFactory.newLatLng(currentLocation))
+            }
+
+            LaunchedEffect(destino) {
+                posicionCamara.animate(CameraUpdateFactory.newLatLng(destino))
+            }
+
+
             if (polylineOptions != null) {
                 val polylinePoints =
                     polylineOptions.points.map { LatLng(it.latitude, it.longitude) }
@@ -161,19 +200,9 @@ fun MapScreen(
                 strokeWidth = 2.dp.value,
                 strokeColor = Color(0xFF4285F4)
             )
+
         }
     }
-}
-
-
-private fun cameraUpdate(current: LatLng, next: LatLng): CameraPositionState {
-
-    if (current != next) {
-
-        return CameraPositionState(position = CameraPosition(next, 18.6f, 0f, 0f))
-    }
-
-    return CameraPositionState(position = CameraPosition(current, 18.6f, 0f, 0f))
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -181,6 +210,7 @@ private fun cameraUpdate(current: LatLng, next: LatLng): CameraPositionState {
 fun ViewContainer(
     navController: NavController,
     viewModel: HomeViewModel,
+    mapViewModel: MapViewModel,
     currentLocation: LatLng,
     polylineOptions: PolylineOptions?,
     destino: LatLng
@@ -217,7 +247,7 @@ fun ViewContainer(
 
 
 
-            MapScreen(destino?:LatLng(0.0,0.0), currentLocation, polylineOptions)
+            MapScreen(mapViewModel, destino ?: LatLng(0.0, 0.0), currentLocation, polylineOptions)
 
 
             Spacer(modifier = Modifier.size(width = 0.dp, height = 5.dp))
@@ -509,3 +539,4 @@ private fun selectorDeUbicacionesRegistradas(
     }
     return mSelectedUbi
 }
+
