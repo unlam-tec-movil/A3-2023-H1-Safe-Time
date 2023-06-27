@@ -59,6 +59,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
@@ -320,7 +321,10 @@ fun ContactItem(
                         text = contact.name,
                         fontWeight = FontWeight.Bold,
                         color = Color.White,
-                        modifier = Modifier.align(Alignment.CenterHorizontally)
+                        fontSize = 18.sp,
+                        modifier = Modifier.align(Alignment.CenterHorizontally),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
                     )
 
                     Text(
@@ -328,7 +332,9 @@ fun ContactItem(
                         color = Color.White,
                         modifier = Modifier
                             .padding(4.dp)
-                            .align(Alignment.CenterHorizontally)
+                            .align(Alignment.CenterHorizontally),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
                     )
 
                     IconButton(
@@ -475,36 +481,43 @@ fun UbicationItem(
         Card(
             modifier = Modifier
                 .size(width = 145.dp, height = 180.dp)
-                .clip(RoundedCornerShape(20.dp)),
+                .clip(RoundedCornerShape(20.dp))
+                .align(Alignment.Center),
             elevation = CardDefaults.elevatedCardElevation(10.dp),
             colors = CardDefaults.cardColors(MaterialTheme.colorScheme.primary),
             onClick = {}
         ) {
-            Spacer(modifier = Modifier.padding(top = 5.dp))
+            Spacer(modifier = Modifier.padding(top = 20.dp))
 
             Text(
                 text = ubicacion.nombre,
                 fontWeight = FontWeight.Bold,
                 color = Color.White,
-                modifier = Modifier.align(Alignment.CenterHorizontally)
+                fontSize = 18.sp,
+                modifier = Modifier.align(Alignment.CenterHorizontally),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
             )
             Text(
                 text = ubicacion.direccion,
                 color = Color.White,
                 modifier = Modifier
-                    .padding(4.dp)
-                    .align(Alignment.CenterHorizontally)
+                    .padding(10.dp)
+                    .align(Alignment.CenterHorizontally),
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
             )
             IconButton(
                 onClick = {
                     onClickIrMapa()
                 },
                 modifier = Modifier.align(Alignment.CenterHorizontally)
+                    .padding(top = 15.dp)
             ) {
                 Icon(
                     Icons.Default.LocationOn,
                     contentDescription = "Llamar",
-                    modifier = Modifier.size(45.dp)
+                    modifier = Modifier.size(50.dp)
                 )
             }
         }
