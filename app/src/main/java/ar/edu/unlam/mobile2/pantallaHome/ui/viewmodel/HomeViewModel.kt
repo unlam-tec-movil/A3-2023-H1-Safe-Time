@@ -1,11 +1,9 @@
 package ar.edu.unlam.mobile2.pantallaHome.ui.viewmodel
 
 import android.util.Log
-import android.widget.Toast
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -18,7 +16,6 @@ import ar.edu.unlam.mobile2.pantallaMapa.domain.RouteServices
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.PolylineOptions
 import com.google.gson.Gson
-import dagger.hilt.android.internal.Contexts
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
@@ -28,31 +25,19 @@ import javax.inject.Inject
 class HomeViewModel @Inject constructor(
 
     private val contactRepository: ContactRepository,
-    private val routeServices: RouteServices,
     private val marcadorRepository: ar.edu.unlam.mobile2.data.room.MarcadorRepository
 
 ) : ViewModel() {
 
     private val _openScan = MutableLiveData<Boolean>()
-    val openScan: LiveData<Boolean> =_openScan
-
-    private val _polylineOptions = MutableLiveData<PolylineOptions?>()
-    val polylineOptions: LiveData<PolylineOptions?> = _polylineOptions
+    val openScan: LiveData<Boolean> = _openScan
 
     private val _contactosEmergencia = MutableLiveData(emptyList<ContactsFromPhone>())
     val contactosEmergencia: LiveData<List<ContactsFromPhone>> = _contactosEmergencia
 
-    private val _marcadores = MutableLiveData(emptyList<MarcadorEntity>())
-    val marcadores: LiveData<List<MarcadorEntity>> = _marcadores
-
     private val _marcadoresFav = MutableLiveData(emptyList<MarcadorEntity>())
     val marcadoresFav: LiveData<List<MarcadorEntity>> = _marcadoresFav
 
-    private val _ubicacionMapa = MutableLiveData<MarcadorEntity>()
-    val ubicacionMapa: LiveData<MarcadorEntity> = _ubicacionMapa
-
-    private var _currentLocation = MutableLiveData<LatLng?>()
-    val currentLocation: LiveData<LatLng?> = _currentLocation
 
     val selectedContacts = MutableStateFlow<List<ContactsFromPhone>>(emptyList())
     val marcadorSeleccionado = MutableStateFlow<List<MarcadorEntity>>(emptyList())
@@ -77,9 +62,7 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch {
 
             _contactosEmergencia.value = contactRepository.getAll()
-            _marcadores.value = marcadorRepository.getAllMarcador()
             _marcadoresFav.value = marcadorRepository.getAllFavMarcador()
-            _ubicacionMapa.value = MarcadorEntity("Marque su destino.",0.0,0.0,"",false)
 
         }
     }
@@ -175,41 +158,13 @@ class HomeViewModel @Inject constructor(
         isButtomShow.value = false
     }
 
-    fun nuevaUbicacionSeleccionadaEnMapa(ubicacion: MarcadorEntity) {
-        _ubicacionMapa.value = ubicacion
-        createRoute()
-
-    }
 
     fun definirPestaña(tab: Int) {
         tabPestañas.value = tab
     }
 
 
-    fun createRoute() {
-
-
-        val stringCurrentLocation =
-            "${_currentLocation.value?.longitude},${currentLocation.value?.latitude}"
-
-        val stringDestino =
-            "${_ubicacionMapa.value?.longitud},${_ubicacionMapa.value?.latitud}"
-
-        _polylineOptions.value?.points?.clear()
-
-        viewModelScope.launch {
-            val response = routeServices.getRoutes(stringCurrentLocation, stringDestino)
-            _polylineOptions.value = response
-        }
-
-    }
-
-    fun setCurrentLocation(result: LatLng) {
-        _currentLocation.value = result
-    }
-
     fun setContactsFromPhone(name: String, number: String) {
-
         _contactosFromPhone.value =
             contactosFromPhone.value?.plus(ContactsFromPhone(name, number))
     }
@@ -220,7 +175,11 @@ class HomeViewModel @Inject constructor(
     }
 
     fun openScanClick() {
-        _openScan.value=true
+        _openScan.value = true
+    }
+
+    fun recargarMarcadoresFavoritos() {
+        _marcadoresFav.value = marcadorRepository.getAllFavMarcador()
     }
 
 

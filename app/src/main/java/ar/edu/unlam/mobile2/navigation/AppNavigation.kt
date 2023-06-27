@@ -23,7 +23,6 @@ fun AppNavigation(viewModel: HomeViewModel, mapViewModel: MapViewModel, sensor: 
 
     val sensorState by sensor.sensorState.observeAsState(false)
 
-
     if (sensorState == true) {
 
         QRDialog(info = viewModel.infoQr) {
@@ -35,7 +34,7 @@ fun AppNavigation(viewModel: HomeViewModel, mapViewModel: MapViewModel, sensor: 
     NavHost(navController = navController, startDestination =AppScreens.HomeScreen.route){
         composable(route = AppScreens.HomeScreen.route){
             viewModel.screenUbication = "home_screen"
-            HomeScreen(navController,viewModel)
+            HomeScreen(navController,viewModel, mapViewModel)
         }
         composable(route = AppScreens.MapScreen.route){
             viewModel.screenUbication = "map_screen"
@@ -45,7 +44,7 @@ fun AppNavigation(viewModel: HomeViewModel, mapViewModel: MapViewModel, sensor: 
             viewModel.screenUbication = "list_screen"
             val tab = viewModel.tabPestañas.value
             if (tab != null) {
-                ContactListScreen(navController,viewModel,tab)
+                ContactListScreen(navController,viewModel,mapViewModel,tab)
             }
         }
 

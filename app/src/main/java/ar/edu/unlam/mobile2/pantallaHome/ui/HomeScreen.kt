@@ -70,11 +70,12 @@ import ar.edu.unlam.mobile2.navigation.AppScreens
 import ar.edu.unlam.mobile2.pantallaHome.ui.viewmodel.HomeViewModel
 import ar.edu.unlam.mobile2.pantallaMapa.ui.Bottombar
 import ar.edu.unlam.mobile2.pantallaMapa.ui.Toolbar
+import ar.edu.unlam.mobile2.pantallaMapa.ui.viewmodel.MapViewModel
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen(navController: NavController, viewModel: HomeViewModel) {
+fun HomeScreen(navController: NavController, viewModel: HomeViewModel, mapViewModel: MapViewModel) {
 
     Scaffold(
         topBar = { Toolbar(navController) },
@@ -87,14 +88,18 @@ fun HomeScreen(navController: NavController, viewModel: HomeViewModel) {
                 .padding(0.5.dp),
             contentAlignment = Alignment.Center
         ) {
-            ContentHome(navController, viewModel)
+            ContentHome(navController, viewModel, mapViewModel)
 
         }
     }
 }
 
 @Composable
-fun ContentHome(navController: NavController, viewModel: HomeViewModel) {
+fun ContentHome(
+    navController: NavController,
+    viewModel: HomeViewModel,
+    mapViewModel: MapViewModel
+) {
 
     val contacts by viewModel.contactosEmergencia.observeAsState(initial = emptyList())
 
@@ -105,6 +110,7 @@ fun ContentHome(navController: NavController, viewModel: HomeViewModel) {
     val context = LocalContext.current
     val intent = remember { Intent(Intent.ACTION_CALL) }
 
+    viewModel.recargarMarcadoresFavoritos()
 
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
@@ -173,7 +179,7 @@ fun ContentHome(navController: NavController, viewModel: HomeViewModel) {
                     navController.navigate(route = AppScreens.ContactListScreen.route)
                 },
                 onClickIrMapa = {
-                    viewModel.nuevaUbicacionSeleccionadaEnMapa(it)
+                    mapViewModel.nuevaUbicacionSeleccionadaEnMapa(it)
                     navController.navigate(route = AppScreens.MapScreen.route)
                 },
                 onClickEliminarUbicacion = {
@@ -193,7 +199,7 @@ fun ContentHome(navController: NavController, viewModel: HomeViewModel) {
         }
 
         item {
-            if (isDialogShow){
+            if (isDialogShow) {
                 QRDialog(
                     onDismiss = { viewModel.onDismissDialog() },
                     info = viewModel.infoQr
@@ -201,11 +207,11 @@ fun ContentHome(navController: NavController, viewModel: HomeViewModel) {
             }
 
         }
-        
-        item { 
-            Button(onClick = { viewModel.openScanClick()}) {
+
+        item {
+            Button(onClick = { viewModel.openScanClick() }) {
                 Text(text = "SCANEAR QR")
-                
+
             }
         }
 
@@ -252,7 +258,7 @@ fun FilaContactos(
                 contact = it,
                 onClickLlamar = { onClickLlamar(it.number) },
                 onClickEliminarContacto = { onClickEliminarContacto(it) },
-                onClickCompartirContacto = { onClickCompartirContacto(it)})
+                onClickCompartirContacto = { onClickCompartirContacto(it) })
         }
 
         item {
@@ -345,18 +351,20 @@ fun ContactItem(
                 .align(Alignment.TopStart)
                 .padding(end = 8.dp),
             modifierIcon = Modifier.align(Alignment.TopEnd),
-            onClickEliminar= { onClickEliminarContacto()},
-            onClickCompartir = {onClickCompartirContacto()}
+            onClickEliminar = { onClickEliminarContacto() },
+            onClickCompartir = { onClickCompartirContacto() }
         )
     }
 }
 
 
 @Composable
-fun MenuOpciones(modifier: Modifier,
-                 modifierIcon: Modifier,
-                 onClickEliminar: () -> Unit,
-                 onClickCompartir: () -> Unit) {
+fun MenuOpciones(
+    modifier: Modifier,
+    modifierIcon: Modifier,
+    onClickEliminar: () -> Unit,
+    onClickCompartir: () -> Unit
+) {
     var isMenuExpanded by remember { mutableStateOf(false) }
 
     if (isMenuExpanded) {
@@ -413,7 +421,7 @@ fun FilaUbicaciones(
     onClickAgregarUbi: () -> Unit,
     onClickEliminarUbicacion: (ubicacion: MarcadorEntity) -> Unit,
     onClickIrMapa: (ubicacion: MarcadorEntity) -> Unit,
-    onClickCompartirUbicacion:(ubicacion:MarcadorEntity)-> Unit
+    onClickCompartirUbicacion: (ubicacion: MarcadorEntity) -> Unit
 ) {
 
     LazyRow(
@@ -428,7 +436,7 @@ fun FilaUbicaciones(
                 ubicacion = it,
                 onClickIrMapa = { onClickIrMapa(it) },
                 onClickEliminarUbicacion = { onClickEliminarUbicacion(it) },
-                onClickCompartirUbicacion = {onClickCompartirUbicacion(it)}
+                onClickCompartirUbicacion = { onClickCompartirUbicacion(it) }
             )
         }
 
@@ -505,8 +513,8 @@ fun UbicationItem(
                 .align(Alignment.TopStart)
                 .padding(end = 8.dp),
             modifierIcon = Modifier.align(Alignment.TopEnd),
-            onClickEliminar ={ onClickEliminarUbicacion() },
-        onClickCompartir = {onClickCompartirUbicacion()})
+            onClickEliminar = { onClickEliminarUbicacion() },
+            onClickCompartir = { onClickCompartirUbicacion() })
     }
 }
 

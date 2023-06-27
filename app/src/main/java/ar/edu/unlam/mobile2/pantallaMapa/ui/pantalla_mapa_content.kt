@@ -1,8 +1,10 @@
 package ar.edu.unlam.mobile2.pantallaMapa.ui
 
+import android.annotation.SuppressLint
 import android.location.Geocoder
 import android.util.Log
 import android.widget.Toast
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -24,9 +26,11 @@ import androidx.compose.material.icons.rounded.Call
 import androidx.compose.material.icons.rounded.Home
 import androidx.compose.material.icons.rounded.LocationOn
 import androidx.compose.material.icons.rounded.Settings
+import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -58,6 +62,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.toSize
@@ -69,13 +74,10 @@ import ar.edu.unlam.mobile2.pantallaHome.ui.viewmodel.HomeViewModel
 import ar.edu.unlam.mobile2.pantallaMapa.data.BottomNavItem
 import ar.edu.unlam.mobile2.pantallaMapa.ui.viewmodel.MapViewModel
 import com.google.android.gms.maps.CameraUpdateFactory
-import com.google.android.gms.maps.model.BitmapDescriptor
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.PolylineOptions
-import com.google.maps.android.compose.CameraPositionState
 import com.google.maps.android.compose.Circle
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.MapProperties
@@ -84,7 +86,6 @@ import com.google.maps.android.compose.MapUiSettings
 import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.Polyline
-import com.google.maps.android.compose.currentCameraPositionState
 import com.google.maps.android.compose.rememberCameraPositionState
 import kotlinx.coroutines.launch
 
@@ -95,15 +96,16 @@ fun PantallaMapa(
     homeViewModel: HomeViewModel,
     mapViewModel: MapViewModel
 ) {
-    val polylineOptions by homeViewModel.polylineOptions.observeAsState()
-    val currentLocation by homeViewModel.currentLocation.observeAsState()
-    val destino by homeViewModel.ubicacionMapa.observeAsState()
+    val polylineOptions by mapViewModel.polylineOptions.observeAsState()
+    val currentLocation by mapViewModel.userLocation.observeAsState()
+    val destino by mapViewModel.ubicacionMapa.observeAsState()
+    val nuevoMarker by mapViewModel.nuevoMarker.observeAsState(LatLng(0.0, 0.0))
 
     currentLocation?.let {
         destino?.let { it1 ->
             ViewContainer(
                 navController, homeViewModel, mapViewModel, it, polylineOptions,
-                LatLng(it1.latitud, it1.longitud)
+                LatLng(it1.latitud, it1.longitud), nuevoMarker
             )
         }
     }
@@ -115,7 +117,7 @@ fun MapScreen(
     mapViewModel: MapViewModel,
     destino: LatLng,
     currentLocation: LatLng,
-    polylineOptions: PolylineOptions?
+    polylineOptions: PolylineOptions?, nuevoMarker: LatLng?
 ) {
     val initialUbication = LatLng(currentLocation.latitude, currentLocation.longitude)
 
@@ -146,7 +148,7 @@ fun MapScreen(
 
     Box(
         Modifier
-            .padding(top = 5.dp)
+            .padding(5.dp)
             .background(
                 color = MaterialTheme.colorScheme.inversePrimary,
                 shape = RoundedCornerShape(20.dp)
@@ -159,23 +161,39 @@ fun MapScreen(
                 .padding(8.dp),
             cameraPositionState = posicionCamara,
             properties = mapProperties,
-            uiSettings = uiSettings, onMapLongClick = {
+            uiSettings = uiSettings,
+            onMapLongClick = {
                 mapViewModel.getDireccion(it)
                 Log.i("MAP_LOG", "Te encontras en: ${mapViewModel.text}")
                 scope.launch {
-                    posicionCamara.animate(CameraUpdateFactory.newLatLng(it))
+                    if (it != LatLng(0.0, 0.0)) {
+                        posicionCamara.animate(CameraUpdateFactory.newLatLng(it))
+                        mapViewModel.setNuevoMarker(it)
+                    }
                 }
             }
         ) {
 
             LaunchedEffect(currentLocation) {
-                posicionCamara.animate(CameraUpdateFactory.newLatLng(currentLocation))
+
+                if (currentLocation != LatLng(0.0, 0.0))
+                    posicionCamara.animate(CameraUpdateFactory.newLatLng(currentLocation))
             }
 
             LaunchedEffect(destino) {
-                posicionCamara.animate(CameraUpdateFactory.newLatLng(destino))
+
+                if (destino != LatLng(0.0, 0.0))
+                    posicionCamara.animate(CameraUpdateFactory.newLatLng(destino))
             }
 
+            if (nuevoMarker != LatLng(0.0, 0.0)) {
+
+                Marker(
+                    title = mapViewModel.text,
+                    state = MarkerState(nuevoMarker!!),
+                    icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)
+                )
+            }
 
             if (polylineOptions != null) {
                 val polylinePoints =
@@ -213,13 +231,14 @@ fun ViewContainer(
     mapViewModel: MapViewModel,
     currentLocation: LatLng,
     polylineOptions: PolylineOptions?,
-    destino: LatLng
+    destino: LatLng,
+    nuevoMarker: LatLng?
 
 ) {
 
     LocalContext.current.applicationContext
     var mUbicacionSeleccionada by remember {
-        mutableStateOf(viewModel.marcadores.value?.get(1))
+        mutableStateOf(mapViewModel.marcadores.value?.get(1))
     }
 
     Scaffold(
@@ -227,66 +246,55 @@ fun ViewContainer(
         bottomBar = { Bottombar(navController, viewModel) }) {
 
 
-        Column(
+        Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues = it)
-                .padding(top = 15.dp),
-            verticalArrangement = Arrangement.Top,
-            horizontalAlignment = Alignment.CenterHorizontally,
+                .padding(it)
         ) {
 
-
-            mUbicacionSeleccionada =
-                viewModel.marcadores.value?.let { it1 ->
-                    selectorDeUbicacionesRegistradas(
-                        it1,
-                        viewModel
-                    )
-                }
-
-
-
-            MapScreen(mapViewModel, destino ?: LatLng(0.0, 0.0), currentLocation, polylineOptions)
-
-
-            Spacer(modifier = Modifier.size(width = 0.dp, height = 5.dp))
-
-            Row(
+            Column(
                 modifier = Modifier
-                    .fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceAround
-
+                    .fillMaxSize()
+                    .padding(top = 8.dp),
+                verticalArrangement = Arrangement.Top,
+                horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                Row(
-                    modifier = Modifier
-                        .background(
-                            MaterialTheme.colorScheme.primary,
-                            shape = RoundedCornerShape(20.dp)
+
+                mUbicacionSeleccionada =
+                    mapViewModel.marcadores.value?.let { it1 ->
+                        selectorDeUbicacionesRegistradas(
+                            it1,
+                            viewModel, mapViewModel
                         )
-                        .size(width = 180.dp, height = 50.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Center
+                    }
+                MapScreen(
+                    mapViewModel,
+                    destino ?: LatLng(0.0, 0.0),
+                    currentLocation,
+                    polylineOptions,
+                    nuevoMarker
+                )
+                Spacer(modifier = Modifier.size(width = 0.dp, height = 5.dp))
+            }
 
-                ) {
+            if (nuevoMarker != LatLng(0.0, 0.0)) {
+                BotonMapa(
+                    agregarMarcadorAlaBDD = {
+                        if (nuevoMarker != null) {
+                            mapViewModel.agregarNuevoMarcador(
+                                MarcadorEntity(
+                                    nombre = "NUEVO",
+                                    nuevoMarker.latitude,
+                                    nuevoMarker.longitude,
+                                    direccion = mapViewModel.text
+                                )
+                            )
 
-                    CartelDistanciaDelPunto(distancia = 0.0)
-
-                }
-                Row(
-                    modifier = Modifier
-                        .background(
-                            MaterialTheme.colorScheme.primary,
-                            shape = RoundedCornerShape(20.dp)
-                        )
-                        .size(width = 180.dp, 50.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Center
-
-                ) {
-                    CartelLlegadaEstimada(tiempo = 0)
-                }
+                        }
+                        navController.navigate(AppScreens.ContactListScreen.route)
+                    },
+                    isShowButton = true
+                )
             }
         }
     }
@@ -470,15 +478,15 @@ private fun CartelLlegadaEstimada(tiempo: Int) {
 @Composable
 private fun selectorDeUbicacionesRegistradas(
     listaMarcadores: List<MarcadorEntity>,
-    viewModel: HomeViewModel
+    viewModel: HomeViewModel, mapViewModel: MapViewModel,
 ): MarcadorEntity? {
 
     var mExpanded by remember { mutableStateOf(false) }
 
     val options: List<MarcadorEntity> = listaMarcadores
 
-    val mSelectedUbi by viewModel.ubicacionMapa.observeAsState(
-        initial = viewModel.marcadores.value?.get(
+    val mSelectedUbi by mapViewModel.ubicacionMapa.observeAsState(
+        initial = mapViewModel.marcadores.value?.get(
             1
         )
     )
@@ -530,7 +538,7 @@ private fun selectorDeUbicacionesRegistradas(
                         mSelectedText = opcion.nombre
                         mExpanded = false
                         // mSelectedUbi = opcion
-                        viewModel.nuevaUbicacionSeleccionadaEnMapa(opcion)
+                        mapViewModel.nuevaUbicacionSeleccionadaEnMapa(opcion)
 
                     },
                     text = { Text(text = opcion.nombre) })
@@ -540,3 +548,36 @@ private fun selectorDeUbicacionesRegistradas(
     return mSelectedUbi
 }
 
+@SuppressLint("StateFlowValueCalledInComposition")
+@Composable
+fun BotonMapa(
+    agregarMarcadorAlaBDD: () -> Unit,
+    isShowButton: Boolean
+) {
+    Box(modifier = Modifier.fillMaxSize()) {
+        AnimatedVisibility(
+            isShowButton,
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+        ) {
+            androidx.compose.material.FloatingActionButton(
+                backgroundColor = MaterialTheme.colorScheme.primary,
+
+                onClick = {
+                    agregarMarcadorAlaBDD()
+                },
+                modifier = Modifier
+                    .align(Alignment.Center)
+                    .padding(16.dp)
+                    .size(200.dp, 60.dp)
+
+            ) {
+                Text(
+                    text = "Guardar marcador",
+                    textAlign = TextAlign.Center,
+                    color = MaterialTheme.colorScheme.onPrimary
+                )
+            }
+        }
+    }
+}

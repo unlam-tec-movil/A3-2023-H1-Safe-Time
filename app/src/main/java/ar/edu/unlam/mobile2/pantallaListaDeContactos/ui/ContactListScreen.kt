@@ -28,6 +28,7 @@ import androidx.compose.material.icons.filled.Call
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -56,17 +57,23 @@ import ar.edu.unlam.mobile2.navigation.AppScreens
 import ar.edu.unlam.mobile2.pantallaHome.ui.viewmodel.HomeViewModel
 import ar.edu.unlam.mobile2.pantallaMapa.ui.Bottombar
 import ar.edu.unlam.mobile2.pantallaMapa.ui.Toolbar
+import ar.edu.unlam.mobile2.pantallaMapa.ui.viewmodel.MapViewModel
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ContactListScreen(navController: NavController, viewModel: HomeViewModel, tab: Int) {
+fun ContactListScreen(
+    navController: NavController,
+    viewModel: HomeViewModel,
+    mapViewModel: MapViewModel,
+    tab: Int
+) {
 
     val isShowButton by viewModel.isButtomShow.observeAsState(initial = false)
     val context = LocalContext.current
     val actionDialIntent = Intent(Intent.ACTION_DIAL)
     val contactList by viewModel.contactosFromPhone.observeAsState(initial = emptyList())
-    val ubicacionList by viewModel.marcadores.observeAsState(initial = emptyList())
+    val ubicacionList by mapViewModel.marcadores.observeAsState(initial = emptyList())
 
 
     val launcher = rememberLauncherForActivityResult(
@@ -97,9 +104,18 @@ fun ContactListScreen(navController: NavController, viewModel: HomeViewModel, ta
                     isShowButton,
                     onClickAgregarSeleccionados = {
                         viewModel.agregarSeleccionados(tab)
+                        viewModel.recargarMarcadoresFavoritos()
                         navController.navigate(route = AppScreens.HomeScreen.route)
                         viewModel.limpiarSeleccionados()
                     },
+                    onClickEliminarSeleccionados = {
+                        if (tab == 1) {
+                            mapViewModel.borrarMarcador(viewModel.marcadorSeleccionado.value)
+                            viewModel.recargarMarcadoresFavoritos()
+                            viewModel.limpiarSeleccionados()
+                        }
+                    },
+                    textButtonEliminarSeleccionados = "Eliminar",
 
                     onClickLlamar = {
 
@@ -115,17 +131,15 @@ fun ContactListScreen(navController: NavController, viewModel: HomeViewModel, ta
                         }
 
                     },
-                    textButtonAgregarSeleccionados = it1,
+                    textButtonAgregarSeleccionados = "Favoritos",
 
                     onContactSelected = { viewModel.contactoSeleccionado(it) },
                     onContactUnSelected = { viewModel.contactoDesSeleccionado(it) },
-
-
-                    ubicacionList,
+                    ubicaciones = ubicacionList,
                     onUbicacionSelected = { viewModel.marcadorSeleccionado(it) },
                     onUbicacionUnSelected = { viewModel.marcadorDeseleccionado(it) },
                     onClickNavegarA = {
-                        viewModel.nuevaUbicacionSeleccionadaEnMapa(it)
+                        mapViewModel.nuevaUbicacionSeleccionadaEnMapa(it)
                         navController.navigate(route = AppScreens.MapScreen.route)
                     }
 
@@ -183,7 +197,6 @@ fun BotonAgregarSeleccionados(
 
     Box(modifier = Modifier.fillMaxSize()) {
 
-
         AnimatedVisibility(
             isShowButton,
             modifier = Modifier
@@ -198,10 +211,43 @@ fun BotonAgregarSeleccionados(
                 modifier = Modifier
                     .align(Alignment.Center)
                     .padding(16.dp)
-                    .size(200.dp, 60.dp)
+                    .size(150.dp, 60.dp)
 
             ) {
                 Text(text = textButtonAgregarSeleccionados, textAlign = TextAlign.Center)
+            }
+        }
+    }
+}
+
+@SuppressLint("StateFlowValueCalledInComposition")
+@Composable
+fun BotonEliminarSeleccionados(
+    onClickEliminarSeleccionados: () -> Unit,
+    isShowButton: Boolean,
+    textButtonEliminarSeleccionados: String
+) {
+
+    Box(modifier = Modifier.fillMaxSize()) {
+
+        AnimatedVisibility(
+            isShowButton,
+            modifier = Modifier
+                .align(Alignment.BottomStart)
+        ) {
+            FloatingActionButton(
+                backgroundColor = MaterialTheme.colorScheme.secondaryContainer,
+
+                onClick = {
+                    onClickEliminarSeleccionados()
+                },
+                modifier = Modifier
+                    .align(Alignment.Center)
+                    .padding(16.dp)
+                    .size(150.dp, 60.dp)
+
+            ) {
+                Text(text = textButtonEliminarSeleccionados, textAlign = TextAlign.Center)
             }
         }
     }
@@ -292,8 +338,10 @@ fun AdressListView(
     ubicaciones: List<MarcadorEntity>,
     isShowButton: Boolean,
     onClickAgregarSeleccionados: () -> Unit,
+    onClickEliminarSeleccionados: () -> Unit,
     onClickNavegarA: (ubicacion: MarcadorEntity) -> Unit,
     textButtonAgregarSeleccionados: String,
+    textButtonEliminarSeleccionados: String,
     onUbicacionSelected: (ubicacion: MarcadorEntity) -> Unit,
     onUbicacionUnSelected: (ubicacion: MarcadorEntity) -> Unit
 
@@ -311,10 +359,16 @@ fun AdressListView(
             }
 
         }
+
         BotonAgregarSeleccionados(
             onClickAgregarSeleccionados,
             isShowButton,
             textButtonAgregarSeleccionados
+        )
+        BotonEliminarSeleccionados(
+            onClickEliminarSeleccionados = { onClickEliminarSeleccionados() },
+            isShowButton = isShowButton,
+            textButtonEliminarSeleccionados = textButtonEliminarSeleccionados
         )
     }
 
@@ -397,8 +451,10 @@ fun TabContactosDirecciones(
     tabParametro: Int = 0,
     isShowButton: Boolean,
     onClickAgregarSeleccionados: () -> Unit,
+    onClickEliminarSeleccionados: () -> Unit,
     onClickLlamar: (contacto: ContactsFromPhone) -> Unit,
     textButtonAgregarSeleccionados: String,
+    textButtonEliminarSeleccionados: String,
     onContactSelected: (contact: ContactsFromPhone) -> Unit,
     onContactUnSelected: (contact: ContactsFromPhone) -> Unit,
 
@@ -458,8 +514,10 @@ fun TabContactosDirecciones(
                     ubicaciones,
                     isShowButton,
                     onClickAgregarSeleccionados,
+                    onClickEliminarSeleccionados,
                     onClickNavegarA,
                     textButtonAgregarSeleccionados,
+                    textButtonEliminarSeleccionados,
                     onUbicacionSelected,
                     onUbicacionUnSelected
                 )

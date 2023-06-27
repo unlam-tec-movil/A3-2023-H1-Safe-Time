@@ -18,14 +18,9 @@ import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.platform.LocalLifecycleOwner
-import androidx.compose.ui.res.integerArrayResource
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.lifecycleScope
 import ar.edu.unlam.mobile2.data.room.model.ContactsFromPhone
 import ar.edu.unlam.mobile2.data.room.model.MarcadorEntity
 import ar.edu.unlam.mobile2.navigation.AppNavigation
@@ -39,8 +34,6 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.gson.Gson
 import com.google.gson.JsonObject
 import com.google.gson.JsonSyntaxException
-import com.google.i18n.phonenumbers.NumberParseException
-import com.google.i18n.phonenumbers.PhoneNumberUtil
 import com.google.zxing.integration.android.IntentIntegrator
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -239,7 +232,7 @@ class MainActivity : ComponentActivity() {
             .addOnSuccessListener { location: Location? ->
                 if (location != null) {
                     val result = LatLng(location.latitude, location.longitude)
-                    viewModel.setCurrentLocation(result)
+                    mapViewModel.setUserLocation(result)
                     Toast.makeText(
                         this,
                         "se obtuvo la ubi y esta en el viewmodel",
