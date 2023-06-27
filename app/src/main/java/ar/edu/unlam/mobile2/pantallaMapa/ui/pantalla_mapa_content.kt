@@ -1,10 +1,10 @@
 package ar.edu.unlam.mobile2.pantallaMapa.ui
 
-import android.annotation.SuppressLint
 import android.location.Geocoder
 import android.util.Log
-import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -15,10 +15,14 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.material.ContentAlpha
+import androidx.compose.material.FloatingActionButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
@@ -26,11 +30,9 @@ import androidx.compose.material.icons.rounded.Call
 import androidx.compose.material.icons.rounded.Home
 import androidx.compose.material.icons.rounded.LocationOn
 import androidx.compose.material.icons.rounded.Settings
-import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -51,14 +53,18 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -164,11 +170,19 @@ fun MapScreen(
             uiSettings = uiSettings,
             onMapLongClick = {
                 mapViewModel.getDireccion(it)
-                Log.i("MAP_LOG", "Te encontras en: ${mapViewModel.text}")
+                Log.i("MAP_LOG", "Te encontras en: ${mapViewModel.nuevaDireccion}")
                 scope.launch {
                     if (it != LatLng(0.0, 0.0)) {
                         posicionCamara.animate(CameraUpdateFactory.newLatLng(it))
                         mapViewModel.setNuevoMarker(it)
+                        mapViewModel.isActivadoNuevoMarcador()
+                    }
+                }
+            },
+            onMapClick = {
+                if (mapViewModel.isAgregarNuevoMarcador.value) {
+                    scope.launch {
+                        mapViewModel.isDesactivadoNuevoMarcador()
                     }
                 }
             }
@@ -186,10 +200,10 @@ fun MapScreen(
                     posicionCamara.animate(CameraUpdateFactory.newLatLng(destino))
             }
 
-            if (nuevoMarker != LatLng(0.0, 0.0)) {
+            if (mapViewModel.isAgregarNuevoMarcador.value) {
 
                 Marker(
-                    title = mapViewModel.text,
+                    title = mapViewModel.nuevaDireccion,
                     state = MarkerState(nuevoMarker!!),
                     icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)
                 )
@@ -206,11 +220,7 @@ fun MapScreen(
                 )
 
                 Marker(state = MarkerState(destino), icon = BitmapDescriptorFactory.defaultMarker())
-            } else {
-                Toast.makeText(LocalContext.current, "POLY NULL", Toast.LENGTH_SHORT).show()
             }
-
-
             Circle(
                 center = initialUbication,
                 radius = 10.0,
@@ -243,7 +253,7 @@ fun ViewContainer(
 
     Scaffold(
         topBar = { Toolbar(navController) },
-        bottomBar = { Bottombar(navController, viewModel) }) {
+        bottomBar = { Bottombar(navController, viewModel, mapViewModel) }) {
 
 
         Box(
@@ -277,24 +287,27 @@ fun ViewContainer(
                 Spacer(modifier = Modifier.size(width = 0.dp, height = 5.dp))
             }
 
-            if (nuevoMarker != LatLng(0.0, 0.0)) {
-                BotonMapa(
+            if (mapViewModel.isAgregarNuevoMarcador.value) {
+
+                mapViewModel.nombreMarcador = textoAgregarMarcador(
+                    isShowButton = mapViewModel.isAgregarNuevoMarcador.value,
                     agregarMarcadorAlaBDD = {
                         if (nuevoMarker != null) {
                             mapViewModel.agregarNuevoMarcador(
                                 MarcadorEntity(
-                                    nombre = "NUEVO",
+                                    nombre = mapViewModel.nombreMarcador,
                                     nuevoMarker.latitude,
                                     nuevoMarker.longitude,
-                                    direccion = mapViewModel.text
+                                    direccion = mapViewModel.nuevaDireccion
                                 )
                             )
-
                         }
+                        viewModel.definirPestaña(1)
+                        mapViewModel.isDesactivadoNuevoMarcador()
                         navController.navigate(AppScreens.ContactListScreen.route)
-                    },
-                    isShowButton = true
+                    }
                 )
+
             }
         }
     }
@@ -302,7 +315,7 @@ fun ViewContainer(
 
 
 @Composable
-fun Bottombar(navController: NavController, viewModel: HomeViewModel) {
+fun Bottombar(navController: NavController, viewModel: HomeViewModel, mapViewModel: MapViewModel) {
     val bottomNavItem = listOf(
 
         BottomNavItem(
@@ -337,12 +350,20 @@ fun Bottombar(navController: NavController, viewModel: HomeViewModel) {
                 onClick = {
                     if (viewModel.screenUbication != item.route) {
                         when (item.route) {
-                            "home_screen" -> navController.navigate(route = AppScreens.HomeScreen.route)
+                            "home_screen" -> {
+                                mapViewModel.isDesactivadoNuevoMarcador()
+                                navController.navigate(route = AppScreens.HomeScreen.route)
+                            }
+
                             "map_screen" -> {
                                 navController.navigate(route = AppScreens.MapScreen.route)
                             }
 
-                            "list_screen" -> navController.navigate(route = AppScreens.ContactListScreen.route)
+                            "list_screen" -> {
+                                mapViewModel.isDesactivadoNuevoMarcador()
+                                navController.navigate(route = AppScreens.ContactListScreen.route)
+                            }
+
                             "infoQr_screen" -> navController.navigate(route = AppScreens.InfoQrScreen.route)
                         }
                     }
@@ -411,67 +432,6 @@ fun TopAppBarActionButton(
             modifier = Modifier.size(35.dp)
         )
     }
-}
-
-
-@Composable
-private fun TextoViajes() {
-
-    Text(
-        text = "VIAJANDO A",
-        fontSize = 18.sp,
-        fontWeight = FontWeight.SemiBold,
-        color = Color.White
-    )
-}
-
-@Composable
-private fun ItemsDirecciones(direccion: String) {
-
-    Text(
-        text = direccion.uppercase(),
-        fontSize = 18.sp,
-        fontWeight = FontWeight.SemiBold,
-        color = MaterialTheme.colorScheme.onSecondaryContainer,
-        modifier = Modifier.clickable { /*MECANISMO DE CAMBIO DE MAPA*/ }
-    )
-}
-
-@Composable
-private fun CartelDistanciaDelPunto(distancia: Double) {
-
-    Text(
-        text = "Distancia del punto: ",
-        fontSize = 15.sp,
-        fontWeight = FontWeight.SemiBold,
-        color = Color.White
-    )
-
-    Text(
-        text = "$distancia",
-        fontSize = 15.sp,
-        fontWeight = FontWeight.SemiBold,
-        color = Color.White
-    )
-}
-
-@Composable
-private fun CartelLlegadaEstimada(tiempo: Int) {
-
-    Text(
-        text = "Llegada estimada: ",
-        fontSize = 15.sp,
-        fontWeight = FontWeight.SemiBold,
-        color = Color.White
-    )
-
-    Text(
-        text = "$tiempo",
-        fontSize = 15.sp,
-        fontWeight = FontWeight.SemiBold,
-        color = Color.White
-    )
-
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -548,29 +508,57 @@ private fun selectorDeUbicacionesRegistradas(
     return mSelectedUbi
 }
 
-@SuppressLint("StateFlowValueCalledInComposition")
+
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
-fun BotonMapa(
-    agregarMarcadorAlaBDD: () -> Unit,
-    isShowButton: Boolean
-) {
-    Box(modifier = Modifier.fillMaxSize()) {
+fun textoAgregarMarcador(
+    isShowButton: Boolean,
+    agregarMarcadorAlaBDD: () -> Unit
+): String {
+
+    var nuevoNombre by remember {
+        mutableStateOf("")
+    }
+
+
+    val keyboard = LocalSoftwareKeyboardController.current
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp)
+            .clip(shape = RectangleShape)
+    ) {
         AnimatedVisibility(
-            isShowButton,
+            visible = isShowButton,
+            enter = slideInVertically(),
+            exit = slideOutVertically(),
             modifier = Modifier
                 .align(Alignment.BottomCenter)
+                .padding(end = 40.dp)
         ) {
-            androidx.compose.material.FloatingActionButton(
-                backgroundColor = MaterialTheme.colorScheme.primary,
 
+            OutlinedTextField(
+                value = nuevoNombre,
+                onValueChange = {
+                    nuevoNombre = it
+                },
+                label = { Text(text = "Nombre") },
+                singleLine = true,
+                keyboardActions = KeyboardActions(onDone = {
+                    keyboard?.hide()
+                })
+            )
+
+            FloatingActionButton(
+                backgroundColor = MaterialTheme.colorScheme.primary,
                 onClick = {
                     agregarMarcadorAlaBDD()
                 },
                 modifier = Modifier
-                    .align(Alignment.Center)
-                    .padding(16.dp)
-                    .size(200.dp, 60.dp)
-
+                    .padding(top = 70.dp)
+                    .size(150.dp, 40.dp)
+                    .align(Alignment.BottomCenter),
             ) {
                 Text(
                     text = "Guardar marcador",
@@ -580,4 +568,6 @@ fun BotonMapa(
             }
         }
     }
+    return nuevoNombre
 }
+

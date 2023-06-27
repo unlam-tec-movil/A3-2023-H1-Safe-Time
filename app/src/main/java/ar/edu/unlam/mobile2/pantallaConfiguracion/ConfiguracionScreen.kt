@@ -23,11 +23,12 @@ import ar.edu.unlam.mobile2.navigation.AppScreens
 import ar.edu.unlam.mobile2.pantallaHome.ui.viewmodel.HomeViewModel
 import ar.edu.unlam.mobile2.pantallaMapa.ui.Bottombar
 import ar.edu.unlam.mobile2.pantallaMapa.ui.Toolbar
+import ar.edu.unlam.mobile2.pantallaMapa.ui.viewmodel.MapViewModel
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ConfiguracionQRScreen(navController:NavController,viewModel:HomeViewModel) {
+fun ConfiguracionQRScreen(navController:NavController,viewModel:HomeViewModel, mapViewModel: MapViewModel) {
 
     val nombre = remember { mutableStateOf("") }
     val apellido = remember { mutableStateOf("") }
@@ -36,7 +37,7 @@ fun ConfiguracionQRScreen(navController:NavController,viewModel:HomeViewModel) {
 
     Scaffold(
         topBar = { Toolbar(navController) },
-        bottomBar = { Bottombar(navController, viewModel) }) {
+        bottomBar = { Bottombar(navController, viewModel, mapViewModel) }) {
 
         Column(
             modifier = Modifier

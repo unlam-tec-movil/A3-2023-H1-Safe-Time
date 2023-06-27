@@ -50,7 +50,7 @@ fun AppNavigation(viewModel: HomeViewModel, mapViewModel: MapViewModel, sensor: 
 
         composable(route = AppScreens.InfoQrScreen.route){
             viewModel.screenUbication = "infoQr_screen"
-            ConfiguracionQRScreen(navController,viewModel)
+            ConfiguracionQRScreen(navController, viewModel, mapViewModel)
         }
 
 

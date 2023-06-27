@@ -1,6 +1,9 @@
 package ar.edu.unlam.mobile2.pantallaMapa.ui.viewmodel
 
 import android.location.Geocoder
+import android.util.Log
+import android.widget.Toast
+import androidx.compose.runtime.currentCompositionLocalContext
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -35,9 +38,11 @@ class MapViewModel @Inject constructor(
 
     var locationAutofill = mutableStateListOf<AutocompleteResult>()
     var currentLocation by mutableStateOf(LatLng(0.0, 0.0))
-    var text by mutableStateOf("")
+    var nuevaDireccion by mutableStateOf("")
     private var job: Job? = null
+    var nombreMarcador by mutableStateOf("")
 
+    var isAgregarNuevoMarcador = mutableStateOf(false)
 
     private val _marcadores = MutableLiveData(emptyList<MarcadorEntity>())
     val marcadores: LiveData<List<MarcadorEntity>> = _marcadores
@@ -55,7 +60,7 @@ class MapViewModel @Inject constructor(
     val nuevoMarker: LiveData<LatLng> = _nuevoMarker
 
     init {
-        _ubicacionMapa.value = MarcadorEntity("Marque su destino.", 0.0, 0.0, "", false)
+        _ubicacionMapa.value = MarcadorEntity("Marque su destino", 0.0, 0.0, "", false)
         _marcadores.value = marcadorRepository.getAllMarcador()
     }
 
@@ -94,7 +99,7 @@ class MapViewModel @Inject constructor(
     fun getDireccion(latLng: LatLng) {
         viewModelScope.launch {
             val direccion = geocoder.getFromLocation(latLng.latitude, latLng.longitude, 1)
-            text =
+            nuevaDireccion =
                 "${direccion?.get(0)?.thoroughfare.toString()} ${direccion?.get(0)?.featureName.toString()}, ${
                     direccion?.get(0)?.locality.toString()
                 }"
@@ -134,10 +139,15 @@ class MapViewModel @Inject constructor(
     }
 
     fun agregarNuevoMarcador(marcador: MarcadorEntity) {
-        marcadorRepository.insert(marcadores = marcador)
-        _marcadores.value = marcadorRepository.getAllMarcador()
 
+        try {
+            marcadorRepository.insert(marcadores = marcador)
+            _marcadores.value = marcadorRepository.getAllMarcador()
+        } catch (error: Throwable) {
+            Log.e("ERROR", "Salto el error")
+        }
     }
+
 
     fun borrarMarcador(marcadores: List<MarcadorEntity>) {
 
@@ -149,5 +159,15 @@ class MapViewModel @Inject constructor(
             marcadorRepository.delete(marcadorEntity)
         }
         _marcadores.value = marcadorRepository.getAllMarcador()
+    }
+
+    fun isActivadoNuevoMarcador() {
+
+        isAgregarNuevoMarcador.value = true
+    }
+
+    fun isDesactivadoNuevoMarcador() {
+
+        isAgregarNuevoMarcador.value = false
     }
 }

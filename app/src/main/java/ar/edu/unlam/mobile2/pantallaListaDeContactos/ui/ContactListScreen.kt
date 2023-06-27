@@ -58,6 +58,7 @@ import ar.edu.unlam.mobile2.pantallaHome.ui.viewmodel.HomeViewModel
 import ar.edu.unlam.mobile2.pantallaMapa.ui.Bottombar
 import ar.edu.unlam.mobile2.pantallaMapa.ui.Toolbar
 import ar.edu.unlam.mobile2.pantallaMapa.ui.viewmodel.MapViewModel
+import kotlinx.coroutines.launch
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -74,7 +75,7 @@ fun ContactListScreen(
     val actionDialIntent = Intent(Intent.ACTION_DIAL)
     val contactList by viewModel.contactosFromPhone.observeAsState(initial = emptyList())
     val ubicacionList by mapViewModel.marcadores.observeAsState(initial = emptyList())
-
+    val scope = rememberCoroutineScope()
 
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
@@ -85,7 +86,7 @@ fun ContactListScreen(
     }
     Scaffold(
         topBar = { Toolbar(navController) },
-        bottomBar = { Bottombar(navController, viewModel) }
+        bottomBar = { Bottombar(navController, viewModel, mapViewModel) }
     ) { it ->
 
         Column(
@@ -96,58 +97,56 @@ fun ContactListScreen(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
 
-
-            viewModel.textButtomAgregarSeleccionados.value?.let { it1 ->
-                TabContactosDirecciones(
-                    contactList,
-                    tab,
-                    isShowButton,
-                    onClickAgregarSeleccionados = {
+            TabContactosDirecciones(
+                contactList,
+                tab,
+                isShowButton,
+                onClickAgregarSeleccionados = {
+                    scope.launch {
                         viewModel.agregarSeleccionados(tab)
                         viewModel.recargarMarcadoresFavoritos()
                         navController.navigate(route = AppScreens.HomeScreen.route)
                         viewModel.limpiarSeleccionados()
-                    },
-                    onClickEliminarSeleccionados = {
-                        if (tab == 1) {
-                            mapViewModel.borrarMarcador(viewModel.marcadorSeleccionado.value)
-                            viewModel.recargarMarcadoresFavoritos()
-                            viewModel.limpiarSeleccionados()
-                        }
-                    },
-                    textButtonEliminarSeleccionados = "Eliminar",
+                    }
+                },
+                onClickEliminarSeleccionados = {
+                    mapViewModel.borrarMarcador(viewModel.marcadorSeleccionado.value)
+                    viewModel.recargarMarcadoresFavoritos()
+                    viewModel.limpiarSeleccionados()
+                },
+                textButtonEliminarSeleccionados = "Eliminar",
 
-                    onClickLlamar = {
+                onClickLlamar = {
 
-                        actionDialIntent.data = Uri.parse("tel:${it.number}")
-                        if (ContextCompat.checkSelfPermission(
-                                context,
-                                Manifest.permission.CALL_PHONE
-                            ) == PackageManager.PERMISSION_GRANTED
-                        ) {
-                            context.startActivity(Intent.createChooser(actionDialIntent, "Llamar"))
-                        } else {
-                            launcher.launch(Manifest.permission.CALL_PHONE)
-                        }
-
-                    },
-                    textButtonAgregarSeleccionados = "Favoritos",
-
-                    onContactSelected = { viewModel.contactoSeleccionado(it) },
-                    onContactUnSelected = { viewModel.contactoDesSeleccionado(it) },
-                    ubicaciones = ubicacionList,
-                    onUbicacionSelected = { viewModel.marcadorSeleccionado(it) },
-                    onUbicacionUnSelected = { viewModel.marcadorDeseleccionado(it) },
-                    onClickNavegarA = {
-                        mapViewModel.nuevaUbicacionSeleccionadaEnMapa(it)
-                        navController.navigate(route = AppScreens.MapScreen.route)
+                    actionDialIntent.data = Uri.parse("tel:${it.number}")
+                    if (ContextCompat.checkSelfPermission(
+                            context,
+                            Manifest.permission.CALL_PHONE
+                        ) == PackageManager.PERMISSION_GRANTED
+                    ) {
+                        context.startActivity(Intent.createChooser(actionDialIntent, "Llamar"))
+                    } else {
+                        launcher.launch(Manifest.permission.CALL_PHONE)
                     }
 
+                },
+                textButtonAgregarSeleccionados = "Favoritos",
 
-                ) {
-                    viewModel.limpiarSeleccionados()
+                onContactSelected = { viewModel.contactoSeleccionado(it) },
+                onContactUnSelected = { viewModel.contactoDesSeleccionado(it) },
+                ubicaciones = ubicacionList,
+                onUbicacionSelected = { viewModel.marcadorSeleccionado(it) },
+                onUbicacionUnSelected = { viewModel.marcadorDeseleccionado(it) },
+                onClickNavegarA = {
+                    mapViewModel.nuevaUbicacionSeleccionadaEnMapa(it)
+                    navController.navigate(route = AppScreens.MapScreen.route)
                 }
+
+
+            ) {
+                viewModel.limpiarSeleccionados()
             }
+
 
         }
     }

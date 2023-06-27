@@ -144,7 +144,6 @@ class HomeViewModel @Inject constructor(
             selectedContacts.value = emptyList()
         } else {
             marcadorSeleccionado.value.forEach {
-
                 marcarFavorito(it)
                 MarcadoresFijos.marcarFavorito(it)
             }

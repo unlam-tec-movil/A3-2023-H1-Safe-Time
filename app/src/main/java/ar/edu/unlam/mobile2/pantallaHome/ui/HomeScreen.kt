@@ -79,7 +79,7 @@ fun HomeScreen(navController: NavController, viewModel: HomeViewModel, mapViewMo
 
     Scaffold(
         topBar = { Toolbar(navController) },
-        bottomBar = { Bottombar(navController, viewModel) }
+        bottomBar = { Bottombar(navController, viewModel, mapViewModel) }
     ) {
         Box(
             modifier = Modifier
